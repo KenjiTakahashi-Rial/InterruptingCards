@@ -9,16 +9,6 @@ namespace InterruptingCards
 
         public static ObjectManager Singleton { get; private set; }
 
-        private void OnEnable()
-        {
-            Singleton = this;
-        }
-
-        private void OnDestroy()
-        {
-            Singleton = null;
-        }
-
         public GameObject InstantiatePlayer()
         {
             if (_playerSpawnPoints.Length == 0)
@@ -35,6 +25,16 @@ namespace InterruptingCards
             );
             obj.SetActive(true);
             return obj;
+        }
+
+        private void OnEnable()
+        {
+            Singleton = this;
+        }
+
+        private void OnDestroy()
+        {
+            Singleton = null;
         }
     }
 }

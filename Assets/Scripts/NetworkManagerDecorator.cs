@@ -11,6 +11,7 @@ namespace InterruptingCards
         public static NetworkManagerDecorator Singleton { get; private set; }
 
         public GameObject PlayerPrefab { get; private set; }
+
         public IReadOnlyDictionary<ulong, NetworkClient> ConnectedClients
         {
             get { return _networkManager.ConnectedClients; }
@@ -37,6 +38,12 @@ namespace InterruptingCards
             return success;
         }
 
+        public override void OnDestroy()
+        {
+            Singleton = null;
+            base.OnDestroy();
+        }
+
         private void OnEnable()
         {
             Singleton = this;
@@ -45,20 +52,14 @@ namespace InterruptingCards
             PlayerPrefab = _networkManager.NetworkConfig.PlayerPrefab;
             _networkManager.NetworkConfig.PlayerPrefab = null;
 
-            void handleOnServerStarted()
+            void HandleOnServerStarted()
             {
                 _networkManager.OnClientConnectedCallback -= SpawnPlayer;
                 _networkManager.OnClientConnectedCallback += SpawnPlayer;
-            };
+            }
 
-            _networkManager.OnServerStarted -= handleOnServerStarted;
-            _networkManager.OnServerStarted += handleOnServerStarted;
-        }
-
-        public override void OnDestroy()
-        {
-            Singleton = null;
-            base.OnDestroy();
+            _networkManager.OnServerStarted -= HandleOnServerStarted;
+            _networkManager.OnServerStarted += HandleOnServerStarted;
         }
 
         private void SpawnPlayer(ulong clientId)
