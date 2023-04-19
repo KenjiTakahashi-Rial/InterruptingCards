@@ -32,7 +32,7 @@ namespace InterruptingCards
             if (success)
             {
                 // NetworkManager invokes OnClientConnected before OnServerStarted
-                SpawnPlayerServerRpc(_networkManager.LocalClientId);
+                SpawnPlayer(_networkManager.LocalClientId);
             }
             return success;
         }
@@ -47,8 +47,8 @@ namespace InterruptingCards
 
             void handleOnServerStarted()
             {
-                _networkManager.OnClientConnectedCallback -= SpawnPlayerServerRpc;
-                _networkManager.OnClientConnectedCallback += SpawnPlayerServerRpc;
+                _networkManager.OnClientConnectedCallback -= SpawnPlayer;
+                _networkManager.OnClientConnectedCallback += SpawnPlayer;
             };
 
             _networkManager.OnServerStarted -= handleOnServerStarted;
@@ -61,13 +61,11 @@ namespace InterruptingCards
             base.OnDestroy();
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        private void SpawnPlayerServerRpc(ulong clientId)
+        private void SpawnPlayer(ulong clientId)
         {
             var playerObj = ObjectManager.Singleton.InstantiatePlayer();
             var networkObj = playerObj.GetComponent<NetworkObject>();
             networkObj.SpawnAsPlayerObject(clientId, destroyWithScene: true);
-            networkObj.ChangeOwnership(clientId);
         }
     }
 }
