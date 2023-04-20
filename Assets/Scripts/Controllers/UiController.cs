@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace InterruptingCards.Managers
+using InterruptingCards.Managers;
+
+namespace InterruptingCards.Controllers
 {
-    public class NetworkManagerUI : MonoBehaviour
+    public class UiController : MonoBehaviour
     {
         [SerializeField] private Button _serverButton;
         [SerializeField] private Button _hostButton;

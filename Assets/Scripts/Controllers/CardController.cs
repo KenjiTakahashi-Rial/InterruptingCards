@@ -4,9 +4,9 @@ using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
-namespace InterruptingCards.Managers
+namespace InterruptingCards.Controllers
 {
-    public class CardManager : NetworkBehaviour
+    public class CardController : NetworkBehaviour
     {
         private const string DefaultCardName = "";
 
