@@ -12,8 +12,9 @@ namespace InterruptingCards.Managers
     {
         private const int GameStateLayer = 0;
 
-        private readonly int _playingStateId = Animator.StringToHash("Game.Playing");
-        private readonly int _playingParamId = Animator.StringToHash("playing");
+        private readonly int _waitingForDrawId = Animator.StringToHash("Game.WaitingForDraw");
+        private readonly int _waitingForEndTurnId = Animator.StringToHash("Game.WaitingForEndTurn");
+        private readonly int _isPlayingId = Animator.StringToHash("isPlaying");
 
         private readonly NetworkManagerDecorator _networkManager = NetworkManagerDecorator.Singleton;
         private readonly List<Player> _players = new();
@@ -22,7 +23,10 @@ namespace InterruptingCards.Managers
 
         private Deck<Suit, Rank> _deck;
 
-        private bool IsPlaying { get { return _gameStateMachine.GetCurrentAnimatorStateInfo(GameStateLayer).fullPathHash == _playingStateId; } }
+        private bool IsPlaying {
+            get { return _gameStateMachine.GetBool(_isPlayingId); }
+            set { _gameStateMachine.SetBool(_isPlayingId, value); }
+        }
 
         public override void OnNetworkSpawn()
         {
@@ -40,7 +44,12 @@ namespace InterruptingCards.Managers
 
         public void Play()
         {
-            _gameStateMachine.SetBool(_playingParamId, true);
+            IsPlaying = true;
+            
+            while (true)
+            {
+
+            }
         }
 
         private void AddPlayer(ulong clientId)
