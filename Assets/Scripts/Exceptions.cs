@@ -26,4 +26,28 @@ namespace InterruptingCards
 
         protected ObjectManagerException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
+
+    [Serializable]
+    public class CardNotFoundException : Exception
+    {
+        public CardNotFoundException() { }
+
+        public CardNotFoundException(string message) : base(message) { }
+
+        public CardNotFoundException(string message, Exception inner) : base(message, inner) { }
+
+        protected CardNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
+    [Serializable]
+    public class CardCollectionEmptyException : Exception
+    {
+        public CardCollectionEmptyException() { }
+
+        public CardCollectionEmptyException(string message) : base(message) { }
+
+        public CardCollectionEmptyException(string message, Exception inner) : base(message, inner) { }
+
+        protected CardCollectionEmptyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
 }

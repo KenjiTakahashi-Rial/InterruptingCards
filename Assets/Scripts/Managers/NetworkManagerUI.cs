@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace InterruptingCards
+namespace InterruptingCards.Managers
 {
     public class NetworkManagerUI : MonoBehaviour
     {

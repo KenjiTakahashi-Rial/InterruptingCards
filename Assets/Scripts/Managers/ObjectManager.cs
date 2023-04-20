@@ -1,7 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-namespace InterruptingCards
+namespace InterruptingCards.Managers
 {
     public class ObjectManager : MonoBehaviour
     {

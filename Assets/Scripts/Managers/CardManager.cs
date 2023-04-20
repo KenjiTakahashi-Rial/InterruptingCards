@@ -4,7 +4,7 @@ using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
-namespace InterruptingCards
+namespace InterruptingCards.Managers
 {
     public class CardManager : NetworkBehaviour
     {

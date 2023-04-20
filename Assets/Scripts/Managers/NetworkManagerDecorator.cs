@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-namespace InterruptingCards
+namespace InterruptingCards.Managers
 {
     public class NetworkManagerDecorator : NetworkBehaviour
     {
@@ -11,6 +12,18 @@ namespace InterruptingCards
         public static NetworkManagerDecorator Singleton { get; private set; }
 
         public GameObject PlayerPrefab { get; private set; }
+
+        public event Action<ulong> OnClientConnectedCallback
+        {
+            add => _networkManager.OnClientConnectedCallback += value;
+            remove => _networkManager.OnClientConnectedCallback -= value;
+        }
+
+        public event Action<ulong> OnClientDisconnectCallback
+        {
+            add => _networkManager.OnClientDisconnectCallback += value;
+            remove => _networkManager.OnClientDisconnectCallback -= value;
+        }
 
         public IReadOnlyDictionary<ulong, NetworkClient> ConnectedClients
         {
@@ -54,8 +67,8 @@ namespace InterruptingCards
 
             void HandleOnServerStarted()
             {
-                _networkManager.OnClientConnectedCallback -= SpawnPlayer;
-                _networkManager.OnClientConnectedCallback += SpawnPlayer;
+                OnClientConnectedCallback -= SpawnPlayer;
+                OnClientConnectedCallback += SpawnPlayer;
             }
 
             _networkManager.OnServerStarted -= HandleOnServerStarted;
