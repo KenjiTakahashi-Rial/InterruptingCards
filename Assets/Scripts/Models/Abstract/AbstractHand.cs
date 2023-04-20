@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 
-using InterruptingCards.Models.PlayingCards;
+using UnityEngine;
 
 namespace InterruptingCards.Models.Abstract
 {
-    public abstract class Hand<S, R> : IHand<S, R> where S : Enum where R : Enum
+    public abstract class AbstractHand<S, R> : MonoBehaviour, IHand<S, R> where S : Enum where R : Enum
     {
         protected readonly IList<ICard<S, R>> _cards;
 
-        public Hand(IList<ICard<S, R>> cards = null)
+        public AbstractHand(IList<ICard<S, R>> cards = null)
         {
             if (cards == null)
             {

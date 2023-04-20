@@ -50,4 +50,28 @@ namespace InterruptingCards
 
         protected CardCollectionEmptyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
+
+    [Serializable]
+    public class PlayerNotFoundException : Exception
+    {
+        public PlayerNotFoundException() { }
+
+        public PlayerNotFoundException(string message) : base(message) { }
+
+        public PlayerNotFoundException(string message, Exception inner) : base(message, inner) { }
+
+        protected PlayerNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
+    [Serializable]
+    public class TooManyPlayersException : Exception
+    {
+        public TooManyPlayersException() { }
+
+        public TooManyPlayersException(string message) : base(message) { }
+
+        public TooManyPlayersException(string message, Exception inner) : base(message, inner) { }
+
+        protected TooManyPlayersException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
 }

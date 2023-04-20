@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-using InterruptingCards.Models.PlayingCards;
+using UnityEngine;
 
 namespace InterruptingCards.Models.Abstract
 {
-    public class Deck<S, R> : IDeck<S, R> where S : Enum where R : Enum
+    public class AbstractDeck<S, R> : MonoBehaviour, IDeck<S, R> where S : Enum where R : Enum
     {
-        private readonly Random _random = new();
+        private readonly System.Random _random = new();
         private readonly IList<ICard<S, R>> _cards;
 
         private int TopIndex
@@ -17,7 +17,7 @@ namespace InterruptingCards.Models.Abstract
 
         private int BottomIndex { get; } = 0;
 
-        public Deck(IList<ICard<S, R>> cards = null)
+        public AbstractDeck(IList<ICard<S, R>> cards = null)
         {
             if (cards == null)
             {
