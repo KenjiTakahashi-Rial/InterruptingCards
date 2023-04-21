@@ -1,6 +1,6 @@
-namespace InterruptingCards.PlayingCards
+namespace InterruptingCards.Models
 {
-    public enum Suit
+    public enum PlayingCardSuit
     {
         Clubs,
         Diamonds,
@@ -8,7 +8,7 @@ namespace InterruptingCards.PlayingCards
         Spades,
     }
 
-    public enum Rank
+    public enum PlayingCardRank
     {
         Ace = 1,
         Two = 2,

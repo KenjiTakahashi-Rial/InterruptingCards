@@ -1,6 +1,6 @@
 using System;
 
-using InterruptingCards.Models.Abstract;
+using InterruptingCards.Models;
 
 using TMPro;
 
@@ -14,6 +14,8 @@ namespace InterruptingCards
 
         private bool _isFaceUp = true;
         private ICard<S, R> _card;
+
+        public event Action OnCardClicked;
 
         public bool IsFaceUp
         {
@@ -35,17 +37,32 @@ namespace InterruptingCards
             }
         }
 
-        public void Refresh()
+        public void UnsubscribeAllOnCardClicked()
         {
-            if (IsFaceUp)
+            OnCardClicked = null;
+        }
+
+        private void Refresh()
+        {
+            if (Card == null)
             {
-                _cardText.SetText(_card.ToString());
-                _cardText.enabled = true;
+                _cardText.gameObject.SetActive(false);
+                return;
             }
-            else
+
+            if (!IsFaceUp)
             {
                 _cardText.enabled = false;
+                return;
             }
+
+            _cardText.SetText(_card.ToString());
+            _cardText.enabled = true;
+        }
+
+        private void OnMouseDown()
+        {
+            OnCardClicked.Invoke();
         }
     }
 }

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace InterruptingCards.Models.Abstract
+namespace InterruptingCards.Models
 {
-    public class AbstractDeck<S, R> : MonoBehaviour, IDeck<S, R> where S : Enum where R : Enum
+    public class AbstractDeck<S, R> : IDeck<S, R> where S : Enum where R : Enum
     {
         private readonly System.Random _random = new();
         private readonly IList<ICard<S, R>> _cards;
@@ -25,6 +25,11 @@ namespace InterruptingCards.Models.Abstract
             }
 
             _cards = cards;
+        }
+
+        public int Count()
+        {
+            return _cards.Count;
         }
 
         public void Shuffle()
@@ -50,9 +55,14 @@ namespace InterruptingCards.Models.Abstract
 
         public void InsertRandom(ICard<S, R> card)
         {
-            CheckEmpty();
             var i = _random.Next(0, _cards.Count + 1);
             _cards.Insert(i, card);
+        }
+
+        public ICard<S, R> PeekTop()
+        {
+            CheckEmpty();
+            return _cards[TopIndex].Clone();
         }
 
         public ICard<S, R> DrawTop()

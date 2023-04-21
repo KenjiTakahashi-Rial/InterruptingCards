@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-using InterruptingCards.Models.Abstract;
+using InterruptingCards.Models;
 
 namespace InterruptingCards.Models
 {
@@ -19,7 +19,7 @@ namespace InterruptingCards.Models
                 }
             }
 
-            throw new CardCollectionEmptyException();
+            throw new CardNotFoundException();
         }
     }
 }

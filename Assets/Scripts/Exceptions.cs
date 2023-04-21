@@ -64,6 +64,18 @@ namespace InterruptingCards
     }
 
     [Serializable]
+    public class TooManyCardsException : Exception
+    {
+        public TooManyCardsException() { }
+
+        public TooManyCardsException(string message) : base(message) { }
+
+        public TooManyCardsException(string message, Exception inner) : base(message, inner) { }
+
+        protected TooManyCardsException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
+    [Serializable]
     public class TooManyPlayersException : Exception
     {
         public TooManyPlayersException() { }

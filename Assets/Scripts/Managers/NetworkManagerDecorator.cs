@@ -57,7 +57,7 @@ namespace InterruptingCards.Managers
             base.OnDestroy();
         }
 
-        private void OnEnable()
+        private void Awake()
         {
             Singleton = this;
 

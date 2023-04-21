@@ -27,7 +27,7 @@ namespace InterruptingCards.Managers
             return obj;
         }
 
-        private void OnEnable()
+        private void Awake()
         {
             Singleton = this;
         }

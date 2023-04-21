@@ -1,9 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-using InterruptingCards.Managers;
-
-namespace InterruptingCards.Controllers
+namespace InterruptingCards.Managers
 {
     public class UiController : MonoBehaviour
     {

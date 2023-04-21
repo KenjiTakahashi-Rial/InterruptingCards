@@ -1,10 +1,8 @@
 using System;
 
-using UnityEngine;
-
-namespace InterruptingCards.Models.Abstract
+namespace InterruptingCards.Models
 {
-    public abstract class AbstractCard<S, R> : MonoBehaviour, ICard<S, R> where S : Enum where R : Enum
+    public abstract class AbstractCard<S, R> : ICard<S, R> where S : Enum where R : Enum
     {
         protected AbstractCard(S suit, R rank)
         {
@@ -15,5 +13,7 @@ namespace InterruptingCards.Models.Abstract
         public S Suit { get; }
 
         public R Rank { get; }
+
+        public abstract ICard<S, R> Clone();
     }
 }

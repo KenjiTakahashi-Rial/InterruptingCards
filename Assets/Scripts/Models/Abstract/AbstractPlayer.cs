@@ -1,6 +1,6 @@
 using System;
 
-namespace InterruptingCards.Models.Abstract
+namespace InterruptingCards.Models
 {
     public abstract class AbstractPlayer<S, R> : IPlayer<S, R> where S : Enum where R : Enum
     {
