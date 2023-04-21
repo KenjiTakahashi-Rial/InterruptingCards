@@ -10,47 +10,9 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public class AbstractGameManager<S, R> where S : Enum where R : Enum
+    public class GameNetworkManager : NetworkBehaviour
     {
-        private const int GameStateMachineLayer = 0;
-        private const int RequiredPlayersCount = 2;
-
-        // Unity doesn't allow generic MonoBehaviour
-        protected readonly GameNetworkManager _network;
-        protected readonly IPlayerFactory<S, R> _playerFactory;
-
-        private readonly int _waitingForClientsStateId = Animator.StringToHash("Base.WaitingForClients");
-        private readonly int _waitingForDrawCardStateId = Animator.StringToHash("Base.InGame.WaitingForDrawCard"); // TODO: Double check that this full path is correct
-        private readonly int _waitingForPlayCardStateId = Animator.StringToHash("Base.InGame.WaitingForPlayCard");
-        private readonly int _startGameTriggerId = Animator.StringToHash("startGame");
-        private readonly int _drawCardTriggerId = Animator.StringToHash("drawCard");
-        private readonly int _playCardTriggerId = Animator.StringToHash("playCard");
-        private readonly int _forceEndTurnTriggerId = Animator.StringToHash("forceEndTurn");
-        private readonly int _forceEndGameTriggerId = Animator.StringToHash("forceEndGame");
-
         private readonly NetworkManagerDecorator _networkManager = NetworkManagerDecorator.Singleton;
-        private readonly LinkedList<IPlayer<S, R>> _players = new();
-
-        [SerializeField] private Animator _gameStateMachine;
-        [SerializeField] private DeckManager<S, R> _deckManager;
-        [SerializeField] private DeckManager<S, R> _discardManager;
-        [SerializeField] private HandManager<S, R>[] _handManagers;
-
-        private IPlayer<S, R> _self; // The player that is on this device
-        private LinkedListNode<IPlayer<S, R>> _playerTurnNode;
-        private Dictionary<IPlayer<S, R>, IHand<S, R>> _playerHands;
-
-        public static AbstractGameManager<S, R> Singleton { get; private set; }
-
-        private bool IsSelfTurn
-        {
-            get { return _playerTurnNode.Value == _self; }
-        }
-
-        private int CurrentStateId
-        {
-            get { return _gameStateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash ; }
-        }
 
         public override void OnNetworkSpawn()
         {
