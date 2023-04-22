@@ -1,14 +1,14 @@
 using InterruptingCards.Models;
 
-namespace InterruptingCards
+namespace InterruptingCards.Serialization
 {
     public struct SerializedPlayingCard
     {
-        public PlayingCardSuit Suit;
-        public PlayingCardRank Rank;
+        internal PlayingCardSuit Suit;
+        internal PlayingCardRank Rank;
     }
 
-    public class PlayingCardSerializer
+    public class PlayingCardSerializer : ISerializer<SerializedPlayingCard, PlayingCard>
     {
         public SerializedPlayingCard Serialize(PlayingCard card)
         {

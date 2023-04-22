@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using UnityEngine;
-
 namespace InterruptingCards.Models
 {
     public class AbstractDeck<S, R> : IDeck<S, R> where S : Enum where R : Enum

@@ -5,6 +5,8 @@ namespace InterruptingCards.Managers.GameManagers
         Invalid,
         AddPlayer,
         RemovePlayer,
+        GetSelf,
+        AssignSelf,
         DrawCard,
         PlayCard,
     }
