@@ -86,4 +86,16 @@ namespace InterruptingCards
 
         protected TooManyPlayersException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
+
+    [Serializable]
+    public class InvalidOperationException : Exception
+    {
+        public InvalidOperationException() { }
+
+        public InvalidOperationException(string message) : base(message) { }
+
+        public InvalidOperationException(string message, Exception inner) : base(message, inner) { }
+
+        protected InvalidOperationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
 }
