@@ -1,17 +1,15 @@
-using System;
-
 using Unity.Netcode;
 
 using InterruptingCards.Factories;
-using InterruptingCards.Serialization;
+using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers.GameManagers
 {
-    public class PlayingCardGameManagerNetworkDependency : NetworkBehaviour, IGameManagerNetworkDependency
+    public class PlayingCardGameManagerNetworkDependency : NetworkBehaviour, IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>
     {
-        private readonly PlayingCardGameManager _gameManager = new(PlayingCardPlayerFactory.Singleton);
+        private readonly PlayingCardGameManager _gameManager = new(PlayingCardPlayerFactory.Singleton, PlayingCardFactory.Singleton);
 
-        internal static IGameManagerNetworkDependency Singleton { get; private set; }
+        internal static IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank> Singleton { get; private set; }
 
         public override void OnNetworkSpawn()
         {
@@ -25,122 +23,46 @@ namespace InterruptingCards.Managers.GameManagers
             Singleton = null;
         }
 
-        void IGameManagerNetworkDependency.DoOperation(Operation operation, object[] args, bool clientRpc, bool requireOwnership)
+        [ServerRpc]
+        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.AddPlayerServerRpc(ulong clientId)
         {
-            if (clientRpc)
-            {
-                DoOperationClient(operation, args);
-            }
-            else if (requireOwnership)
-            {
-                DoOperationServerRequireOwnership(operation, args);
-            }
-            else
-            {
-                DoOperationServerNotRequireOwnership(operation, args);
-            }
-        }
-
-        private void DoOperationImpl(Operation operation, object[] args)
-        {
-            switch (operation)
-            {
-                case Operation.Invalid:
-                    throw new InvalidOperationException();
-                case Operation.AddPlayer:
-                    AddPlayer(args);
-                    break;
-                case Operation.RemovePlayer:
-                    RemovePlayer(args);
-                    break;
-                case Operation.GetSelf:
-                    GetSelf(args);
-                    break;
-                case Operation.AssignSelf:
-                    AssignSelf(args);
-                    break;
-                case Operation.DrawCard:
-                    DrawCard(args);
-                    break;
-                case Operation.PlayCard:
-                    PlayCard(args);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
-        [ClientRpc]
-        private void DoOperationClient(Operation operation, object[] args)
-        {
-            DoOperationImpl(operation, args);
+            _gameManager.AddPlayer(clientId);
         }
 
         [ServerRpc]
-        private void DoOperationServerRequireOwnership(Operation operation, object[] args)
+        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.RemovePlayerServerRpc(ulong clientId)
         {
-            DoOperationImpl(operation, args);
+            _gameManager.RemovePlayer(clientId);
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        private void DoOperationServerNotRequireOwnership(Operation operation, object[] args)
+        [ServerRpc]
+        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.GetSelfServerRpc(ServerRpcParams serverRpcParams)
         {
-            DoOperationImpl(operation, args);
+            _gameManager.GetSelf(serverRpcParams);
         }
 
-        private void AddPlayer(object[] args)
+        [ClientRpc]
+        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.AssignSelfClientRpc(ClientRpcParams clientRpcParams)
         {
-            if (args == null || args.Length != 1 || args[0] is not ulong)
-            {
-                throw new ArgumentException("AddPlayer takes exactly 1 ulong argument");
-            }
-
-            _gameManager.AddPlayerServerRpc((ulong)args[0]);
+            _gameManager.AssignSelf(clientRpcParams);
         }
-        private void RemovePlayer(object[] args)
-        {
-            if (args == null || args.Length != 1 || args[0] is not ulong)
-            {
-                throw new ArgumentException("RemovePlayer takes exactly 1 ulong argument");
-            }
 
-            _gameManager.RemovePlayerServerRpc((ulong)args[0]);
+        [ServerRpc]
+        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.DealHandsServerRpc()
+        {
+            _gameManager.DealHands();
         }
-        private void GetSelf(object[] args)
-        {
-            if (args != null)
-            {
-                throw new ArgumentException("GetSelf takes no arguments");
-            }
 
-            _gameManager.GetSelfServerRpc(default);
+        [ServerRpc]
+        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.DrawCardServerRpc(ServerRpcParams serverRpcParams)
+        {
+            _gameManager.DrawCard(serverRpcParams);
         }
-        private void AssignSelf(object[] args)
-        {
-            if (args == null || args.Length != 1 || args[0] is not ClientRpcParams)
-            {
-                throw new ArgumentException("AssignSelf takes exactly 1 ClientRpcParams argument");
-            }
 
-            _gameManager.AssignSelfClientRpc((ClientRpcParams)args[0]);
-        }
-        private void DrawCard(object[] args)
+        [ServerRpc]
+        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.PlayCardServerRpc(PlayingCardSuit suit, PlayingCardRank rank, ServerRpcParams serverRpcParams)
         {
-            if (args != null)
-            {
-                throw new ArgumentException("DrawCard takes no arguments");
-            }
-
-            _gameManager.DrawCardServerRpc(default);
-        }
-        private void PlayCard(object[] args)
-        {
-            if (args == null || args.Length != 1 || args[0] is not SerializedPlayingCard)
-            {
-                throw new ArgumentException("PlayCard takes exactly 1 SerializedPlayingCard argument");
-            }
-
-            _gameManager.PlayCardServerRpc((SerializedPlayingCard)args[0], default);
+            _gameManager.PlayCard(suit, rank, serverRpcParams);
         }
     }
 }

@@ -1,8 +1,10 @@
 using System;
 
+using Unity.Netcode;
+
 namespace InterruptingCards.Models
 {
-    public interface ICard<out S, out R> where S : Enum where R : Enum
+    public interface ICard<out S, out R> : INetworkSerializable
     {
         S Suit { get; }
         R Rank { get; }

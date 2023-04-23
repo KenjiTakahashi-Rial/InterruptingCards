@@ -1,3 +1,5 @@
+using Unity.Netcode;
+
 namespace InterruptingCards.Models
 {
     public enum PlayingCardSuit
