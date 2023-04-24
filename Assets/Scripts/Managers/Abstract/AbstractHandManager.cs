@@ -8,7 +8,7 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public class HandManager<S, R> : MonoBehaviour, IHand<S, R> where S : Enum where R : Enum
+    public abstract class AbstractHandManager<S, R> : MonoBehaviour, IHandManager<S, R> where S : Enum where R : Enum
     {
         [SerializeField] private IList<CardBehaviour<S, R>> _cardSlots;
 

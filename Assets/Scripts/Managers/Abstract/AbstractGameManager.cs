@@ -10,47 +10,47 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers.GameManagers
 {
-    public abstract class AbstractGameManager<S, R> where S : Enum where R : Enum
+    public abstract class AbstractGameManager<S, R> : IGameManager<S, R> where S : Enum where R : Enum
     {
-        protected internal const int GameStateMachineLayer = 0;
+        protected const int GameStateMachineLayer = 0;
 
-        protected internal readonly int _waitingForClientsStateId = Animator.StringToHash("Base.WaitingForClients");
-        protected internal readonly int _waitingForDrawCardStateId = Animator.StringToHash("Base.InGame.WaitingForDrawCard"); // TODO: Double check that this full path is correct
-        protected internal readonly int _waitingForPlayCardStateId = Animator.StringToHash("Base.InGame.WaitingForPlayCard");
-        protected internal readonly int _startGameTriggerId = Animator.StringToHash("startGame");
-        protected internal readonly int _drawCardTriggerId = Animator.StringToHash("drawCard");
-        protected internal readonly int _playCardTriggerId = Animator.StringToHash("playCard");
-        protected internal readonly int _forceEndTurnTriggerId = Animator.StringToHash("forceEndTurn");
-        protected internal readonly int _forceEndGameTriggerId = Animator.StringToHash("forceEndGame");
+        protected readonly int _waitingForClientsStateId = Animator.StringToHash("Base.WaitingForClients");
+        protected readonly int _waitingForDrawCardStateId = Animator.StringToHash("Base.InGame.WaitingForDrawCard"); // TODO: Double check that this full path is correct
+        protected readonly int _waitingForPlayCardStateId = Animator.StringToHash("Base.InGame.WaitingForPlayCard");
+        protected readonly int _startGameTriggerId = Animator.StringToHash("startGame");
+        protected readonly int _drawCardTriggerId = Animator.StringToHash("drawCard");
+        protected readonly int _playCardTriggerId = Animator.StringToHash("playCard");
+        protected readonly int _forceEndTurnTriggerId = Animator.StringToHash("forceEndTurn");
+        protected readonly int _forceEndGameTriggerId = Animator.StringToHash("forceEndGame");
 
-        protected internal readonly NetworkManagerDecorator _networkManager = NetworkManagerDecorator.Singleton;
-        protected internal readonly IPlayerFactory<S, R> _playerFactory;
-        protected internal readonly ICardFactory<S, R> _cardFactory;
-        protected internal readonly LinkedList<IPlayer<S, R>> _players = new();
+        protected readonly NetworkManagerDecorator _networkManager = NetworkManagerDecorator.Singleton;
+        protected readonly IPlayerFactory<S, R> _playerFactory;
+        protected readonly ICardFactory<S, R> _cardFactory;
+        protected readonly LinkedList<IPlayer<S, R>> _players = new();
 
-        [SerializeField] protected internal Animator _gameStateMachine;
-        [SerializeField] protected internal DeckManager<S, R> _deckManager;
-        [SerializeField] protected internal DeckManager<S, R> _discardManager;
-        [SerializeField] protected internal HandManager<S, R>[] _handManagers;
+        [SerializeField] protected Animator _gameStateMachine;
+        [SerializeField] protected IDeckManager<S, R> _deckManager;
+        [SerializeField] protected IDeckManager<S, R> _discardManager;
+        [SerializeField] protected IHandManager<S, R>[] _handManagers;
 
-        protected internal IPlayer<S, R> _self; // The player that is on this device
-        protected internal LinkedListNode<IPlayer<S, R>> _playerTurnNode;
-        protected internal Dictionary<IPlayer<S, R>, IHand<S, R>> _playerHands;
+        protected IPlayer<S, R> _self; // The player that is on this device
+        protected LinkedListNode<IPlayer<S, R>> _playerTurnNode;
+        protected Dictionary<IPlayer<S, R>, IHand<S, R>> _playerHands;
 
-        internal static AbstractGameManager<S, R> Singleton { get; private set; }
+        public static IGameManager<S, R> Singleton { get; private set; }
 
-        protected internal abstract IGameManagerNetworkDependency<S, R> NetworkDependency { get; }
+        protected abstract IGameManagerNetworkDependency<S, R> NetworkDependency { get; }
 
-        protected internal abstract int MinPlayers { get; }
+        protected abstract int MinPlayers { get; }
 
-        protected internal abstract int MaxPlayers { get; }
+        protected abstract int MaxPlayers { get; }
 
-        protected internal virtual bool IsSelfTurn
+        protected bool IsSelfTurn
         {
             get { return _playerTurnNode.Value == _self; }
         }
 
-        protected internal virtual int CurrentStateId
+        protected int CurrentStateId
         {
             get { return _gameStateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash; }
         }
@@ -62,7 +62,7 @@ namespace InterruptingCards.Managers.GameManagers
             Singleton = this;
         }
 
-        internal virtual void OnNetworkSpawn()
+        public void OnNetworkSpawn()
         {
             _networkManager.OnClientConnectedCallback -= TryAddPlayer;
             _networkManager.OnClientConnectedCallback += TryAddPlayer;
@@ -79,7 +79,7 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        internal virtual void OnNetworkDespawn()
+        public void OnNetworkDespawn()
         {
             _networkManager.OnClientConnectedCallback -= TryAddPlayer;
             _networkManager.OnClientDisconnectCallback -= TryRemovePlayer;
@@ -92,7 +92,7 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        protected virtual void StateTrigger(int triggerId)
+        protected void StateTrigger(int triggerId)
         {
             _gameStateMachine.SetTrigger(triggerId);
         }
@@ -107,7 +107,7 @@ namespace InterruptingCards.Managers.GameManagers
             StateTrigger(_startGameTriggerId);
         }
 
-        protected virtual void ShiftTurn(int times = 1)
+        protected void ShiftTurn(int times = 1)
         {
             for (var i = 0; i < times; i++)
             {
@@ -128,7 +128,7 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        internal virtual void AddPlayer(ulong clientId)
+        public void AddPlayer(ulong clientId)
         {
             if (CurrentStateId != _waitingForClientsStateId)
             {
@@ -149,13 +149,13 @@ namespace InterruptingCards.Managers.GameManagers
         {
             if (!_networkManager.ConnectedClients.ContainsKey(clientId))
             {
-                RemovePlayer(clientId);
+                NetworkDependency.RemovePlayerServerRpc(clientId);
             }
 
             // TODO: Remove their hand
         }
 
-        internal virtual void RemovePlayer(ulong clientId)
+        public void RemovePlayer(ulong clientId)
         {
             var player = _players.FirstOrDefault(p => p.Id == clientId) ?? throw new PlayerNotFoundException();
 
@@ -177,7 +177,7 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        internal void GetSelf(ServerRpcParams serverRpcParams)
+        public void GetSelf(ServerRpcParams serverRpcParams)
         {
             var clientRpcParams = new ClientRpcParams
             {
@@ -190,7 +190,7 @@ namespace InterruptingCards.Managers.GameManagers
             NetworkDependency.AssignSelfClientRpc(clientRpcParams);
         }
 
-        internal virtual void AssignSelf(ClientRpcParams clientRpcParams)
+        public void AssignSelf(ClientRpcParams clientRpcParams)
         {
             var selfClientId = clientRpcParams.Send.TargetClientIds.First();
             _self = _players.First(p => p.Id == selfClientId);
@@ -221,7 +221,7 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        internal abstract void DealHands();
+        public abstract void DealHands();
 
         protected virtual void TryDrawCard()
         {
@@ -231,9 +231,9 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        internal virtual void DrawCard(ServerRpcParams serverRpsParams)
+        public void DrawCard(ServerRpcParams serverRpcParams)
         {
-            var senderId = serverRpsParams.Receive.SenderClientId;
+            var senderId = serverRpcParams.Receive.SenderClientId;
 
             if (senderId != _playerTurnNode.Value.Id)
             {
@@ -261,9 +261,9 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        internal virtual void PlayCard(S suit, R rank, ServerRpcParams serverRpsParams)
+        public void PlayCard(S suit, R rank, ServerRpcParams serverRpcParams)
         {
-            var senderId = serverRpsParams.Receive.SenderClientId;
+            var senderId = serverRpcParams.Receive.SenderClientId;
 
             if (senderId != _playerTurnNode.Value.Id)
             {

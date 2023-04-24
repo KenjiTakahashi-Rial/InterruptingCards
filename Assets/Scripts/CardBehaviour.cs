@@ -4,11 +4,12 @@ using InterruptingCards.Models;
 
 using TMPro;
 
+using Unity.Netcode;
 using UnityEngine;
 
 namespace InterruptingCards
 {
-    public class CardBehaviour<S, R> : MonoBehaviour where S : Enum where R : Enum
+    public class CardBehaviour<S, R> : NetworkBehaviour where S : Enum where R : Enum
     {
         [SerializeField] private TextMeshPro _cardText;
 

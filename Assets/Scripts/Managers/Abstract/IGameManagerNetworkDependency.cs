@@ -8,21 +8,27 @@ namespace InterruptingCards.Managers.GameManagers
     // Couple the concrete game manager with an implementation of this for networking capabilities
     public interface IGameManagerNetworkDependency<S, R> where S : Enum where R : Enum
     {
-        internal static IGameManagerNetworkDependency<S, R> Singleton { get; }
+        static IGameManagerNetworkDependency<S, R> Singleton { get; }
 
         [ServerRpc]
-        internal void AddPlayerServerRpc(ulong clientId);
+        void AddPlayerServerRpc(ulong clientId);
+
         [ServerRpc]
-        internal void RemovePlayerServerRpc(ulong clientId);
+        void RemovePlayerServerRpc(ulong clientId);
+
         [ServerRpc]
-        internal void GetSelfServerRpc(ServerRpcParams serverRpcParams = default);
+        void GetSelfServerRpc(ServerRpcParams serverRpcParams = default);
+
         [ClientRpc]
-        internal void AssignSelfClientRpc(ClientRpcParams clientRpcParams);
+        void AssignSelfClientRpc(ClientRpcParams clientRpcParams);
+
         [ServerRpc]
-        internal void DealHandsServerRpc();
+        void DealHandsServerRpc();
+
         [ServerRpc]
-        internal void DrawCardServerRpc(ServerRpcParams serverRpcParams = default);
+        void DrawCardServerRpc(ServerRpcParams serverRpcParams = default);
+
         [ServerRpc]
-        internal void PlayCardServerRpc(S suit, R rank, ServerRpcParams serverRpcParams = default);
+        void PlayCardServerRpc(S suit, R rank, ServerRpcParams serverRpcParams = default);
     }
 }

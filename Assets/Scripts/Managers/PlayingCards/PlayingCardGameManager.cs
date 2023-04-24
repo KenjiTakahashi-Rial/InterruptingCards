@@ -6,14 +6,16 @@ namespace InterruptingCards.Managers.GameManagers
     public class PlayingCardGameManager : AbstractGameManager<PlayingCardSuit, PlayingCardRank>
     {
         public PlayingCardGameManager(
-            IPlayerFactory<PlayingCardSuit, PlayingCardRank> playerFactory, ICardFactory<PlayingCardSuit, PlayingCardRank> cardFactory
+            IPlayerFactory<PlayingCardSuit,PlayingCardRank> playerFactory,
+            ICardFactory<PlayingCardSuit, PlayingCardRank> cardFactory
         ) : base(playerFactory, cardFactory) { }
 
-        protected internal override IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank> NetworkDependency => PlayingCardGameManagerNetworkDependency.Singleton;
+        protected override IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank> NetworkDependency =>
+            PlayingCardGameManagerNetworkDependency.Singleton;
 
-        protected internal override int MinPlayers => 2;
+        protected override int MinPlayers => 2;
 
-        protected internal override int MaxPlayers => 2;
+        protected override int MaxPlayers => 2;
 
         protected override void TryDealHands()
         {
@@ -21,7 +23,7 @@ namespace InterruptingCards.Managers.GameManagers
             throw new System.NotImplementedException();
         }
 
-        internal override void DealHands()
+        public override void DealHands()
         {
             // TODO: this
             throw new System.NotImplementedException();

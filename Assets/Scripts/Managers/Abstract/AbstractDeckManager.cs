@@ -6,7 +6,7 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public class DeckManager<S, R> : MonoBehaviour, IDeck<S, R> where S : Enum where R : Enum
+    public abstract class AbstractDeckManager<S, R> : MonoBehaviour, IDeckManager<S, R> where S : Enum where R : Enum
     {
         [SerializeField] private CardBehaviour<S, R> _topCard;
 
@@ -89,10 +89,7 @@ namespace InterruptingCards.Managers
             return card;
         }
 
-        public void ResetDeck()
-        {
-            // TODO: Implement
-        }
+        public abstract void ResetDeck();
 
         private void OnEnable()
         {
