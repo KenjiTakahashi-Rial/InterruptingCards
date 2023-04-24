@@ -17,16 +17,6 @@ namespace InterruptingCards.Managers.GameManagers
 
         protected override int MaxPlayers => 2;
 
-        protected override void TryDealHands()
-        {
-            // TODO: this
-            throw new System.NotImplementedException();
-        }
-
-        public override void DealHands()
-        {
-            // TODO: this
-            throw new System.NotImplementedException();
-        }
+        protected override int StartingHandCardCount => 5;
     }
 }

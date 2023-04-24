@@ -4,8 +4,8 @@ using Unity.Netcode;
 
 namespace InterruptingCards.Managers.GameManagers
 {
-    // AbstractGameManager is generic, so it cannot inherit from NetworkBehaviour
-    // Couple the concrete game manager with an implementation of this for networking capabilities
+    // AbstractGameManager is generic, so it cannot inherit perform ServerRpc
+    // Couple the concrete game manager with an implementation of this dependency to allow ServerRpc calls
     public interface IGameManagerNetworkDependency<S, R> where S : Enum where R : Enum
     {
         static IGameManagerNetworkDependency<S, R> Singleton { get; }

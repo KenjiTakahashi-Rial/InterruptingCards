@@ -14,8 +14,9 @@ namespace InterruptingCards.Managers.GameManagers
     {
         protected const int GameStateMachineLayer = 0;
 
+        // TODO: Double check that this full path format is correct
         protected readonly int _waitingForClientsStateId = Animator.StringToHash("Base.WaitingForClients");
-        protected readonly int _waitingForDrawCardStateId = Animator.StringToHash("Base.InGame.WaitingForDrawCard"); // TODO: Double check that this full path is correct
+        protected readonly int _waitingForDrawCardStateId = Animator.StringToHash("Base.InGame.WaitingForDrawCard");
         protected readonly int _waitingForPlayCardStateId = Animator.StringToHash("Base.InGame.WaitingForPlayCard");
         protected readonly int _startGameTriggerId = Animator.StringToHash("startGame");
         protected readonly int _drawCardTriggerId = Animator.StringToHash("drawCard");
@@ -44,6 +45,8 @@ namespace InterruptingCards.Managers.GameManagers
         protected abstract int MinPlayers { get; }
 
         protected abstract int MaxPlayers { get; }
+
+        protected abstract int StartingHandCardCount { get; }
 
         protected bool IsSelfTurn
         {
@@ -128,7 +131,7 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        public void AddPlayer(ulong clientId)
+        public virtual void AddPlayer(ulong clientId)
         {
             if (CurrentStateId != _waitingForClientsStateId)
             {
@@ -155,7 +158,7 @@ namespace InterruptingCards.Managers.GameManagers
             // TODO: Remove their hand
         }
 
-        public void RemovePlayer(ulong clientId)
+        public virtual void RemovePlayer(ulong clientId)
         {
             var player = _players.FirstOrDefault(p => p.Id == clientId) ?? throw new PlayerNotFoundException();
 
@@ -177,7 +180,7 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        public void GetSelf(ServerRpcParams serverRpcParams)
+        public virtual void GetSelf(ServerRpcParams serverRpcParams)
         {
             var clientRpcParams = new ClientRpcParams
             {
@@ -190,7 +193,7 @@ namespace InterruptingCards.Managers.GameManagers
             NetworkDependency.AssignSelfClientRpc(clientRpcParams);
         }
 
-        public void AssignSelf(ClientRpcParams clientRpcParams)
+        public virtual void AssignSelf(ClientRpcParams clientRpcParams)
         {
             var selfClientId = clientRpcParams.Send.TargetClientIds.First();
             _self = _players.First(p => p.Id == selfClientId);
@@ -215,13 +218,34 @@ namespace InterruptingCards.Managers.GameManagers
 
         protected virtual void TryDealHands()
         {
-            if (_players.Count < MinPlayers)
+            if (_players.Count < MinPlayers && _playerTurnNode == null)
             {
                 NetworkDependency.DealHandsServerRpc();
             }
         }
 
-        public abstract void DealHands();
+        public virtual void DealHands()
+        {
+            if (_players.Count < MinPlayers)
+            {
+                Debug.Log($"Tried to deal hands before {MinPlayers} joined");
+                return;
+            }
+
+            if (_playerTurnNode != null)
+            {
+                Debug.Log($"Tried to deal hands during a game");
+                return;
+            }
+
+            for (var i = 0; i < StartingHandCardCount; i++)
+            {
+                foreach (var hand in _handManagers)
+                {
+                    hand.Add(_deckManager.DrawTop());
+                }
+            }
+        }
 
         protected virtual void TryDrawCard()
         {
@@ -231,7 +255,7 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        public void DrawCard(ServerRpcParams serverRpcParams)
+        public virtual void DrawCard(ServerRpcParams serverRpcParams)
         {
             var senderId = serverRpcParams.Receive.SenderClientId;
 
@@ -261,7 +285,7 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        public void PlayCard(S suit, R rank, ServerRpcParams serverRpcParams)
+        public virtual void PlayCard(S suit, R rank, ServerRpcParams serverRpcParams)
         {
             var senderId = serverRpcParams.Receive.SenderClientId;
 
