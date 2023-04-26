@@ -1,36 +1,37 @@
 using System;
 using System.Collections.Generic;
 
+using InterruptingCards.Factories;
+
 namespace InterruptingCards.Models
 {
-    public class AbstractDeck<S, R> : IDeck<S, R> where S : Enum where R : Enum
+    public abstract class AbstractDeck<S, R> : IDeck<S, R> where S : Enum where R : Enum
     {
-        private readonly System.Random _random = new();
-        private readonly IList<ICard<S, R>> _cards;
+        protected readonly Random _random = new();
+        protected IList<ICard<S, R>> _cards;
 
-        private int TopIndex
+        protected abstract ICardFactory<S, R> CardFactory { get; }
+
+        protected virtual int TopIndex
         {
             get { return _cards.Count - 1; }
         }
 
-        private int BottomIndex { get; } = 0;
+        protected virtual int BottomIndex { get; } = 0;
 
-        public AbstractDeck(IList<ICard<S, R>> cards = null)
+        protected AbstractDeck(IList<ICard<S, R>> cards = null)
         {
-            if (cards == null)
-            {
-                return;
-            }
-
             _cards = cards;
         }
 
-        public int Count()
+        public abstract object Clone();
+
+        public virtual int Count()
         {
             return _cards.Count;
         }
 
-        public void Shuffle()
+        public virtual void Shuffle()
         {
             CheckEmpty();
 
@@ -41,44 +42,44 @@ namespace InterruptingCards.Models
             }
         }
 
-        public void PlaceTop(ICard<S, R> card)
+        public virtual void PlaceTop(ICard<S, R> card)
         {
             _cards.Add(card);
         }
 
-        public void PlaceBottom(ICard<S, R> card)
+        public virtual void PlaceBottom(ICard<S, R> card)
         {
             _cards.Insert(0, card);
         }
 
-        public void InsertRandom(ICard<S, R> card)
+        public virtual void InsertRandom(ICard<S, R> card)
         {
             var i = _random.Next(0, _cards.Count + 1);
             _cards.Insert(i, card);
         }
 
-        public ICard<S, R> PeekTop()
+        public virtual ICard<S, R> PeekTop()
         {
             CheckEmpty();
-            return _cards[TopIndex].Clone();
+            return (ICard<S, R>)_cards[TopIndex].Clone();
         }
 
-        public ICard<S, R> DrawTop()
+        public virtual ICard<S, R> DrawTop()
         {
             return PopAt(TopIndex);
         }
 
-        public ICard<S, R> DrawBottom()
+        public virtual ICard<S, R> DrawBottom()
         {
             return PopAt(BottomIndex);
         }
 
-        public ICard<S, R> Remove(S suit, R rank)
+        public virtual ICard<S, R> Remove(S suit, R rank)
         {
             return Utilities.Remove(_cards, suit, rank);
         }
 
-        private void CheckEmpty()
+        protected virtual void CheckEmpty()
         {
             if (_cards.Count == 0)
             {
@@ -86,7 +87,7 @@ namespace InterruptingCards.Models
             }
         }
 
-        private ICard<S, R> PopAt(int i)
+        protected virtual ICard<S, R> PopAt(int i)
         {
             CheckEmpty();
             var card = _cards[i];

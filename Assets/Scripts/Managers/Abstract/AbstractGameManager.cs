@@ -10,7 +10,7 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers.GameManagers
 {
-    public abstract class AbstractGameManager<S, R> : IGameManager<S, R> where S : Enum where R : Enum
+    public abstract class AbstractGameManager<S, R> : MonoBehaviour, IGameManager<S, R> where S : Enum where R : Enum
     {
         protected const int GameStateMachineLayer = 0;
 
@@ -24,9 +24,6 @@ namespace InterruptingCards.Managers.GameManagers
         protected readonly int _forceEndTurnTriggerId = Animator.StringToHash("forceEndTurn");
         protected readonly int _forceEndGameTriggerId = Animator.StringToHash("forceEndGame");
 
-        protected readonly NetworkManagerDecorator _networkManager = NetworkManagerDecorator.Singleton;
-        protected readonly IPlayerFactory<S, R> _playerFactory;
-        protected readonly ICardFactory<S, R> _cardFactory;
         protected readonly LinkedList<IPlayer<S, R>> _players = new();
 
         [SerializeField] protected Animator _gameStateMachine;
@@ -38,9 +35,15 @@ namespace InterruptingCards.Managers.GameManagers
         protected LinkedListNode<IPlayer<S, R>> _playerTurnNode;
         protected Dictionary<IPlayer<S, R>, IHand<S, R>> _playerHands;
 
-        public static IGameManager<S, R> Singleton { get; private set; }
+        public static IGameManager<S, R> Singleton { get; protected set; }
+
+        protected virtual NetworkManager NetworkManager { get { return NetworkManager.Singleton; } }
 
         protected abstract IGameManagerNetworkDependency<S, R> NetworkDependency { get; }
+
+        protected abstract IPlayerFactory<S, R> PlayerFactory { get; }
+
+        protected abstract ICardFactory<S, R> CardFactory { get; }
 
         protected abstract int MinPlayers { get; }
 
@@ -48,29 +51,22 @@ namespace InterruptingCards.Managers.GameManagers
 
         protected abstract int StartingHandCardCount { get; }
 
-        protected bool IsSelfTurn
+        protected virtual bool IsSelfTurn
         {
             get { return _playerTurnNode.Value == _self; }
         }
 
-        protected int CurrentStateId
+        protected virtual int CurrentStateId
         {
             get { return _gameStateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash; }
         }
 
-        protected AbstractGameManager(IPlayerFactory<S, R> playerFactory, ICardFactory<S, R> cardFactory)
+        public virtual void OnNetworkSpawn()
         {
-            _playerFactory = playerFactory;
-            _cardFactory = cardFactory;
-            Singleton = this;
-        }
-
-        public void OnNetworkSpawn()
-        {
-            _networkManager.OnClientConnectedCallback -= TryAddPlayer;
-            _networkManager.OnClientConnectedCallback += TryAddPlayer;
-            _networkManager.OnClientDisconnectCallback -= TryRemovePlayer;
-            _networkManager.OnClientDisconnectCallback += TryRemovePlayer;
+            NetworkManager.OnClientConnectedCallback -= TryAddPlayer;
+            NetworkManager.OnClientConnectedCallback += TryAddPlayer;
+            NetworkManager.OnClientDisconnectCallback -= TryRemovePlayer;
+            NetworkManager.OnClientDisconnectCallback += TryRemovePlayer;
 
             _deckManager.OnDeckClicked -= TryDrawCard;
             _deckManager.OnDeckClicked += TryDrawCard;
@@ -82,52 +78,16 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        public void OnNetworkDespawn()
+        public virtual void OnNetworkDespawn()
         {
-            _networkManager.OnClientConnectedCallback -= TryAddPlayer;
-            _networkManager.OnClientDisconnectCallback -= TryRemovePlayer;
+            NetworkManager.OnClientConnectedCallback -= TryAddPlayer;
+            NetworkManager.OnClientDisconnectCallback -= TryRemovePlayer;
 
             _deckManager.OnDeckClicked -= TryDrawCard;
 
             foreach (var handManager in _handManagers)
             {
                 handManager.OnCardClicked -= TryPlayCard;
-            }
-        }
-
-        protected void StateTrigger(int triggerId)
-        {
-            _gameStateMachine.SetTrigger(triggerId);
-        }
-
-        public virtual void StartGame()
-        {
-            NetworkDependency.GetSelfServerRpc();
-            _deckManager.ResetDeck();
-            AssignHands();
-            TryDealHands();
-            _playerTurnNode = _players.First;
-            StateTrigger(_startGameTriggerId);
-        }
-
-        protected void ShiftTurn(int times = 1)
-        {
-            for (var i = 0; i < times; i++)
-            {
-                _playerTurnNode = _playerTurnNode.Next ?? _players.First;
-            }
-        }
-
-        protected virtual void EndGame()
-        {
-            _playerTurnNode = null;
-        }
-
-        protected virtual void TryAddPlayer(ulong clientId)
-        {
-            if (CurrentStateId == _waitingForClientsStateId && _players.Count < MinPlayers)
-            {
-                NetworkDependency.AddPlayerServerRpc(clientId);
             }
         }
 
@@ -145,17 +105,7 @@ namespace InterruptingCards.Managers.GameManagers
                 return;
             }
 
-            _players.AddLast(_playerFactory.CreatePlayer(clientId, clientId.ToString()));
-        }
-
-        protected virtual void TryRemovePlayer(ulong clientId)
-        {
-            if (!_networkManager.ConnectedClients.ContainsKey(clientId))
-            {
-                NetworkDependency.RemovePlayerServerRpc(clientId);
-            }
-
-            // TODO: Remove their hand
+            _players.AddLast(PlayerFactory.Create(clientId, clientId.ToString()));
         }
 
         public virtual void RemovePlayer(ulong clientId)
@@ -199,31 +149,6 @@ namespace InterruptingCards.Managers.GameManagers
             _self = _players.First(p => p.Id == selfClientId);
         }
 
-        protected virtual void AssignHands()
-        {
-            if (_players.Count > _handManagers.Count())
-            {
-                throw new TooManyPlayersException();
-            }
-
-            _playerHands = new();
-            var i = 0;
-            foreach (var player in _players)
-            {
-                var hand = _handManagers[i++];
-                player.Hand = hand;
-                _playerHands[player] = hand;
-            }
-        }
-
-        protected virtual void TryDealHands()
-        {
-            if (_players.Count < MinPlayers && _playerTurnNode == null)
-            {
-                NetworkDependency.DealHandsServerRpc();
-            }
-        }
-
         public virtual void DealHands()
         {
             if (_players.Count < MinPlayers)
@@ -244,14 +169,6 @@ namespace InterruptingCards.Managers.GameManagers
                 {
                     hand.Add(_deckManager.DrawTop());
                 }
-            }
-        }
-
-        protected virtual void TryDrawCard()
-        {
-            if (IsSelfTurn && CurrentStateId == _waitingForDrawCardStateId)
-            {
-                NetworkDependency.DrawCardServerRpc();
             }
         }
 
@@ -277,14 +194,6 @@ namespace InterruptingCards.Managers.GameManagers
             StateTrigger(_drawCardTriggerId);
         }
 
-        protected virtual void TryPlayCard(ICard<S, R> card)
-        {
-            if (IsSelfTurn && CurrentStateId == _waitingForPlayCardStateId)
-            {
-                NetworkDependency.PlayCardServerRpc(card.Suit, card.Rank);
-            }
-        }
-
         public virtual void PlayCard(S suit, R rank, ServerRpcParams serverRpcParams)
         {
             var senderId = serverRpcParams.Receive.SenderClientId;
@@ -302,9 +211,106 @@ namespace InterruptingCards.Managers.GameManagers
             }
 
             _playerHands[_playerTurnNode.Value].Remove(suit, rank);
-            _discardManager.PlaceTop(_cardFactory.CreateCard(suit, rank));
+            _discardManager.PlaceTop(CardFactory.Create(suit, rank));
 
             StateTrigger(_playCardTriggerId);
+        }
+
+        protected virtual void Awake()
+        {
+            Singleton = this;
+        }
+
+        protected virtual void OnDestroy()
+        {
+            Singleton = null;
+        }
+
+        protected virtual void StateTrigger(int triggerId)
+        {
+            _gameStateMachine.SetTrigger(triggerId);
+        }
+
+        protected virtual void StartGame()
+        {
+            NetworkDependency.GetSelfServerRpc();
+            _deckManager.ResetDeck();
+            AssignHands();
+            TryDealHands();
+            _playerTurnNode = _players.First;
+            StateTrigger(_startGameTriggerId);
+        }
+
+        protected virtual void ShiftTurn(int times = 1)
+        {
+            for (var i = 0; i < times; i++)
+            {
+                _playerTurnNode = _playerTurnNode.Next ?? _players.First;
+            }
+        }
+
+        protected virtual void EndGame()
+        {
+            _playerTurnNode = null;
+        }
+
+        protected virtual void TryAddPlayer(ulong clientId)
+        {
+            if (CurrentStateId == _waitingForClientsStateId && _players.Count < MinPlayers)
+            {
+                NetworkDependency.AddPlayerServerRpc(clientId);
+            }
+        }
+
+        protected virtual void TryRemovePlayer(ulong clientId)
+        {
+            if (!NetworkManager.ConnectedClients.ContainsKey(clientId))
+            {
+                NetworkDependency.RemovePlayerServerRpc(clientId);
+            }
+
+            // TODO: Remove their hand
+        }
+
+        protected virtual void AssignHands()
+        {
+            if (_players.Count > _handManagers.Count())
+            {
+                throw new TooManyPlayersException();
+            }
+
+            _playerHands = new();
+            var i = 0;
+            foreach (var player in _players)
+            {
+                var hand = _handManagers[i++];
+                player.Hand = hand;
+                _playerHands[player] = hand;
+            }
+        }
+
+        protected virtual void TryDealHands()
+        {
+            if (_players.Count < MinPlayers && _playerTurnNode == null)
+            {
+                NetworkDependency.DealHandsServerRpc();
+            }
+        }
+
+        protected virtual void TryDrawCard()
+        {
+            if (IsSelfTurn && CurrentStateId == _waitingForDrawCardStateId)
+            {
+                NetworkDependency.DrawCardServerRpc();
+            }
+        }
+
+        protected virtual void TryPlayCard(ICard<S, R> card)
+        {
+            if (IsSelfTurn && CurrentStateId == _waitingForPlayCardStateId)
+            {
+                NetworkDependency.PlayCardServerRpc(card.Suit, card.Rank);
+            }
         }
     }
 }

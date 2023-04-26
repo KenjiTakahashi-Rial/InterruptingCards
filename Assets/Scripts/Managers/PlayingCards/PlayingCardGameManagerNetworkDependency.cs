@@ -1,68 +1,67 @@
 using Unity.Netcode;
 
-using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers.GameManagers
 {
     public class PlayingCardGameManagerNetworkDependency : NetworkBehaviour, IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>
     {
-        private readonly PlayingCardGameManager _gameManager = new(PlayingCardPlayerFactory.Singleton, PlayingCardFactory.Singleton);
+        public static IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank> Singleton { get; private set; }
 
-        internal static IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank> Singleton { get; private set; }
+        private IGameManager<PlayingCardSuit, PlayingCardRank> GameManager { get { return PlayingCardGameManager.Singleton; } }
 
         public override void OnNetworkSpawn()
         {
             Singleton = this;
-            _gameManager.OnNetworkSpawn();
+            GameManager.OnNetworkSpawn();
         }
 
         public override void OnNetworkDespawn()
         {
-            _gameManager.OnNetworkDespawn();
+            GameManager.OnNetworkDespawn();
             Singleton = null;
         }
 
         [ServerRpc]
-        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.AddPlayerServerRpc(ulong clientId)
+        public void AddPlayerServerRpc(ulong clientId)
         {
-            _gameManager.AddPlayer(clientId);
+            GameManager.AddPlayer(clientId);
         }
 
         [ServerRpc]
-        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.RemovePlayerServerRpc(ulong clientId)
+        public void RemovePlayerServerRpc(ulong clientId)
         {
-            _gameManager.RemovePlayer(clientId);
+            GameManager.RemovePlayer(clientId);
         }
 
         [ServerRpc]
-        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.GetSelfServerRpc(ServerRpcParams serverRpcParams)
+        public void GetSelfServerRpc(ServerRpcParams serverRpcParams = default)
         {
-            _gameManager.GetSelf(serverRpcParams);
+            GameManager.GetSelf(serverRpcParams);
         }
 
         [ClientRpc]
-        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.AssignSelfClientRpc(ClientRpcParams clientRpcParams)
+        public void AssignSelfClientRpc(ClientRpcParams clientRpcParams)
         {
-            _gameManager.AssignSelf(clientRpcParams);
+            GameManager.AssignSelf(clientRpcParams);
         }
 
         [ServerRpc]
-        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.DealHandsServerRpc()
+        public void DealHandsServerRpc()
         {
-            _gameManager.DealHands();
+            GameManager.DealHands();
         }
 
         [ServerRpc]
-        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.DrawCardServerRpc(ServerRpcParams serverRpcParams)
+        public void DrawCardServerRpc(ServerRpcParams serverRpcParams = default)
         {
-            _gameManager.DrawCard(serverRpcParams);
+            GameManager.DrawCard(serverRpcParams);
         }
 
         [ServerRpc]
-        void IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>.PlayCardServerRpc(PlayingCardSuit suit, PlayingCardRank rank, ServerRpcParams serverRpcParams)
+        public void PlayCardServerRpc(PlayingCardSuit suit, PlayingCardRank rank, ServerRpcParams serverRpcParams = default)
         {
-            _gameManager.PlayCard(suit, rank, serverRpcParams);
+            GameManager.PlayCard(suit, rank, serverRpcParams);
         }
     }
 }

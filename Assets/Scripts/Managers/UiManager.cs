@@ -1,9 +1,10 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace InterruptingCards.Managers
 {
-    public class UiController : MonoBehaviour
+    public class UiManager : MonoBehaviour
     {
         [SerializeField] private Button _serverButton;
         [SerializeField] private Button _hostButton;
@@ -11,9 +12,9 @@ namespace InterruptingCards.Managers
 
         private void Awake()
         {
-            _serverButton.onClick.AddListener(() => NetworkManagerDecorator.Singleton.StartServer());
-            _hostButton.onClick.AddListener(() => NetworkManagerDecorator.Singleton.StartHost());
-            _clientButton.onClick.AddListener(() => NetworkManagerDecorator.Singleton.StartClient());
+            _serverButton.onClick.AddListener(() => NetworkManager.Singleton.StartServer());
+            _hostButton.onClick.AddListener(() => NetworkManager.Singleton.StartHost());
+            _clientButton.onClick.AddListener(() => NetworkManager.Singleton.StartClient());
         }
     }
 }

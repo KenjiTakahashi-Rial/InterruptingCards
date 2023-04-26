@@ -8,9 +8,14 @@ namespace InterruptingCards.Factories
     {
         public static ICardFactory<PlayingCardSuit, PlayingCardRank> Singleton { get; private set; }
 
-        public ICard<PlayingCardSuit, PlayingCardRank> CreateCard(PlayingCardSuit suit, PlayingCardRank rank)
+        public ICard<PlayingCardSuit, PlayingCardRank> Create(PlayingCardSuit suit, PlayingCardRank rank)
         {
             return new PlayingCard(suit, rank);
+        }
+
+        public ICard<PlayingCardSuit, PlayingCardRank> Clone(ICard<PlayingCardSuit, PlayingCardRank> original)
+        {
+            return (PlayingCard)original.Clone();
         }
 
         private void Awake()

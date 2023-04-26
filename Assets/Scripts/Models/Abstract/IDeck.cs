@@ -2,7 +2,7 @@ using System;
 
 namespace InterruptingCards.Models
 {
-    public interface IDeck<S, R> where S : Enum where R : Enum
+    public interface IDeck<S, R> : ICloneable where S : Enum where R : Enum
     {
 
         int Count();

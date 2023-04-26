@@ -1,20 +1,21 @@
 using System;
 
-using InterruptingCards.Models;
-
 using TMPro;
 
 using Unity.Netcode;
 using UnityEngine;
 
-namespace InterruptingCards
+using InterruptingCards.Models;
+
+namespace InterruptingCards.Behaviours
 {
-    public class CardBehaviour<S, R> : NetworkBehaviour where S : Enum where R : Enum
+    // TODO: Consider adding a network dependency for this so it can inherit most of the functionality from a generic abstract class
+    public class PlayingCardBehaviour : NetworkBehaviour, ICardBehaviour<PlayingCardSuit, PlayingCardRank>
     {
         [SerializeField] private TextMeshPro _cardText;
 
         private readonly NetworkVariable<bool> _isFaceUp = new(true);
-        private readonly NetworkVariable<ICard<S, R>> _card = new();
+        private readonly NetworkVariable<ICard<PlayingCardSuit, PlayingCardRank>> _card = new();
 
         public event Action OnCardClicked;
 
@@ -28,7 +29,7 @@ namespace InterruptingCards
             }
         }
 
-        public ICard<S, R> Card
+        public ICard<PlayingCardSuit, PlayingCardRank> Card
         {
             get { return _card.Value; }
             set
@@ -75,10 +76,7 @@ namespace InterruptingCards
             _cardText.enabled = true;
         }
 
-        // The parameters are necessary for use in NetworkVariable.OnValueChanged
-#pragma warning disable S1172 // Unused method parameters should be removed
         private void Refresh<T>(T _, T v)
-#pragma warning restore S1172 // Unused method parameters should be removed
         {
             Refresh();
         }

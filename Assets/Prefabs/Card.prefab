@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 7352211822102072789}
   - component: {fileID: 7099380014465609517}
   - component: {fileID: 1075542451944468006}
-  - component: {fileID: -2768040128115707906}
   m_Layer: 5
   m_Name: Card
   m_TagString: Untagged
@@ -28,7 +27,7 @@ RectTransform:
   m_GameObject: {fileID: 4441051490982890013}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.5, y: 2.5, z: 1}
+  m_LocalScale: {x: 100, y: 100, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1499624550254829681}
@@ -108,19 +107,6 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &-2768040128115707906
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4441051490982890013}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c73f67e815b100d40803024e19676d09, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _cardName: {fileID: 910167586431815590}
 --- !u!1 &8730709138086622415
 GameObject:
   m_ObjectHideFlags: 0

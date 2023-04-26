@@ -5,13 +5,14 @@ namespace InterruptingCards.Managers.GameManagers
 {
     public class PlayingCardGameManager : AbstractGameManager<PlayingCardSuit, PlayingCardRank>
     {
-        public PlayingCardGameManager(
-            IPlayerFactory<PlayingCardSuit,PlayingCardRank> playerFactory,
-            ICardFactory<PlayingCardSuit, PlayingCardRank> cardFactory
-        ) : base(playerFactory, cardFactory) { }
-
         protected override IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank> NetworkDependency =>
             PlayingCardGameManagerNetworkDependency.Singleton;
+
+        protected override IPlayerFactory<PlayingCardSuit, PlayingCardRank> PlayerFactory =>
+            PlayingCardPlayerFactory.Singleton;
+
+        protected override ICardFactory<PlayingCardSuit, PlayingCardRank> CardFactory =>
+            (ICardFactory<PlayingCardSuit, PlayingCardRank>)PlayingCardFactory.Singleton;
 
         protected override int MinPlayers => 2;
 

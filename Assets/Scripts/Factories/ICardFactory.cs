@@ -8,6 +8,8 @@ namespace InterruptingCards.Factories
     {
         public static ICardFactory<S, R> Singleton { get; }
 
-        public ICard<S, R> CreateCard(S suit, R rank);
+        public ICard<S, R> Create(S suit, R rank);
+
+        public ICard<S, R> Clone(ICard<S, R> original);
     }
 }

@@ -6,7 +6,7 @@ namespace InterruptingCards.Models
     {
         public PlayingCard(PlayingCardSuit suit, PlayingCardRank rank) : base(suit, rank) { }
 
-        public override ICard<PlayingCardSuit, PlayingCardRank> Clone()
+        public override object Clone()
         {
             return new PlayingCard(Suit, Rank);
         }

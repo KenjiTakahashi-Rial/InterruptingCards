@@ -15,11 +15,11 @@ namespace InterruptingCards.Models
             _rank = rank;
         }
 
-        public S Suit { get { return _suit; } }
+        public virtual S Suit { get { return _suit; } }
 
-        public R Rank { get { return _rank; } }
+        public virtual R Rank { get { return _rank; } }
 
-        public abstract ICard<S, R> Clone();
+        public abstract object Clone();
 
         public abstract void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter;
     }

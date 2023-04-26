@@ -4,13 +4,14 @@ using System.Linq;
 
 using UnityEngine;
 
+using InterruptingCards.Behaviours;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
     public abstract class AbstractHandManager<S, R> : MonoBehaviour, IHandManager<S, R> where S : Enum where R : Enum
     {
-        [SerializeField] private IList<CardBehaviour<S, R>> _cardSlots;
+        [SerializeField] private IList<ICardBehaviour<S, R>> _cardSlots;
 
         private IHand<S, R> _hand;
 

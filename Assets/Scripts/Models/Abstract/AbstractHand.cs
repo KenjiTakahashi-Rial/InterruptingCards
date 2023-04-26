@@ -7,7 +7,7 @@ namespace InterruptingCards.Models
     {
         protected readonly IList<ICard<S, R>> _cards;
 
-        public AbstractHand(IList<ICard<S, R>> cards = null)
+        protected AbstractHand(IList<ICard<S, R>> cards = null)
         {
             if (cards == null)
             {
@@ -17,27 +17,27 @@ namespace InterruptingCards.Models
             _cards = cards;
         }
 
-        public int Count()
+        public virtual int Count()
         {
             return _cards.Count;
         }
 
-        public void Insert(int i, ICard<S, R> card)
+        public virtual void Insert(int i, ICard<S, R> card)
         {
             _cards.Insert(i, card);
         }
 
-        public void Add(ICard<S, R> card)
+        public virtual void Add(ICard<S, R> card)
         {
             Insert(0, card);
         }
 
-        public ICard<S, R> Remove(S suit, R rank)
+        public virtual ICard<S, R> Remove(S suit, R rank)
         {
             return Utilities.Remove(_cards, suit, rank);
         }
 
-        public ICard<S, R> Get(int i)
+        public virtual ICard<S, R> Get(int i)
         {
             return _cards[i];
         }

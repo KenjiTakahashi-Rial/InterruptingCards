@@ -8,7 +8,7 @@ namespace InterruptingCards.Factories
     {
         public static IPlayerFactory<PlayingCardSuit, PlayingCardRank> Singleton { get; private set; }
 
-        public IPlayer<PlayingCardSuit, PlayingCardRank> CreatePlayer(ulong id, string name, IHand<PlayingCardSuit, PlayingCardRank> hand = null)
+        public IPlayer<PlayingCardSuit, PlayingCardRank> Create(ulong id, string name, IHand<PlayingCardSuit, PlayingCardRank> hand = null)
         {
             return new PlayingCardPlayer(id, name, hand);
         }

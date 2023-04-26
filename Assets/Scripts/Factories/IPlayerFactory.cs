@@ -8,6 +8,6 @@ namespace InterruptingCards.Factories
     {
         public static IPlayerFactory<S, R> Singleton { get; }
 
-        public IPlayer<S, R> CreatePlayer(ulong id, string name, IHand<S, R> hand = null);
+        public IPlayer<S, R> Create(ulong id, string name, IHand<S, R> hand = null);
     }
 }

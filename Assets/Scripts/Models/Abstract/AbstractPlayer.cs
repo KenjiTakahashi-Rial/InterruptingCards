@@ -11,10 +11,10 @@ namespace InterruptingCards.Models
             Hand = hand;
         }
 
-        public ulong Id { get; }
+        public virtual ulong Id { get; }
 
-        public string Name { get; }
+        public virtual string Name { get; }
 
-        public IHand<S, R> Hand { get; set; }
+        public virtual IHand<S, R> Hand { get; set; }
     }
 }
