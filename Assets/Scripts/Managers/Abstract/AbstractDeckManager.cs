@@ -11,8 +11,6 @@ namespace InterruptingCards.Managers
 {
     public abstract class AbstractDeckManager<S, R> : MonoBehaviour, IDeckManager<S, R> where S : Enum where R : Enum
     {
-        [SerializeField] protected ICardBehaviour<S, R> _topCard;
-
         protected bool _isFaceUp = false;
         protected IDeck<S, R> _deck;
         protected IDeck<S, R> _deckPrototype;
@@ -22,10 +20,10 @@ namespace InterruptingCards.Managers
         protected abstract ICardFactory<S, R> CardFactory { get; }
 
         protected abstract IDeckFactory<S, R> DeckFactory { get; }
-
+        
         public virtual bool IsFaceUp
         {
-            get { return _isFaceUp; }
+            get => _isFaceUp;
             set
             {
                 _isFaceUp = value;
@@ -35,13 +33,15 @@ namespace InterruptingCards.Managers
 
         public virtual IDeck<S, R> Deck
         {
-            get { return _deck; }
+            get => _deck;
             set
             {
                 _deck = value;
                 Refresh();
             }
         }
+
+        protected abstract ICardBehaviour<S, R> TopCard { get; }
 
         public virtual object Clone()
         {
@@ -108,20 +108,21 @@ namespace InterruptingCards.Managers
             Shuffle();
         }
 
-        protected virtual void Awake()
+        protected virtual void Start()
         {
+            // Must be called aftger awake so Singletons can be set
             CreatePrototype();
         }
 
         protected virtual void OnEnable()
         {
-            _topCard.OnCardClicked -= InvokeOnDeckClicked;
-            _topCard.OnCardClicked += InvokeOnDeckClicked;
+            TopCard.OnCardClicked -= InvokeOnDeckClicked;
+            TopCard.OnCardClicked += InvokeOnDeckClicked;
         }
 
         protected virtual void OnDisable()
         {
-            _topCard.OnCardClicked -= InvokeOnDeckClicked;
+            TopCard.OnCardClicked -= InvokeOnDeckClicked;
         }
 
         protected virtual void CreatePrototype()
@@ -143,8 +144,8 @@ namespace InterruptingCards.Managers
 
         protected virtual void Refresh()
         {
-            _topCard.IsFaceUp = IsFaceUp;
-            _topCard.Card = _deck.Count() == 0 ? null : PeekTop();
+            TopCard.IsFaceUp = IsFaceUp;
+            TopCard.Card = _deck.Count() == 0 ? null : PeekTop();
         }
 
         protected virtual void InvokeOnDeckClicked()

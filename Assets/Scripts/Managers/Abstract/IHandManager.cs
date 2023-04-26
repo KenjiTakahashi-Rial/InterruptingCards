@@ -7,5 +7,7 @@ namespace InterruptingCards.Managers
     public interface IHandManager<S, R> : IHand<S, R> where S: Enum where R : Enum
     {
         event Action<ICard<S, R>> OnCardClicked;
+
+        IHand<S, R> Hand { get; set; }
     }
 }

@@ -4,7 +4,6 @@ namespace InterruptingCards.Models
 {
     public interface IDeck<S, R> : ICloneable where S : Enum where R : Enum
     {
-
         int Count();
 
         void Shuffle();

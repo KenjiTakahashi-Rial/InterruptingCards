@@ -15,9 +15,9 @@ namespace InterruptingCards.Models
             _rank = rank;
         }
 
-        public virtual S Suit { get { return _suit; } }
+        public virtual S Suit { get => _suit; }
 
-        public virtual R Rank { get { return _rank; } }
+        public virtual R Rank { get => _rank; }
 
         public abstract object Clone();
 

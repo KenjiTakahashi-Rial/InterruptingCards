@@ -11,15 +11,13 @@ namespace InterruptingCards.Managers
 {
     public abstract class AbstractHandManager<S, R> : MonoBehaviour, IHandManager<S, R> where S : Enum where R : Enum
     {
-        [SerializeField] private IList<ICardBehaviour<S, R>> _cardSlots;
-
-        private IHand<S, R> _hand;
+        protected IHand<S, R> _hand;
 
         public event Action<ICard<S, R>> OnCardClicked;
 
-        public IHand<S, R> Hand
+        public virtual IHand<S, R> Hand
         {
-            get { return _hand; }
+            get => _hand;
             set
             {
                 _hand = value;
@@ -27,61 +25,68 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public int Count()
+        public virtual int Count()
         {
             return _hand.Count();
         }
 
-        public void Add(ICard<S, R> card)
+        protected abstract IList<ICardBehaviour<S, R>> CardSlots { get; }
+
+        public virtual void Add(ICard<S, R> card)
         {
-            if (Count() == _cardSlots.Count)
+            if (Count() == CardSlots.Count)
             {
                 throw new TooManyCardsException();
             }
 
             _hand.Add(card);
-            _cardSlots[Count() - 1].Card = card;
+            CardSlots[Count() - 1].Card = card;
 
             Refresh();
         }
 
-        public ICard<S, R> Remove(S suit, R rank)
+        public virtual ICard<S, R> Remove(S suit, R rank)
         {
             var card = _hand.Remove(suit, rank);
-            _cardSlots.Remove(_cardSlots.FirstOrDefault(c => c.Card.Suit.Equals(suit) && c.Card.Rank.Equals(rank)));
+            CardSlots.Remove(CardSlots.FirstOrDefault(c => c.Card.Suit.Equals(suit) && c.Card.Rank.Equals(rank)));
             Refresh();
             return card;
         }
 
-        public ICard<S, R> Get(int i)
+        public virtual ICard<S, R> Get(int i)
         {
             return _hand.Get(i);
         }
 
-        public void SetIsFaceUp(int i)
+        public virtual void SetIsFaceUp(int i)
         {
-            _cardSlots[i].IsFaceUp = true;
+            CardSlots[i].IsFaceUp = true;
         }
 
-        private void OnEnable()
+        public virtual object Clone()
+        {
+            throw new NotImplementedException("HandManager should not be cloned");
+        }
+
+        protected virtual void OnEnable()
         {
             Refresh();
         }
 
-        private void OnDisable()
+        protected virtual void OnDisable()
         {
-            foreach (var cardSlot in _cardSlots)
+            foreach (var cardSlot in CardSlots)
             {
                 cardSlot.UnsubscribeAllOnCardClicked();
                 cardSlot.Card = null;
             }
         }
 
-        private void Refresh()
+        protected virtual void Refresh()
         {
-            for (var i = 0; i < _cardSlots.Count; i++)
+            for (var i = 0; i < CardSlots.Count; i++)
             {
-                var cardSlot = _cardSlots[i];
+                var cardSlot = CardSlots[i];
                 cardSlot.UnsubscribeAllOnCardClicked();
 
                 if (i >= Count())

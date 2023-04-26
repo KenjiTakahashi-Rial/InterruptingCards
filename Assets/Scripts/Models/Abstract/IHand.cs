@@ -2,7 +2,7 @@ using System;
 
 namespace InterruptingCards.Models
 {
-    public interface IHand<S, R> where S : Enum where R : Enum
+    public interface IHand<S, R> : ICloneable where S : Enum where R : Enum
     {
         int Count();
 

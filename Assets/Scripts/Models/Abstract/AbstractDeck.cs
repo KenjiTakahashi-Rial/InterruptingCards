@@ -12,14 +12,11 @@ namespace InterruptingCards.Models
 
         protected abstract ICardFactory<S, R> CardFactory { get; }
 
-        protected virtual int TopIndex
-        {
-            get { return _cards.Count - 1; }
-        }
+        protected virtual int TopIndex { get => _cards.Count - 1;}
 
         protected virtual int BottomIndex { get; } = 0;
 
-        protected AbstractDeck(IList<ICard<S, R>> cards = null)
+        protected AbstractDeck(IList<ICard<S, R>> cards)
         {
             _cards = cards;
         }

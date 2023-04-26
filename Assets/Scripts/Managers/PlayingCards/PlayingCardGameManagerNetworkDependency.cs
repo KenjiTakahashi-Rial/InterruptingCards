@@ -8,7 +8,7 @@ namespace InterruptingCards.Managers.GameManagers
     {
         public static IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank> Singleton { get; private set; }
 
-        private IGameManager<PlayingCardSuit, PlayingCardRank> GameManager { get { return PlayingCardGameManager.Singleton; } }
+        private IGameManager<PlayingCardSuit, PlayingCardRank> GameManager { get => PlayingCardGameManager.Singleton; }
 
         public override void OnNetworkSpawn()
         {

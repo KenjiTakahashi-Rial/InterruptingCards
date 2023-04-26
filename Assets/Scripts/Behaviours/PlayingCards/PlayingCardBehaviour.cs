@@ -21,7 +21,7 @@ namespace InterruptingCards.Behaviours
 
         public bool IsFaceUp
         {
-            get { return _isFaceUp.Value; }
+            get => _isFaceUp.Value;
             set
             {
                 _isFaceUp.Value = value;
@@ -31,7 +31,7 @@ namespace InterruptingCards.Behaviours
 
         public ICard<PlayingCardSuit, PlayingCardRank> Card
         {
-            get { return _card.Value; }
+            get => _card.Value;
             set
             {
                 _card.Value = value;
@@ -65,6 +65,8 @@ namespace InterruptingCards.Behaviours
                 _cardText.gameObject.SetActive(false);
                 return;
             }
+
+            _cardText.gameObject.SetActive(true);
 
             if (!IsFaceUp)
             {

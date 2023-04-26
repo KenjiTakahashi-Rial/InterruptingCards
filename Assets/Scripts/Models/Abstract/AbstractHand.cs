@@ -7,13 +7,8 @@ namespace InterruptingCards.Models
     {
         protected readonly IList<ICard<S, R>> _cards;
 
-        protected AbstractHand(IList<ICard<S, R>> cards = null)
+        protected AbstractHand(IList<ICard<S, R>> cards)
         {
-            if (cards == null)
-            {
-                return;
-            }
-
             _cards = cards;
         }
 
@@ -41,5 +36,7 @@ namespace InterruptingCards.Models
         {
             return _cards[i];
         }
+
+        public abstract object Clone();
     }
 }
