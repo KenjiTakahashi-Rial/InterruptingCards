@@ -4,7 +4,7 @@ using Unity.Netcode;
 
 namespace InterruptingCards.Models
 {
-    public interface ICard : ICloneable, INetworkSerializable
+    public interface ICard : INetworkSerializable, ICloneable
     {
         SuitEnum Suit { get; set; }
         RankEnum Rank { get; set; }

@@ -7,6 +7,8 @@ namespace InterruptingCards.Models
         protected SuitEnum _suit;
         protected RankEnum _rank;
 
+        protected AbstractCard() { }
+
         protected AbstractCard(SuitEnum suit, RankEnum rank)
         {
             _suit = suit;
