@@ -104,13 +104,18 @@ namespace InterruptingCards.Managers.GameManagers
                 return;
             }
 
-            if (_players.Count == MaxPlayers)
+            if (_players.Count >= MaxPlayers)
             {
                 Debug.LogWarning($"Did not add player ({clientId}): lobby is full");
                 return;
             }
 
             _players.AddLast(PlayerFactory.Create(clientId, clientId.ToString()));
+
+            if (_players.Count == MaxPlayers)
+            {
+                StateTrigger(_startGameTriggerId);
+            }
         }
 
         public virtual void RemovePlayer(ulong clientId)
@@ -129,10 +134,20 @@ namespace InterruptingCards.Managers.GameManagers
 
             _players.Remove(player);
 
-            if (_players.Count <= 1)
+            if (_players.Count <= MinPlayers)
             {
                 StateTrigger(_forceEndGameTriggerId);
             }
+        }
+
+        public virtual void StartGame()
+        {
+            Debug.Log("Starting Game");
+            NetworkDependency.GetSelfServerRpc();
+            DeckManager.ResetDeck();
+            AssignHands();
+            TryDealHands();
+            _playerTurnNode = _players.First;
         }
 
         public virtual void GetSelf(ServerRpcParams serverRpcParams)
@@ -236,16 +251,6 @@ namespace InterruptingCards.Managers.GameManagers
             _gameStateMachine.SetTrigger(triggerId);
         }
 
-        protected virtual void StartGame()
-        {
-            NetworkDependency.GetSelfServerRpc();
-            DeckManager.ResetDeck();
-            AssignHands();
-            TryDealHands();
-            _playerTurnNode = _players.First;
-            StateTrigger(_startGameTriggerId);
-        }
-
         protected virtual void ShiftTurn(int times = 1)
         {
             for (var i = 0; i < times; i++)
@@ -261,7 +266,7 @@ namespace InterruptingCards.Managers.GameManagers
 
         protected virtual void TryAddPlayer(ulong clientId)
         {
-            if (CurrentStateId == _waitingForClientsStateId && _players.Count < MinPlayers)
+            if (CurrentStateId == _waitingForClientsStateId && _players.Count < MaxPlayers)
             {
                 NetworkDependency.AddPlayerServerRpc(clientId);
             }

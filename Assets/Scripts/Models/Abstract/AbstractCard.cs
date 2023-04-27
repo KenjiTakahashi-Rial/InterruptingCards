@@ -6,21 +6,18 @@ namespace InterruptingCards.Models
 {
     public abstract class AbstractCard<S, R> : ICard<S, R> where S : Enum where R : Enum
     {
-        protected S _suit;
-        protected R _rank;
-
         protected AbstractCard(S suit, R rank)
         {
-            _suit = suit;
-            _rank = rank;
+            Suit = suit;
+            Rank = rank;
         }
 
-        public virtual S Suit { get => _suit; }
+        public virtual S Suit { get; set; }
 
-        public virtual R Rank { get => _rank; }
+        public virtual R Rank { get; set; }
 
         public abstract object Clone();
 
-        public abstract void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter;
+        // TODO: public abstract void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter;
     }
 }

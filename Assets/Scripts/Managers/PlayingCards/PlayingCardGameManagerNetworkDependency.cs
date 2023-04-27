@@ -10,6 +10,8 @@ namespace InterruptingCards.Managers.GameManagers
 
         private IGameManager<PlayingCardSuit, PlayingCardRank> GameManager { get => PlayingCardGameManager.Singleton; }
 
+        public bool IsSelfHost => IsHost;
+
         public override void OnNetworkSpawn()
         {
             Singleton = this;
@@ -34,7 +36,7 @@ namespace InterruptingCards.Managers.GameManagers
             GameManager.RemovePlayer(clientId);
         }
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         public void GetSelfServerRpc(ServerRpcParams serverRpcParams = default)
         {
             GameManager.GetSelf(serverRpcParams);

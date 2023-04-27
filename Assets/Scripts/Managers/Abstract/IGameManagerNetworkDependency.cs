@@ -10,13 +10,15 @@ namespace InterruptingCards.Managers.GameManagers
     {
         static IGameManagerNetworkDependency<S, R> Singleton { get; }
 
+        bool IsSelfHost { get; }
+
         [ServerRpc]
         void AddPlayerServerRpc(ulong clientId);
 
         [ServerRpc]
         void RemovePlayerServerRpc(ulong clientId);
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         void GetSelfServerRpc(ServerRpcParams serverRpcParams = default);
 
         [ClientRpc]

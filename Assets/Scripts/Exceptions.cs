@@ -98,4 +98,16 @@ namespace InterruptingCards
 
         protected InvalidOperationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
+
+    [Serializable]
+    public class StateBehaviourNotFoundException : Exception
+    {
+        public StateBehaviourNotFoundException() { }
+
+        public StateBehaviourNotFoundException(string message) : base(message) { }
+
+        public StateBehaviourNotFoundException(string message, Exception inner) : base(message, inner) { }
+
+        protected StateBehaviourNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
 }

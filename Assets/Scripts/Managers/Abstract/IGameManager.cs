@@ -16,6 +16,8 @@ namespace InterruptingCards.Managers.GameManagers
 
         void RemovePlayer(ulong clientId);
 
+        void StartGame();
+
         void GetSelf(ServerRpcParams serverRpcParams);
 
         void AssignSelf(ClientRpcParams clientRpcParams);

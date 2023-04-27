@@ -4,6 +4,7 @@ namespace InterruptingCards.Models
 {
     public enum PlayingCardSuit
     {
+        Invalid,
         Clubs,
         Diamonds,
         Hearts,
@@ -12,6 +13,7 @@ namespace InterruptingCards.Models
 
     public enum PlayingCardRank
     {
+        Invalid,
         Ace = 1,
         Two = 2,
         Three = 3,
