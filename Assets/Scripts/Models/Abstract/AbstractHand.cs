@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 
+using Unity.Netcode;
+
 namespace InterruptingCards.Models
 {
     public abstract class AbstractHand : IHand
@@ -11,10 +13,7 @@ namespace InterruptingCards.Models
             _cards = cards;
         }
 
-        public virtual int Count()
-        {
-            return _cards.Count;
-        }
+        public virtual int Count => _cards.Count;
 
         public virtual void Insert(int i, ICard card)
         {

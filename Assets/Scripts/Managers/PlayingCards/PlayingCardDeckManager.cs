@@ -8,7 +8,7 @@ using InterruptingCards.Behaviours;
 using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
-namespace InterruptingCards.Managers.GameManagers
+namespace InterruptingCards.Managers
 {
     public class PlayingCardDeckManager : AbstractDeckManager
     {

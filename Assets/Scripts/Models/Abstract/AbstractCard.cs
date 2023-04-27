@@ -19,12 +19,12 @@ namespace InterruptingCards.Models
 
         public virtual RankEnum Rank { get => _rank; set => _rank = value; }
 
-        public abstract object Clone();
-
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
             serializer.SerializeValue(ref _suit);
             serializer.SerializeValue(ref _rank);
         }
+
+        public abstract object Clone();
     }
 }

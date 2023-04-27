@@ -5,7 +5,7 @@ using UnityEngine;
 using InterruptingCards.Behaviours;
 using System.Collections.Generic;
 
-namespace InterruptingCards.Managers.GameManagers
+namespace InterruptingCards.Managers
 {
     public class PlayingCardHandManager : AbstractHandManager
     {

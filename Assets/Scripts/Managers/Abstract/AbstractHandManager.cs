@@ -6,6 +6,7 @@ using UnityEngine;
 
 using InterruptingCards.Behaviours;
 using InterruptingCards.Models;
+using Unity.Netcode;
 
 namespace InterruptingCards.Managers
 {
@@ -25,22 +26,19 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public virtual int Count()
-        {
-            return _hand.Count();
-        }
+        public virtual int Count => _hand.Count;
 
         protected abstract IList<ICardBehaviour> CardSlots { get; }
 
         public virtual void Add(ICard card)
         {
-            if (Count() == CardSlots.Count)
+            if (Count == CardSlots.Count)
             {
                 throw new TooManyCardsException();
             }
 
             _hand.Add(card);
-            CardSlots[Count() - 1].Card = card;
+            CardSlots[Count - 1].Card = card;
 
             Refresh();
         }
@@ -89,7 +87,7 @@ namespace InterruptingCards.Managers
                 var cardSlot = CardSlots[i];
                 cardSlot.UnsubscribeAllOnCardClicked();
 
-                if (i >= Count())
+                if (i >= Count)
                 {
                     cardSlot.Card = null;
                     continue;

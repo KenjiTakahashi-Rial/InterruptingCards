@@ -1,6 +1,8 @@
+using Unity.Netcode;
+
 namespace InterruptingCards.Models
 {
-    public interface IPlayer
+    public interface IPlayer : INetworkSerializable
     {
         ulong Id { get; }
 

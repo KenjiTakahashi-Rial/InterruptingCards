@@ -1,18 +1,14 @@
 using InterruptingCards.Factories;
-using InterruptingCards.Models;
 
 using UnityEngine;
 
-namespace InterruptingCards.Managers.GameManagers
+namespace InterruptingCards.Managers
 {
     public class PlayingCardGameManager : AbstractGameManager
     {
         [SerializeField] private PlayingCardDeckManager _deckManager;
         [SerializeField] private PlayingCardDeckManager _discardManager;
         [SerializeField] private PlayingCardHandManager[] _handManagers;
-
-        protected override IGameManagerNetworkDependency NetworkDependency =>
-            PlayingCardGameManagerNetworkDependency.Singleton;
 
         protected override IPlayerFactory PlayerFactory => PlayingCardPlayerFactory.Singleton;
 
