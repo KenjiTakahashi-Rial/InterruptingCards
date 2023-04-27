@@ -4,9 +4,9 @@ using InterruptingCards.Factories;
 
 namespace InterruptingCards.Models
 {
-    public class PlayingCardHand : AbstractHand<PlayingCardSuit, PlayingCardRank>
+    public class PlayingCardHand : AbstractHand
     {
-        public PlayingCardHand(IList<ICard<PlayingCardSuit, PlayingCardRank>> cards) : base(cards) { }
+        public PlayingCardHand(IList<ICard> cards) : base(cards) { }
 
         public override object Clone()
         {

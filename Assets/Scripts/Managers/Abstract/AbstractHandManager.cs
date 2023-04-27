@@ -9,13 +9,13 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public abstract class AbstractHandManager<S, R> : MonoBehaviour, IHandManager<S, R> where S : Enum where R : Enum
+    public abstract class AbstractHandManager : MonoBehaviour, IHandManager
     {
-        protected IHand<S, R> _hand;
+        protected IHand _hand;
 
-        public event Action<ICard<S, R>> OnCardClicked;
+        public event Action<ICard> OnCardClicked;
 
-        public virtual IHand<S, R> Hand
+        public virtual IHand Hand
         {
             get => _hand;
             set
@@ -30,9 +30,9 @@ namespace InterruptingCards.Managers
             return _hand.Count();
         }
 
-        protected abstract IList<ICardBehaviour<S, R>> CardSlots { get; }
+        protected abstract IList<ICardBehaviour> CardSlots { get; }
 
-        public virtual void Add(ICard<S, R> card)
+        public virtual void Add(ICard card)
         {
             if (Count() == CardSlots.Count)
             {
@@ -45,7 +45,7 @@ namespace InterruptingCards.Managers
             Refresh();
         }
 
-        public virtual ICard<S, R> Remove(S suit, R rank)
+        public virtual ICard Remove(SuitEnum suit, RankEnum rank)
         {
             var card = _hand.Remove(suit, rank);
             CardSlots.Remove(CardSlots.FirstOrDefault(c => c.Card.Suit.Equals(suit) && c.Card.Rank.Equals(rank)));
@@ -53,7 +53,7 @@ namespace InterruptingCards.Managers
             return card;
         }
 
-        public virtual ICard<S, R> Get(int i)
+        public virtual ICard Get(int i)
         {
             return _hand.Get(i);
         }

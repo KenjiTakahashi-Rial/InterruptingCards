@@ -1,9 +1,7 @@
-using InterruptingCards.Models;
-
 namespace InterruptingCards.Models
 {
-    public class PlayingCardPlayer : AbstractPlayer<PlayingCardSuit, PlayingCardRank>
+    public class PlayingCardPlayer : AbstractPlayer
     {
-        public PlayingCardPlayer(ulong id, string name, IHand<PlayingCardSuit, PlayingCardRank> hand = null) : base(id, name, hand) { }
+        public PlayingCardPlayer(ulong id, string name, IHand hand = null) : base(id, name, hand) { }
     }
 }

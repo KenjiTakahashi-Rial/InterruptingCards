@@ -4,12 +4,12 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Factories
 {
-    public class PlayingCardPlayerFactory : MonoBehaviour, IPlayerFactory<PlayingCardSuit, PlayingCardRank>
+    public class PlayingCardPlayerFactory : MonoBehaviour, IPlayerFactory
     {
-        public static IPlayerFactory<PlayingCardSuit, PlayingCardRank> Singleton { get; private set; }
+        public static IPlayerFactory Singleton { get; private set; }
 
-        public IPlayer<PlayingCardSuit, PlayingCardRank> Create(
-            ulong id, string name, IHand<PlayingCardSuit, PlayingCardRank> hand = null
+        public IPlayer Create(
+            ulong id, string name, IHand hand = null
         )
         {
             return new PlayingCardPlayer(id, name, hand);

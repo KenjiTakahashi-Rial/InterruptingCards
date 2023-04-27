@@ -5,12 +5,12 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Factories
 {
-    public interface IDeckFactory<S, R> where S : Enum where R : Enum
+    public interface IDeckFactory
     {
-        public static IDeckFactory<S, R> Singleton { get; }
+        public static IDeckFactory Singleton { get; }
 
-        public IDeck<S, R> Create(IList<ICard<S, R>> cards);
+        public IDeck Create(IList<ICard> cards);
 
-        public IDeck<S, R> Clone(IDeck<S, R> original);
+        public IDeck Clone(IDeck original);
     }
 }

@@ -5,29 +5,26 @@ using UnityEngine;
 
 namespace InterruptingCards.Managers.GameManagers
 {
-    public class PlayingCardGameManager : AbstractGameManager<PlayingCardSuit, PlayingCardRank>
+    public class PlayingCardGameManager : AbstractGameManager
     {
         [SerializeField] private PlayingCardDeckManager _deckManager;
         [SerializeField] private PlayingCardDeckManager _discardManager;
         [SerializeField] private PlayingCardHandManager[] _handManagers;
 
-        protected override IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank> NetworkDependency =>
+        protected override IGameManagerNetworkDependency NetworkDependency =>
             PlayingCardGameManagerNetworkDependency.Singleton;
 
-        protected override IPlayerFactory<PlayingCardSuit, PlayingCardRank> PlayerFactory =>
-            PlayingCardPlayerFactory.Singleton;
+        protected override IPlayerFactory PlayerFactory => PlayingCardPlayerFactory.Singleton;
 
-        protected override ICardFactory<PlayingCardSuit, PlayingCardRank> CardFactory =>
-            PlayingCardFactory.Singleton;
+        protected override ICardFactory CardFactory => PlayingCardFactory.Singleton;
 
-        protected override IHandFactory<PlayingCardSuit, PlayingCardRank> HandFactory =>
-            PlayingCardHandFactory.Singleton;
+        protected override IHandFactory HandFactory => PlayingCardHandFactory.Singleton;
 
-        protected override IDeckManager<PlayingCardSuit, PlayingCardRank> DeckManager { get => _deckManager; }
+        protected override IDeckManager DeckManager => _deckManager;
 
-        protected override IDeckManager<PlayingCardSuit, PlayingCardRank> DiscardManager { get => _discardManager; }
+        protected override IDeckManager DiscardManager => _discardManager;
 
-        protected override IHandManager<PlayingCardSuit, PlayingCardRank>[] HandManagers { get => _handManagers; }
+        protected override IHandManager[] HandManagers => _handManagers;
 
         protected override int MinPlayers => 2;
 

@@ -4,22 +4,26 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using InterruptingCards.Behaviours;
-using InterruptingCards.Models;
 using InterruptingCards.Factories;
+using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public abstract class AbstractDeckManager<S, R> : MonoBehaviour, IDeckManager<S, R> where S : Enum where R : Enum
+    public abstract class AbstractDeckManager : MonoBehaviour, IDeckManager
     {
         protected bool _isFaceUp = false;
-        protected IDeck<S, R> _deck;
-        protected IDeck<S, R> _deckPrototype;
+        protected IDeck _deck;
+        protected IDeck _deckPrototype;
 
         public event Action OnDeckClicked;
 
-        protected abstract ICardFactory<S, R> CardFactory { get; }
+        protected abstract ICollection<SuitEnum> Suits { get; }
 
-        protected abstract IDeckFactory<S, R> DeckFactory { get; }
+        protected abstract ICollection<RankEnum> Ranks { get; }
+
+        protected abstract ICardFactory CardFactory { get; }
+
+        protected abstract IDeckFactory DeckFactory { get; }
         
         public virtual bool IsFaceUp
         {
@@ -31,7 +35,7 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public virtual IDeck<S, R> Deck
+        public virtual IDeck Deck
         {
             get => _deck;
             set
@@ -41,7 +45,7 @@ namespace InterruptingCards.Managers
             }
         }
 
-        protected abstract ICardBehaviour<S, R> TopCard { get; }
+        protected abstract ICardBehaviour TopCard { get; }
 
         public virtual object Clone()
         {
@@ -58,44 +62,44 @@ namespace InterruptingCards.Managers
             _deck.Shuffle();
             Refresh();
         }
-        public virtual void PlaceTop(ICard<S, R> card)
+        public virtual void PlaceTop(ICard card)
         {
             _deck.PlaceTop(card);
             Refresh();
         }
 
-        public virtual void PlaceBottom(ICard<S, R> card)
+        public virtual void PlaceBottom(ICard card)
         {
             _deck.PlaceBottom(card);
             Refresh();
         }
 
-        public virtual void InsertRandom(ICard<S, R> card)
+        public virtual void InsertRandom(ICard card)
         {
             _deck.InsertRandom(card);
             Refresh();
         }
 
-        public virtual ICard<S, R> PeekTop()
+        public virtual ICard PeekTop()
         {
             return _deck.PeekTop();
         }
 
-        public virtual ICard<S, R> DrawTop()
+        public virtual ICard DrawTop()
         {
             var card = _deck.DrawTop();
             Refresh();
             return card;
         }
 
-        public virtual ICard<S, R> DrawBottom()
+        public virtual ICard DrawBottom()
         {
             var card = _deck.DrawBottom();
             Refresh();
             return card;
         }
 
-        public virtual ICard<S, R> Remove(S suit, R rank)
+        public virtual ICard Remove(SuitEnum suit, RankEnum rank)
         {
             var card = _deck.Remove(suit, rank);
             Refresh();
@@ -127,15 +131,13 @@ namespace InterruptingCards.Managers
 
         protected virtual void CreatePrototype()
         {
-            var suitValues = Enum.GetValues(typeof(S));
-            var rankValues = Enum.GetValues(typeof(R));
-            var cards = new List<ICard<S, R>>(suitValues.Length * rankValues.Length);
+            var cards = new List<ICard>(Suits.Count * Ranks.Count);
 
-            foreach (var suit in suitValues)
+            foreach (var suit in Suits)
             {
-                foreach (var rank in rankValues)
+                foreach (var rank in Ranks)
                 {
-                    cards.Add(CardFactory.Create((S)suit, (R)rank));
+                    cards.Add(CardFactory.Create(suit, rank));
                 }
             }
 

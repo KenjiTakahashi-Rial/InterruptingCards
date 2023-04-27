@@ -4,10 +4,10 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public interface IHandManager<S, R> : IHand<S, R> where S: Enum where R : Enum
+    public interface IHandManager : IHand
     {
-        event Action<ICard<S, R>> OnCardClicked;
+        event Action<ICard> OnCardClicked;
 
-        IHand<S, R> Hand { get; set; }
+        IHand Hand { get; set; }
     }
 }

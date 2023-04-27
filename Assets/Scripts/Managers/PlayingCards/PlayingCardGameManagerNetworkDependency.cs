@@ -4,11 +4,11 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers.GameManagers
 {
-    public class PlayingCardGameManagerNetworkDependency : NetworkBehaviour, IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank>
+    public class PlayingCardGameManagerNetworkDependency : NetworkBehaviour, IGameManagerNetworkDependency
     {
-        public static IGameManagerNetworkDependency<PlayingCardSuit, PlayingCardRank> Singleton { get; private set; }
+        public static IGameManagerNetworkDependency Singleton { get; private set; }
 
-        private IGameManager<PlayingCardSuit, PlayingCardRank> GameManager { get => PlayingCardGameManager.Singleton; }
+        private IGameManager GameManager => AbstractGameManager.Singleton;
 
         public bool IsSelfHost => IsHost;
 
@@ -61,7 +61,7 @@ namespace InterruptingCards.Managers.GameManagers
         }
 
         [ServerRpc]
-        public void PlayCardServerRpc(PlayingCardSuit suit, PlayingCardRank rank, ServerRpcParams serverRpcParams = default)
+        public void PlayCardServerRpc(SuitEnum suit, RankEnum rank, ServerRpcParams serverRpcParams = default)
         {
             GameManager.PlayCard(suit, rank, serverRpcParams);
         }

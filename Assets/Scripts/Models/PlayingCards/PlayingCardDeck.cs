@@ -4,12 +4,11 @@ using InterruptingCards.Factories;
 
 namespace InterruptingCards.Models
 {
-    public class PlayingCardDeck : AbstractDeck<PlayingCardSuit, PlayingCardRank>
+    public class PlayingCardDeck : AbstractDeck
     {
-        protected override ICardFactory<PlayingCardSuit, PlayingCardRank> CardFactory =>
-            PlayingCardFactory.Singleton;
+        protected override ICardFactory CardFactory => PlayingCardFactory.Singleton;
 
-        public PlayingCardDeck(IList<ICard<PlayingCardSuit, PlayingCardRank>> cards) : base(cards) { }
+        public PlayingCardDeck(IList<ICard> cards) : base(cards) { }
 
         public override object Clone()
         {

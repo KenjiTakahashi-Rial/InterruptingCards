@@ -1,13 +1,12 @@
-using System;
 using System.Collections.Generic;
 
 namespace InterruptingCards.Models
 {
-    public abstract class AbstractHand<S, R> : IHand<S, R> where S : Enum where R : Enum
+    public abstract class AbstractHand : IHand
     {
-        protected readonly IList<ICard<S, R>> _cards;
+        protected readonly IList<ICard> _cards;
 
-        protected AbstractHand(IList<ICard<S, R>> cards)
+        protected AbstractHand(IList<ICard> cards)
         {
             _cards = cards;
         }
@@ -17,22 +16,22 @@ namespace InterruptingCards.Models
             return _cards.Count;
         }
 
-        public virtual void Insert(int i, ICard<S, R> card)
+        public virtual void Insert(int i, ICard card)
         {
             _cards.Insert(i, card);
         }
 
-        public virtual void Add(ICard<S, R> card)
+        public virtual void Add(ICard card)
         {
             Insert(0, card);
         }
 
-        public virtual ICard<S, R> Remove(S suit, R rank)
+        public virtual ICard Remove(SuitEnum suit, RankEnum rank)
         {
             return Utilities.Remove(_cards, suit, rank);
         }
 
-        public virtual ICard<S, R> Get(int i)
+        public virtual ICard Get(int i)
         {
             return _cards[i];
         }

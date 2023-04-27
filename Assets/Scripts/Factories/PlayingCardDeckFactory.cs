@@ -6,16 +6,16 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Factories
 {
-    public class PlayingCardDeckFactory : MonoBehaviour, IDeckFactory<PlayingCardSuit, PlayingCardRank>
+    public class PlayingCardDeckFactory : MonoBehaviour, IDeckFactory
     {
-        public static IDeckFactory<PlayingCardSuit, PlayingCardRank> Singleton { get; private set; }
+        public static IDeckFactory Singleton { get; private set; }
 
-        public IDeck<PlayingCardSuit, PlayingCardRank> Create(IList<ICard<PlayingCardSuit, PlayingCardRank>> cards)
+        public IDeck Create(IList<ICard> cards)
         {
             return new PlayingCardDeck(cards);
         }
 
-        public IDeck<PlayingCardSuit, PlayingCardRank> Clone(IDeck<PlayingCardSuit, PlayingCardRank> original)
+        public IDeck Clone(IDeck original)
         {
             return (PlayingCardDeck)original.Clone();
         }

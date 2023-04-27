@@ -1,14 +1,14 @@
-using System;
-
 using Unity.Netcode;
+
+using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers.GameManagers
 {
     // AbstractGameManager is generic, so it cannot inherit perform ServerRpc
     // Couple the concrete game manager with an implementation of this dependency to allow ServerRpc calls
-    public interface IGameManagerNetworkDependency<S, R> where S : Enum where R : Enum
+    public interface IGameManagerNetworkDependency
     {
-        static IGameManagerNetworkDependency<S, R> Singleton { get; }
+        static IGameManagerNetworkDependency Singleton { get; }
 
         bool IsSelfHost { get; }
 
@@ -31,6 +31,6 @@ namespace InterruptingCards.Managers.GameManagers
         void DrawCardServerRpc(ServerRpcParams serverRpcParams = default);
 
         [ServerRpc]
-        void PlayCardServerRpc(S suit, R rank, ServerRpcParams serverRpcParams = default);
+        void PlayCardServerRpc(SuitEnum suit, RankEnum rank, ServerRpcParams serverRpcParams = default);
     }
 }

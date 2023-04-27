@@ -1,13 +1,10 @@
-using System;
 using System.Collections.Generic;
-
-using InterruptingCards.Models;
 
 namespace InterruptingCards.Models
 {
     public static class Utilities
     {
-        public static ICard<S, R> Remove<S, R>(IList<ICard<S, R>> cards, S suit, R rank) where S : Enum where R : Enum
+        public static ICard Remove(IList<ICard> cards, SuitEnum suit, RankEnum rank)
         {
             for (var i = 0; i < cards.Count; i++)
             {

@@ -1,15 +1,13 @@
-using System;
-
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Factories
 {
-    public interface ICardFactory<S, R> where S : Enum where R : Enum
+    public interface ICardFactory
     {
-        public static ICardFactory<S, R> Singleton { get; }
+        public static ICardFactory Singleton { get; }
 
-        public ICard<S, R> Create(S suit, R rank);
+        public ICard Create(SuitEnum suit, RankEnum rank);
 
-        public ICard<S, R> Clone(ICard<S, R> original);
+        public ICard Clone(ICard original);
     }
 }

@@ -5,18 +5,18 @@ using InterruptingCards.Factories;
 
 namespace InterruptingCards.Models
 {
-    public abstract class AbstractDeck<S, R> : IDeck<S, R> where S : Enum where R : Enum
+    public abstract class AbstractDeck : IDeck
     {
         protected readonly Random _random = new();
-        protected IList<ICard<S, R>> _cards;
+        protected IList<ICard> _cards;
 
-        protected abstract ICardFactory<S, R> CardFactory { get; }
+        protected abstract ICardFactory CardFactory { get; }
 
         protected virtual int TopIndex { get => _cards.Count - 1;}
 
         protected virtual int BottomIndex { get; } = 0;
 
-        protected AbstractDeck(IList<ICard<S, R>> cards)
+        protected AbstractDeck(IList<ICard> cards)
         {
             _cards = cards;
         }
@@ -39,39 +39,39 @@ namespace InterruptingCards.Models
             }
         }
 
-        public virtual void PlaceTop(ICard<S, R> card)
+        public virtual void PlaceTop(ICard card)
         {
             _cards.Add(card);
         }
 
-        public virtual void PlaceBottom(ICard<S, R> card)
+        public virtual void PlaceBottom(ICard card)
         {
             _cards.Insert(0, card);
         }
 
-        public virtual void InsertRandom(ICard<S, R> card)
+        public virtual void InsertRandom(ICard card)
         {
             var i = _random.Next(0, _cards.Count + 1);
             _cards.Insert(i, card);
         }
 
-        public virtual ICard<S, R> PeekTop()
+        public virtual ICard PeekTop()
         {
             CheckEmpty();
-            return (ICard<S, R>)_cards[TopIndex].Clone();
+            return (ICard)_cards[TopIndex].Clone();
         }
 
-        public virtual ICard<S, R> DrawTop()
+        public virtual ICard DrawTop()
         {
             return PopAt(TopIndex);
         }
 
-        public virtual ICard<S, R> DrawBottom()
+        public virtual ICard DrawBottom()
         {
             return PopAt(BottomIndex);
         }
 
-        public virtual ICard<S, R> Remove(S suit, R rank)
+        public virtual ICard Remove(SuitEnum suit, RankEnum rank)
         {
             return Utilities.Remove(_cards, suit, rank);
         }
@@ -84,7 +84,7 @@ namespace InterruptingCards.Models
             }
         }
 
-        protected virtual ICard<S, R> PopAt(int i)
+        protected virtual ICard PopAt(int i)
         {
             CheckEmpty();
             var card = _cards[i];

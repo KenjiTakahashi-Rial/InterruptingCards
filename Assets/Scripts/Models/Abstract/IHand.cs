@@ -2,14 +2,14 @@ using System;
 
 namespace InterruptingCards.Models
 {
-    public interface IHand<S, R> : ICloneable where S : Enum where R : Enum
+    public interface IHand : ICloneable
     {
         int Count();
 
-        void Add(ICard<S, R> card);
+        void Add(ICard card);
 
-        ICard<S, R> Remove(S suit, R rank);
+        ICard Remove(SuitEnum suit, RankEnum rank);
 
-        ICard<S, R> Get(int i);
+        ICard Get(int i);
     }
 }

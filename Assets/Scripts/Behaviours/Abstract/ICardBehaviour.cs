@@ -4,13 +4,13 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
 {
-    public interface ICardBehaviour<S, R>
+    public interface ICardBehaviour
     {
         event Action OnCardClicked;
 
         bool IsFaceUp { get; set; }
 
-        ICard<S, R> Card { get; set; }
+        ICard Card { get; set; }
 
         void UnsubscribeAllOnCardClicked();
     }

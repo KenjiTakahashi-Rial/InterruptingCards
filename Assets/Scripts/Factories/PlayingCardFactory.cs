@@ -4,16 +4,17 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Factories
 {
-    public class PlayingCardFactory : MonoBehaviour, ICardFactory<PlayingCardSuit, PlayingCardRank>
+    // TODO: Are these factories still necessary?
+    public class PlayingCardFactory : MonoBehaviour, ICardFactory
     {
-        public static ICardFactory<PlayingCardSuit, PlayingCardRank> Singleton { get; private set; }
+        public static ICardFactory Singleton { get; private set; }
 
-        public ICard<PlayingCardSuit, PlayingCardRank> Create(PlayingCardSuit suit, PlayingCardRank rank)
+        public ICard Create(SuitEnum suit, RankEnum rank)
         {
             return new PlayingCard(suit, rank);
         }
 
-        public ICard<PlayingCardSuit, PlayingCardRank> Clone(ICard<PlayingCardSuit, PlayingCardRank> original)
+        public ICard Clone(ICard original)
         {
             return (PlayingCard)original.Clone();
         }

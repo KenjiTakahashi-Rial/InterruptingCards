@@ -1,12 +1,12 @@
-using System;
-
 using Unity.Netcode;
+
+using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers.GameManagers
 {
-    public interface IGameManager<S, R> where S : Enum where R : Enum
+    public interface IGameManager
     {
-        static IGameManager<S, R> Singleton { get; }
+        static IGameManager Singleton { get; }
 
         void OnNetworkSpawn();
 
@@ -26,6 +26,6 @@ namespace InterruptingCards.Managers.GameManagers
 
         void DrawCard(ServerRpcParams serverRpcParams);
 
-        void PlayCard(S suit, R rank, ServerRpcParams serverRpcParams);
+        void PlayCard(SuitEnum suit, RankEnum rank, ServerRpcParams serverRpcParams);
     }
 }

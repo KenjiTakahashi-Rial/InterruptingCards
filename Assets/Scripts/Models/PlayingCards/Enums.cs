@@ -2,7 +2,7 @@ using Unity.Netcode;
 
 namespace InterruptingCards.Models
 {
-    public enum PlayingCardSuit
+    public enum SuitEnum
     {
         Invalid,
         Clubs,
@@ -11,7 +11,7 @@ namespace InterruptingCards.Models
         Spades,
     }
 
-    public enum PlayingCardRank
+    public enum RankEnum
     {
         Invalid,
         Ace = 1,

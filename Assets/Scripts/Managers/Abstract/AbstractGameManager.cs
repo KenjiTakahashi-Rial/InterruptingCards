@@ -10,7 +10,7 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers.GameManagers
 {
-    public abstract class AbstractGameManager<S, R> : MonoBehaviour, IGameManager<S, R> where S : Enum where R : Enum
+    public abstract class AbstractGameManager : MonoBehaviour, IGameManager
     {
         protected const int GameStateMachineLayer = 0;
 
@@ -24,31 +24,31 @@ namespace InterruptingCards.Managers.GameManagers
         protected readonly int _forceEndTurnTriggerId = Animator.StringToHash("forceEndTurn");
         protected readonly int _forceEndGameTriggerId = Animator.StringToHash("forceEndGame");
 
-        protected readonly LinkedList<IPlayer<S, R>> _players = new();
+        protected readonly LinkedList<IPlayer> _players = new();
 
         [SerializeField] protected Animator _gameStateMachine;
 
-        protected IPlayer<S, R> _self; // The player that is on this device
-        protected LinkedListNode<IPlayer<S, R>> _playerTurnNode;
-        protected Dictionary<IPlayer<S, R>, IHand<S, R>> _playerHands;
+        protected IPlayer _self; // The player that is on this device
+        protected LinkedListNode<IPlayer> _playerTurnNode;
+        protected Dictionary<IPlayer, IHand> _playerHands;
 
-        public static IGameManager<S, R> Singleton { get; protected set; }
+        public static IGameManager Singleton { get; protected set; }
 
         protected virtual NetworkManager NetworkManager => NetworkManager.Singleton;
 
-        protected abstract IGameManagerNetworkDependency<S, R> NetworkDependency { get; }
+        protected abstract IGameManagerNetworkDependency NetworkDependency { get; }
 
-        protected abstract IPlayerFactory<S, R> PlayerFactory { get; }
+        protected abstract IPlayerFactory PlayerFactory { get; }
 
-        protected abstract ICardFactory<S, R> CardFactory { get; }
+        protected abstract ICardFactory CardFactory { get; }
 
-        protected abstract IHandFactory<S, R> HandFactory { get; }
+        protected abstract IHandFactory HandFactory { get; }
 
-        protected abstract IDeckManager<S, R> DeckManager { get; }
+        protected abstract IDeckManager DeckManager { get; }
 
-        protected abstract IDeckManager<S, R> DiscardManager { get; }
+        protected abstract IDeckManager DiscardManager { get; }
 
-        protected abstract IHandManager<S, R>[] HandManagers { get; }
+        protected abstract IHandManager[] HandManagers { get; }
 
         protected abstract int MinPlayers { get; }
 
@@ -214,7 +214,7 @@ namespace InterruptingCards.Managers.GameManagers
             StateTrigger(_drawCardTriggerId);
         }
 
-        public virtual void PlayCard(S suit, R rank, ServerRpcParams serverRpcParams)
+        public virtual void PlayCard(SuitEnum suit, RankEnum rank, ServerRpcParams serverRpcParams)
         {
             var senderId = serverRpcParams.Receive.SenderClientId;
 
@@ -293,7 +293,7 @@ namespace InterruptingCards.Managers.GameManagers
             var i = 0;
             foreach (var player in _players)
             {
-                HandManagers[i].Hand = HandFactory.Create(new List<ICard<S, R>>());
+                HandManagers[i].Hand = HandFactory.Create(new List<ICard>());
                 var hand = HandManagers[i++];
                 player.Hand = hand;
                 _playerHands[player] = hand;
@@ -316,7 +316,7 @@ namespace InterruptingCards.Managers.GameManagers
             }
         }
 
-        protected virtual void TryPlayCard(ICard<S, R> card)
+        protected virtual void TryPlayCard(ICard card)
         {
             if (IsSelfTurn && CurrentStateId == _waitingForPlayCardStateId)
             {
