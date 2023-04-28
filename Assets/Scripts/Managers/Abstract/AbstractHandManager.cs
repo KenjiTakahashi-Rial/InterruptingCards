@@ -6,7 +6,6 @@ using UnityEngine;
 
 using InterruptingCards.Behaviours;
 using InterruptingCards.Models;
-using Unity.Netcode;
 
 namespace InterruptingCards.Managers
 {
@@ -26,7 +25,7 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public virtual int Count => _hand.Count;
+        public virtual int Count => _hand == null ? 0 : _hand.Count;
 
         protected abstract IList<ICardBehaviour> CardSlots { get; }
 

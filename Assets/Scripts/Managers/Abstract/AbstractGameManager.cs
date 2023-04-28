@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,19 +26,22 @@ namespace InterruptingCards.Managers
         protected readonly int _waitingForClientsStateId = Animator.StringToHash("Base.WaitingForClients");
         protected readonly int _waitingForDrawCardStateId = Animator.StringToHash("Base.InGame.WaitingForDrawCard");
         protected readonly int _waitingForPlayCardStateId = Animator.StringToHash("Base.InGame.WaitingForPlayCard");
+        protected readonly int _waitForReadyTriggerId = Animator.StringToHash("waitForReady");
         protected readonly int _startGameTriggerId = Animator.StringToHash("startGame");
         protected readonly int _drawCardTriggerId = Animator.StringToHash("drawCard");
         protected readonly int _playCardTriggerId = Animator.StringToHash("playCard");
         protected readonly int _forceEndTurnTriggerId = Animator.StringToHash("forceEndTurn");
         protected readonly int _forceEndGameTriggerId = Animator.StringToHash("forceEndGame");
 
-        protected readonly NetworkList<ulong> _playerTurnOrder = new();
-        protected readonly Dictionary<ulong, IPlayer> _playerMap = new();
+        // Server-only
+        protected readonly List<ulong> _lobby = new();
+        protected readonly HashSet<ulong> _notReadyPlayers = new();
+        protected readonly LinkedList<IPlayer> _players;
+        protected LinkedListNode<IPlayer> _activePlayerNode;
 
         [SerializeField] protected Animator _gameStateMachine;
 
-        protected int _playerTurnIndex = -1;
-        protected IPlayer _self; // The player that is on this device
+        protected ulong _selfId; // The player that is on this device
 
         /******************************************************************************************\
          * Properties                                                                             *
@@ -65,10 +69,7 @@ namespace InterruptingCards.Managers
 
         protected abstract int StartingHandCardCount { get; }
 
-        protected virtual IPlayer ActivePlayer =>
-            _playerTurnIndex < 0 ? null : _playerMap[_playerTurnOrder[_playerTurnIndex]];
-
-        protected virtual bool IsSelfTurn => ActivePlayer.Id == _self.Id;
+        protected virtual bool IsSelfTurn => _activePlayerNode.Value.Id == _selfId;
 
         protected virtual int CurrentStateId =>
             _gameStateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash;
@@ -79,18 +80,18 @@ namespace InterruptingCards.Managers
 
         public override void OnNetworkSpawn()
         {
+            Debug.Log("Network spawned");
+
             GetSelfServerRpc();
 
-            // OnClientConnectedCallback for host happens before network spawns
-            if (IsHost)
+            if (IsServer)
             {
-                TryAddPlayer(_self.Id);
+                AddPlayerServerRpc(_selfId);
+                Network.OnClientConnectedCallback -= AddPlayerServerRpc;
+                Network.OnClientConnectedCallback += AddPlayerServerRpc;
+                Network.OnClientDisconnectCallback -= RemovePlayerServerRpc;
+                Network.OnClientDisconnectCallback += RemovePlayerServerRpc;
             }
-
-            Network.OnClientConnectedCallback -= TryAddPlayer;
-            Network.OnClientConnectedCallback += TryAddPlayer;
-            Network.OnClientDisconnectCallback -= TryRemovePlayer;
-            Network.OnClientDisconnectCallback += TryRemovePlayer;
 
             DeckManager.OnDeckClicked -= TryDrawCard;
             DeckManager.OnDeckClicked += TryDrawCard;
@@ -104,8 +105,16 @@ namespace InterruptingCards.Managers
 
         public override void OnNetworkDespawn()
         {
-            Network.OnClientConnectedCallback -= TryAddPlayer;
-            Network.OnClientDisconnectCallback -= TryRemovePlayer;
+            Debug.Log("Network despawned");
+
+            if (IsServer)
+            {
+                _players.Clear();
+                Network.OnClientConnectedCallback -= AddPlayerServerRpc;
+                Network.OnClientDisconnectCallback -= RemovePlayerServerRpc;
+            }
+
+            _activePlayerNode = null;
 
             DeckManager.OnDeckClicked -= TryDrawCard;
 
@@ -118,10 +127,21 @@ namespace InterruptingCards.Managers
         public virtual void StartGame()
         {
             Debug.Log("Starting Game");
+
             DeckManager.ResetDeck();
             AssignHands();
             TryDealHands();
-            _playerTurnIndex = 0;
+            _activePlayerNode = _players.First;
+        }
+
+        public virtual void ShiftTurn(int shifts = 1)
+        {
+            Debug.Log($"Shifting turn {shifts} times");
+
+            for (var i = 0; i < shifts; i++)
+            {
+                _activePlayerNode = _activePlayerNode.Next ?? _players.First;
+            }
         }
 
         /******************************************************************************************\
@@ -130,58 +150,68 @@ namespace InterruptingCards.Managers
 
         protected virtual void Awake()
         {
+            Debug.Log($"Waking game manager");
+
             Singleton = this;
         }
 
         protected virtual new void OnDestroy()
         {
+            Debug.Log($"Destroying game manager");
+
             Singleton = null;
+            _players.Clear();
             base.OnDestroy();
         }
 
-        protected virtual void StateTrigger(int triggerId)
+        protected virtual void Update()
         {
+            var x = 0;
+        }
+
+        [ClientRpc]
+        protected virtual void StateTriggerClientRpc(int triggerId, ClientRpcParams clientRpcParams = default)
+        {
+            Debug.Log($"Triggering {triggerId}");
             _gameStateMachine.SetTrigger(triggerId);
         }
 
-        protected virtual void ShiftTurn(int times = 1)
+        [ServerRpc(RequireOwnership = false)]
+        protected virtual void GetSelfServerRpc(ServerRpcParams serverRpcParams = default)
         {
-            for (var i = 0; i < times; i++)
-            {
-                _playerTurnIndex = ++_playerTurnIndex == _playerTurnOrder.Count ? 0 : _playerTurnIndex;
-            }
-        }
+            var clientId = serverRpcParams.Receive.SenderClientId;
 
-        [ServerRpc]
-        public virtual void GetSelfServerRpc(ServerRpcParams serverRpcParams = default)
-        {
+            Debug.Log($"Getting self ({clientId})");
+
             var clientRpcParams = new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
                 {
-                    TargetClientIds = new ulong[] { serverRpcParams.Receive.SenderClientId }
+                    TargetClientIds = new ulong[] { clientId }
                 }
             };
 
-            AssignSelfClientRpc(clientRpcParams);
+            AssignSelfClientRpc(clientId, clientRpcParams);
         }
 
         [ClientRpc]
-        protected virtual void AssignSelfClientRpc(ClientRpcParams clientRpcParams)
+        protected virtual void AssignSelfClientRpc(ulong selfId, ClientRpcParams clientRpcParams = default)
         {
-            var selfClientId = clientRpcParams.Send.TargetClientIds.First();
-            _self = _playerMap[selfClientId];
+            Debug.Log($"Assigning self ({selfId})");
+            _selfId = selfId;
         }
 
         protected virtual void AssignHands()
         {
-            if (_playerMap.Count > HandManagers.Count())
+            Debug.Log("Assigning hands");
+
+            if (_players.Count > HandManagers.Count())
             {
                 throw new TooManyPlayersException();
             }
 
             var i = 0;
-            foreach (var player in _playerMap.Values)
+            foreach (var player in _players)
             {
                 HandManagers[i].Hand = HandFactory.Create(new List<ICard>());
                 var hand = HandManagers[i++];
@@ -189,73 +219,78 @@ namespace InterruptingCards.Managers
             }
         }
 
-        protected virtual void TryAddPlayer(ulong clientId)
-        {
-            if (CurrentStateId == _waitingForClientsStateId && _playerMap.Count < MaxPlayers)
-            {
-                AddPlayerServerRpc(clientId);
-            }
-        }
-
         [ServerRpc]
         protected virtual void AddPlayerServerRpc(ulong clientId)
         {
+            Debug.Log($"Adding player ({clientId})");
+
             if (CurrentStateId != _waitingForClientsStateId)
             {
                 Debug.LogWarning($"Did not add player ({clientId}): game already started");
                 return;
             }
 
-            if (_playerMap.Count >= MaxPlayers)
+            if (_lobby.Count >= MaxPlayers)
             {
                 Debug.LogWarning($"Did not add player ({clientId}): lobby is full");
                 return;
             }
 
-            _playerMap[clientId] = PlayerFactory.Create(clientId, clientId.ToString());
-            _playerTurnOrder.Add(clientId);
+            _lobby.Add(clientId);
             
             // TODO: Change this to a button or something
-            if (_playerMap.Count == MaxPlayers)
+            if (_lobby.Count == MaxPlayers)
             {
-                StateTrigger(_startGameTriggerId);
+                _notReadyPlayers.UnionWith(_lobby);
+                StateTriggerClientRpc(_waitForReadyTriggerId);
+                SetPlayersClientRpc(_lobby.ToArray());
             }
-        }
-
-        protected virtual void TryRemovePlayer(ulong clientId)
-        {
-            if (!Network.ConnectedClients.ContainsKey(clientId))
-            {
-                RemovePlayerServerRpc(clientId);
-            }
-
-            // TODO: Remove their hand
         }
 
         [ServerRpc]
         protected virtual void RemovePlayerServerRpc(ulong clientId)
         {
+            Debug.Log($"Removing player ({clientId})");
+
             if (CurrentStateId != _waitingForClientsStateId)
             {
-                if (clientId == ActivePlayer.Id)
+                if (clientId == _activePlayerNode.Value.Id)
                 {
-                    StateTrigger(_forceEndTurnTriggerId);
+                    StateTriggerClientRpc(_forceEndTurnTriggerId);
 
                 }
                 Debug.LogWarning($"Player ({clientId}) removed while game is playing");
             }
 
-            _playerMap.Remove(clientId);
+            // TODO: Continue game without player
+            StateTriggerClientRpc(_forceEndGameTriggerId);
+        }
 
-            if (_playerMap.Count < MinPlayers)
+        [ClientRpc]
+        protected virtual void SetPlayersClientRpc(ulong[] playerIds, ClientRpcParams clientRpcParams = default)
+        {
+            foreach (var playerId in playerIds)
             {
-                StateTrigger(_forceEndGameTriggerId);
+               _players.AddLast(PlayerFactory.Create(playerId, playerId.ToString()));
+            }
+
+            PlayerReadyServerRpc();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        protected virtual void PlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
+        {
+            _notReadyPlayers.Remove(serverRpcParams.Receive.SenderClientId);
+            
+            if (_notReadyPlayers.Count == 0)
+            {
+                StateTriggerClientRpc(_startGameTriggerId);
             }
         }
 
         protected virtual void TryDealHands()
         {
-            if (_playerMap.Count >= MinPlayers && _playerTurnIndex < 0)
+            if (_players.Count >= MinPlayers && _activePlayerNode == null)
             {
                 DealHandsServerRpc();
             }
@@ -264,13 +299,15 @@ namespace InterruptingCards.Managers
         [ServerRpc]
         protected virtual void DealHandsServerRpc()
         {
-            if (_playerMap.Count < MinPlayers)
+            Debug.Log("Dealing hands");
+
+            if (_players.Count < MinPlayers)
             {
                 Debug.Log($"Tried to deal hands before {MinPlayers} joined");
                 return;
             }
 
-            if (_playerTurnIndex >= 0)
+            if (_activePlayerNode != null)
             {
                 Debug.Log($"Tried to deal hands during a game");
                 return;
@@ -296,9 +333,11 @@ namespace InterruptingCards.Managers
         [ServerRpc]
         protected virtual void DrawCardServerRpc(ServerRpcParams serverRpcParams = default)
         {
+            Debug.Log("Drawing card");
+
             var senderId = serverRpcParams.Receive.SenderClientId;
 
-            if (senderId != ActivePlayer.Id)
+            if (senderId != _activePlayerNode.Value.Id)
             {
                 Debug.Log($"Player ({senderId}) tried to draw a card out of turn");
                 return;
@@ -311,9 +350,9 @@ namespace InterruptingCards.Managers
             }
 
             var card = DeckManager.DrawTop();
-            ActivePlayer.Hand.Add(card);
+            _activePlayerNode.Value.Hand.Add(card);
 
-            StateTrigger(_drawCardTriggerId);
+            StateTriggerClientRpc(_drawCardTriggerId);
         }
 
         protected virtual void TryPlayCard(ICard card)
@@ -325,11 +364,13 @@ namespace InterruptingCards.Managers
         }
 
         [ServerRpc]
-        public virtual void PlayCardServerRpc(SuitEnum suit, RankEnum rank, ServerRpcParams serverRpcParams = default)
+        protected virtual void PlayCardServerRpc(SuitEnum suit, RankEnum rank, ServerRpcParams serverRpcParams = default)
         {
+            Debug.Log("Playing card");
+
             var senderId = serverRpcParams.Receive.SenderClientId;
 
-            if (senderId != ActivePlayer.Id)
+            if (senderId != _activePlayerNode.Value.Id)
             {
                 Debug.Log($"Player ({senderId}) tried to play a card out of turn");
                 return;
@@ -341,15 +382,17 @@ namespace InterruptingCards.Managers
                 return;
             }
 
-            ActivePlayer.Hand.Remove(suit, rank);
+            _activePlayerNode.Value.Hand.Remove(suit, rank);
             DiscardManager.PlaceTop(CardFactory.Create(suit, rank));
 
-            StateTrigger(_playCardTriggerId);
+            StateTriggerClientRpc(_playCardTriggerId);
         }
 
         protected virtual void EndGame()
         {
-            _playerTurnIndex = -1;
+            Debug.Log($"Ending game");
+
+            _activePlayerNode = null;
         }
     }
 }

@@ -272,7 +272,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2697637174834264641, guid: 305f2660e9804854f8f1a805ce7a89ef, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2697637174834264642, guid: 305f2660e9804854f8f1a805ce7a89ef, type: 3}
       propertyPath: m_Pivot.x
@@ -529,10 +529,8 @@ GameObject:
   m_Component:
   - component: {fileID: 413059300}
   - component: {fileID: 413059303}
-  - component: {fileID: 413059302}
   - component: {fileID: 413059301}
   - component: {fileID: 413059299}
-  - component: {fileID: 413059304}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -591,18 +589,6 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &413059302
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 413059298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94540e43e0e5d89409fb0d0838cf855c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &413059303
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -621,19 +607,6 @@ MonoBehaviour:
   _handManagers:
   - {fileID: 250600551}
   - {fileID: 1066470687}
---- !u!114 &413059304
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 413059298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 946cc83829a79d843bc5a747a7c29853, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _animator: {fileID: 413059299}
 --- !u!1 &450171642
 GameObject:
   m_ObjectHideFlags: 0
@@ -1053,6 +1026,7 @@ GameObject:
   - component: {fileID: 760812528}
   - component: {fileID: 760812526}
   - component: {fileID: 760812527}
+  - component: {fileID: 760812530}
   - component: {fileID: 760812529}
   m_Layer: 0
   m_Name: Factories
@@ -1110,6 +1084,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9042bbb20091ab408647bf085174eda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &760812530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 760812525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8bc146d90a4cc74396a30e03d9e3562, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &787831373
@@ -1783,7 +1769,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2697637174834264641, guid: 305f2660e9804854f8f1a805ce7a89ef, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2697637174834264642, guid: 305f2660e9804854f8f1a805ce7a89ef, type: 3}
       propertyPath: m_Pivot.x

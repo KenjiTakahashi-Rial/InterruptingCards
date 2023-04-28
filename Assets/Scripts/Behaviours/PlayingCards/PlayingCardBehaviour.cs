@@ -24,7 +24,11 @@ namespace InterruptingCards.Behaviours
             get => _isFaceUp.Value;
             set
             {
-                _isFaceUp.Value = value;
+                if (IsOwner)
+                {
+                    _isFaceUp.Value = value;
+                }
+
                 Refresh();
             }
         }
@@ -34,7 +38,11 @@ namespace InterruptingCards.Behaviours
             get => _card.Value;
             set
             {
-                _card.Value = (PlayingCard)value;
+                if (IsOwner)
+                {
+                    _card.Value = (PlayingCard)value;
+                }
+
                 Refresh();
             }
         }
@@ -63,11 +71,11 @@ namespace InterruptingCards.Behaviours
         {
             if (_card.Value == null)
             {
-                _cardText.gameObject.SetActive(false);
+                gameObject.SetActive(false);
                 return;
             }
 
-            _cardText.gameObject.SetActive(true);
+            gameObject.SetActive(true);
 
             if (!IsFaceUp)
             {

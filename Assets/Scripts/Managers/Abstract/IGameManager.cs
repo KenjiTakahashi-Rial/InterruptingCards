@@ -5,5 +5,7 @@ namespace InterruptingCards.Managers
         static IGameManager Singleton { get; }
 
         void StartGame();
+
+        void ShiftTurn(int shifts = 1);
     }
 }

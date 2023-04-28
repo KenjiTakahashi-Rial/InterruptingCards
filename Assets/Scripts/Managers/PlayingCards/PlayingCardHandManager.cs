@@ -11,16 +11,15 @@ namespace InterruptingCards.Managers
     {
         [SerializeField] private List<PlayingCardBehaviour> _cardSlots;
 
-        private IList<ICardBehaviour> _convertedCardSlots;
+        private IList<ICardBehaviour> _convertedCardSlots = null;
 
         protected override IList<ICardBehaviour> CardSlots
         {
-            get => _convertedCardSlots;
-        }
-
-        private void Awake()
-        {
-            _convertedCardSlots = _cardSlots.Cast<ICardBehaviour>().ToList();
+            get
+            {
+                _convertedCardSlots ??= _cardSlots.Cast<ICardBehaviour>().ToList();
+                return _convertedCardSlots;
+            }
         }
     }
 }
