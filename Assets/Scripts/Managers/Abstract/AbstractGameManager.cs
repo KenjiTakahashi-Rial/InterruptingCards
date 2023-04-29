@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -52,8 +51,6 @@ namespace InterruptingCards.Managers
 
         public static IGameManager Singleton { get; protected set; }
 
-        protected virtual NetworkManager Network => NetworkManager.Singleton;
-
         protected abstract IPlayerFactory PlayerFactory { get; }
 
         protected abstract ICardFactory CardFactory { get; }
@@ -90,10 +87,10 @@ namespace InterruptingCards.Managers
             if (IsServer)
             {
                 AddPlayerServerRpc(_selfId);
-                Network.OnClientConnectedCallback -= AddPlayerServerRpc;
-                Network.OnClientConnectedCallback += AddPlayerServerRpc;
-                Network.OnClientDisconnectCallback -= RemovePlayerServerRpc;
-                Network.OnClientDisconnectCallback += RemovePlayerServerRpc;
+                NetworkManager.OnClientConnectedCallback -= AddPlayerServerRpc;
+                NetworkManager.OnClientConnectedCallback += AddPlayerServerRpc;
+                NetworkManager.OnClientDisconnectCallback -= RemovePlayerServerRpc;
+                NetworkManager.OnClientDisconnectCallback += RemovePlayerServerRpc;
             }
 
             DeckManager.OnDeckClicked -= TryDrawCard;
@@ -113,8 +110,8 @@ namespace InterruptingCards.Managers
             if (IsServer)
             {
                 _players.Clear();
-                Network.OnClientConnectedCallback -= AddPlayerServerRpc;
-                Network.OnClientDisconnectCallback -= RemovePlayerServerRpc;
+                NetworkManager.OnClientConnectedCallback -= AddPlayerServerRpc;
+                NetworkManager.OnClientDisconnectCallback -= RemovePlayerServerRpc;
             }
 
             _activePlayerNode = null;

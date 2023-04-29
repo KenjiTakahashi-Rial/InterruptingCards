@@ -17,6 +17,8 @@ namespace InterruptingCards.Behaviours
         [SerializeField] private TextMeshPro _cardText;
         [SerializeField] private SpriteRenderer _cardSprite;
 
+        private Vector3 _originalScale;
+
         public event Action OnCardClicked;
 
         public bool IsFaceUp
@@ -82,6 +84,17 @@ namespace InterruptingCards.Behaviours
         private void Refresh<T>(T _, T v)
         {
             Refresh();
+        }
+
+        private void Awake()
+        {
+            _originalScale = transform.localScale;
+        }
+
+        private void Update()
+        {
+            // TODO: NetworkManager spawns the objects at wrong scale. Figure out why and find a better solution
+            transform.localScale = _originalScale;
         }
 
         private void OnMouseDown()
