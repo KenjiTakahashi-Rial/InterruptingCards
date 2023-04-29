@@ -7,6 +7,7 @@ using UnityEngine;
 
 using InterruptingCards.Factories;
 using InterruptingCards.Models;
+using TMPro;
 
 namespace InterruptingCards.Managers
 {
@@ -36,10 +37,12 @@ namespace InterruptingCards.Managers
         // Server-only
         protected readonly List<ulong> _lobby = new();
         protected readonly HashSet<ulong> _notReadyPlayers = new();
-        protected readonly LinkedList<IPlayer> _players;
+        
+        protected readonly LinkedList<IPlayer> _players = new();
         protected LinkedListNode<IPlayer> _activePlayerNode;
 
         [SerializeField] protected Animator _gameStateMachine;
+        [SerializeField] protected TextMeshPro _tempInfoText;
 
         protected ulong _selfId; // The player that is on this device
 
@@ -130,7 +133,12 @@ namespace InterruptingCards.Managers
 
             DeckManager.ResetDeck();
             AssignHands();
-            TryDealHands();
+            
+            if (IsServer)
+            {
+                DealHandsServerRpc();
+            }
+
             _activePlayerNode = _players.First;
         }
 
@@ -166,7 +174,12 @@ namespace InterruptingCards.Managers
 
         protected virtual void Update()
         {
-            var x = 0;
+            if (_activePlayerNode == null)
+            {
+                return;
+            }
+
+            _tempInfoText.SetText($"{_activePlayerNode.Value.Id}");
         }
 
         [ClientRpc]
@@ -288,14 +301,6 @@ namespace InterruptingCards.Managers
             }
         }
 
-        protected virtual void TryDealHands()
-        {
-            if (_players.Count >= MinPlayers && _activePlayerNode == null)
-            {
-                DealHandsServerRpc();
-            }
-        }
-
         [ServerRpc]
         protected virtual void DealHandsServerRpc()
         {
@@ -330,7 +335,7 @@ namespace InterruptingCards.Managers
             }
         }
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         protected virtual void DrawCardServerRpc(ServerRpcParams serverRpcParams = default)
         {
             Debug.Log("Drawing card");
@@ -357,13 +362,15 @@ namespace InterruptingCards.Managers
 
         protected virtual void TryPlayCard(ICard card)
         {
+            Debug.Log($"Trying to play card {card.ToString()}");
+
             if (IsSelfTurn && CurrentStateId == _waitingForPlayCardStateId)
             {
                 PlayCardServerRpc(card.Suit, card.Rank);
             }
         }
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         protected virtual void PlayCardServerRpc(SuitEnum suit, RankEnum rank, ServerRpcParams serverRpcParams = default)
         {
             Debug.Log("Playing card");

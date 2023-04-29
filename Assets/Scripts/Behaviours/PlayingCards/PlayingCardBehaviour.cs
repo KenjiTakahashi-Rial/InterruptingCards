@@ -9,7 +9,6 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
 {
-    // TODO: Consider adding a network dependency for this so it can inherit most of the functionality from a generic abstract class
     public class PlayingCardBehaviour : NetworkBehaviour, ICardBehaviour
     {
         private readonly NetworkVariable<bool> _isFaceUp = new(true);
@@ -94,6 +93,7 @@ namespace InterruptingCards.Behaviours
 
         private void OnMouseDown()
         {
+            Debug.Log("Mouse down on card");
             OnCardClicked.Invoke();
         }
     }
