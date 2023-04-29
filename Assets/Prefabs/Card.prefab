@@ -54,6 +54,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cardText: {fileID: 910167586431815590}
+  _cardSprite: {fileID: 7099380014465609517}
 --- !u!114 &1075542451944468006
 MonoBehaviour:
   m_ObjectHideFlags: 0

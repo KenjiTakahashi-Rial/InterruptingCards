@@ -58,7 +58,7 @@ namespace InterruptingCards.Models
         public virtual ICard PeekTop()
         {
             CheckEmpty();
-            return (ICard)_cards[TopIndex].Clone();
+            return CardFactory.Clone(_cards[TopIndex]);
         }
 
         public virtual ICard DrawTop()

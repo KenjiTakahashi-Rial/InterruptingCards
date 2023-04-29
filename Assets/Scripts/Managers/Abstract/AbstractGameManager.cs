@@ -131,11 +131,11 @@ namespace InterruptingCards.Managers
         {
             Debug.Log("Starting Game");
 
-            DeckManager.ResetDeck();
             AssignHands();
             
             if (IsServer)
             {
+                DeckManager.ResetDeck();
                 DealHandsServerRpc();
             }
 

@@ -15,6 +15,7 @@ namespace InterruptingCards.Behaviours
         private readonly NetworkVariable<PlayingCard> _card = new(null);
 
         [SerializeField] private TextMeshPro _cardText;
+        [SerializeField] private SpriteRenderer _cardSprite;
 
         public event Action OnCardClicked;
 
@@ -23,11 +24,7 @@ namespace InterruptingCards.Behaviours
             get => _isFaceUp.Value;
             set
             {
-                if (IsOwner)
-                {
-                    _isFaceUp.Value = value;
-                }
-
+                _isFaceUp.Value = value;
                 Refresh();
             }
         }
@@ -37,11 +34,7 @@ namespace InterruptingCards.Behaviours
             get => _card.Value;
             set
             {
-                if (IsOwner)
-                {
-                    _card.Value = (PlayingCard)value;
-                }
-
+                _card.Value = (PlayingCard)value;
                 Refresh();
             }
         }
@@ -70,20 +63,20 @@ namespace InterruptingCards.Behaviours
         {
             if (_card.Value == null)
             {
-                gameObject.SetActive(false);
-                return;
-            }
-
-            gameObject.SetActive(true);
-
-            if (!IsFaceUp)
-            {
+                _cardSprite.enabled = false;
                 _cardText.enabled = false;
-                return;
             }
-
-            _cardText.SetText(_card.Value.ToString()); // TODO: Change  
-            _cardText.enabled = true;
+            else if (!IsFaceUp)
+            {
+                _cardSprite.enabled = true;
+                _cardText.enabled = false;
+            }
+            else
+            {
+                _cardText.SetText(_card.Value.ToString()); // TODO: Change
+                _cardSprite.enabled = true;
+                _cardText.enabled = true;
+            }
         }
 
         private void Refresh<T>(T _, T v)

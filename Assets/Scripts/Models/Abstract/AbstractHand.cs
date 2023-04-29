@@ -22,7 +22,7 @@ namespace InterruptingCards.Models
 
         public virtual void Add(ICard card)
         {
-            Insert(0, card);
+            _cards.Add(card);
         }
 
         public virtual ICard Remove(SuitEnum suit, RankEnum rank)
