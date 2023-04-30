@@ -8,6 +8,10 @@ namespace InterruptingCards.Managers
     {
         event Action OnDeckClicked;
 
-        void ResetDeck();
+        bool IsFaceUp { get; set; }
+
+        void Initialize();
+
+        void Clear();
     }
 }

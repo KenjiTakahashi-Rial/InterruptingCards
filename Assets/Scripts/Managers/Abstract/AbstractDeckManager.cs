@@ -11,7 +11,6 @@ namespace InterruptingCards.Managers
 {
     public abstract class AbstractDeckManager : MonoBehaviour, IDeckManager
     {
-        protected bool _isFaceUp = false;
         protected IDeck _deck;
         protected IDeck _deckPrototype;
 
@@ -27,22 +26,8 @@ namespace InterruptingCards.Managers
         
         public virtual bool IsFaceUp
         {
-            get => _isFaceUp;
-            set
-            {
-                _isFaceUp = value;
-                Refresh();
-            }
-        }
-
-        public virtual IDeck Deck
-        {
-            get => _deck;
-            set
-            {
-                _deck = value;
-                Refresh();
-            }
+            get => TopCard.IsFaceUp;
+            set => TopCard.IsFaceUp = value;
         }
 
         protected abstract ICardBehaviour TopCard { get; }
@@ -106,15 +91,22 @@ namespace InterruptingCards.Managers
             return card;
         }
 
-        public virtual void ResetDeck()
+        public virtual void Initialize()
         {
             _deck = DeckFactory.Clone(_deckPrototype);
             Shuffle();
+            Refresh();
+        }
+
+        public virtual void Clear()
+        {
+            _deck = DeckFactory.Create(new List<ICard>());
+            Refresh();
         }
 
         protected virtual void Start()
         {
-            // Must be called aftger awake so Singletons can be set
+            // Must be called after awake so Singletons can be set
             CreatePrototype();
         }
 
@@ -146,12 +138,12 @@ namespace InterruptingCards.Managers
 
         protected virtual void Refresh()
         {
-            TopCard.IsFaceUp = IsFaceUp;
             TopCard.Card = _deck.Count() == 0 ? null : PeekTop();
         }
 
         protected virtual void InvokeOnDeckClicked()
         {
+            Debug.Log("Deck clicked");
             OnDeckClicked.Invoke();
         }
     }

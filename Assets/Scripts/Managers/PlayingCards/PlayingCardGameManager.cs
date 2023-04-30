@@ -26,6 +26,6 @@ namespace InterruptingCards.Managers
 
         protected override int MaxPlayers => 2;
 
-        protected override int StartingHandCardCount => 5;
+        protected override int StartingHandCardCount => 4;
     }
 }

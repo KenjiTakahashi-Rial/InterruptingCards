@@ -24,8 +24,8 @@ namespace InterruptingCards.Managers
 
         // TODO: Double check that this full path format is correct
         protected readonly int _waitingForClientsStateId = Animator.StringToHash("Base.WaitingForClients");
-        protected readonly int _waitingForDrawCardStateId = Animator.StringToHash("Base.InGame.WaitingForDrawCard");
-        protected readonly int _waitingForPlayCardStateId = Animator.StringToHash("Base.InGame.WaitingForPlayCard");
+        protected readonly int _waitingForDrawCardStateId = Animator.StringToHash("Base.InGame.PlayerTurns.WaitingForDrawCard");
+        protected readonly int _waitingForPlayCardStateId = Animator.StringToHash("Base.InGame.PlayerTurns.WaitingForPlayCard");
         protected readonly int _waitForReadyTriggerId = Animator.StringToHash("waitForReady");
         protected readonly int _startGameTriggerId = Animator.StringToHash("startGame");
         protected readonly int _drawCardTriggerId = Animator.StringToHash("drawCard");
@@ -132,7 +132,9 @@ namespace InterruptingCards.Managers
             
             if (IsServer)
             {
-                DeckManager.ResetDeck();
+                DeckManager.Initialize();
+                DeckManager.IsFaceUp = false;
+                DiscardManager.Clear();
                 DealHandsServerRpc();
             }
 
@@ -155,14 +157,14 @@ namespace InterruptingCards.Managers
 
         protected virtual void Awake()
         {
-            Debug.Log($"Waking game manager");
+            Debug.Log("Waking game manager");
 
             Singleton = this;
         }
 
         protected virtual new void OnDestroy()
         {
-            Debug.Log($"Destroying game manager");
+            Debug.Log("Destroying game manager");
 
             Singleton = null;
             _players.Clear();
@@ -220,12 +222,16 @@ namespace InterruptingCards.Managers
                 throw new TooManyPlayersException();
             }
 
+            if (!IsServer)
+            {
+                return;
+            }
+
             var i = 0;
             foreach (var player in _players)
             {
                 HandManagers[i].Hand = HandFactory.Create(new List<ICard>());
-                var hand = HandManagers[i++];
-                player.Hand = hand;
+                player.Hand = HandManagers[i++];
             }
         }
 
@@ -311,7 +317,7 @@ namespace InterruptingCards.Managers
 
             if (_activePlayerNode != null)
             {
-                Debug.Log($"Tried to deal hands during a game");
+                Debug.Log("Tried to deal hands during a game");
                 return;
             }
 
@@ -326,6 +332,8 @@ namespace InterruptingCards.Managers
 
         protected virtual void TryDrawCard()
         {
+            Debug.Log("Trying to draw card");
+
             if (IsSelfTurn && CurrentStateId == _waitingForDrawCardStateId)
             {
                 DrawCardServerRpc();
@@ -345,9 +353,9 @@ namespace InterruptingCards.Managers
                 return;
             }
 
-            if (CurrentStateId == _waitingForDrawCardStateId)
+            if (CurrentStateId != _waitingForDrawCardStateId)
             {
-                Debug.Log($"Player ({senderId}) tried to draw when they weren't allowed to");
+                Debug.Log($"Player ({senderId}) tried to draw in the wrong state");
                 return;
             }
 
@@ -359,7 +367,7 @@ namespace InterruptingCards.Managers
 
         protected virtual void TryPlayCard(ICard card)
         {
-            Debug.Log($"Trying to play card {card.ToString()}");
+            Debug.Log($"Trying to play card {card}");
 
             if (IsSelfTurn && CurrentStateId == _waitingForPlayCardStateId)
             {
@@ -394,7 +402,7 @@ namespace InterruptingCards.Managers
 
         protected virtual void EndGame()
         {
-            Debug.Log($"Ending game");
+            Debug.Log("Ending game");
 
             _activePlayerNode = null;
         }

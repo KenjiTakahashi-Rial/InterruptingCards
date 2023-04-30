@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using UnityEngine;
 
@@ -45,7 +44,6 @@ namespace InterruptingCards.Managers
         public virtual ICard Remove(SuitEnum suit, RankEnum rank)
         {
             var card = _hand.Remove(suit, rank);
-            CardSlots.Remove(CardSlots.FirstOrDefault(c => c.Card.Suit.Equals(suit) && c.Card.Rank.Equals(rank)));
             Refresh();
             return card;
         }
