@@ -81,8 +81,12 @@ namespace InterruptingCards.Behaviours
             }
         }
 
-        private void Refresh<T>(T _, T v)
+        private void Refresh<T>(T oldValue, T newValue)
         {
+            var before = oldValue == null ? "null" : oldValue.ToString();
+            var after = newValue == null ? "null" : newValue.ToString();
+            Debug.Log($"Refreshing card ({before} -> {after})");
+
             Refresh();
         }
 
@@ -94,7 +98,10 @@ namespace InterruptingCards.Behaviours
         private void Update()
         {
             // TODO: NetworkManager spawns the objects at wrong scale. Figure out why and find a better solution
-            transform.localScale = _originalScale;
+            if (transform.localScale != _originalScale)
+            {
+                transform.localScale = _originalScale;
+            }
         }
 
         private void OnMouseDown()

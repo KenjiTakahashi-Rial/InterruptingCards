@@ -19,6 +19,7 @@ namespace InterruptingCards.Managers
             get => _hand;
             set
             {
+                Debug.Log("Hand set");
                 _hand = value;
                 Refresh();
             }
@@ -30,6 +31,8 @@ namespace InterruptingCards.Managers
 
         public virtual void Add(ICard card)
         {
+            Debug.Log($"Adding card to hand ({card})");
+
             if (Count == CardSlots.Count)
             {
                 throw new TooManyCardsException();
@@ -43,6 +46,8 @@ namespace InterruptingCards.Managers
 
         public virtual ICard Remove(SuitEnum suit, RankEnum rank)
         {
+            Debug.Log($"Removing {rank} | {suit} from hand");
+
             var card = _hand.Remove(suit, rank);
             Refresh();
             return card;

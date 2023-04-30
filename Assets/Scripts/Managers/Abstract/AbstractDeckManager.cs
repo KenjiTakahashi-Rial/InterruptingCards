@@ -144,6 +144,7 @@ namespace InterruptingCards.Managers
         protected virtual void InvokeOnDeckClicked()
         {
             Debug.Log("Deck clicked");
+
             OnDeckClicked.Invoke();
         }
     }
