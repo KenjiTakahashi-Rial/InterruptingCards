@@ -10,6 +10,8 @@ namespace InterruptingCards.Models
         protected readonly Random _random = new();
         protected IList<ICard> _cards;
 
+        public virtual int Count => _cards.Count;
+
         protected abstract ICardFactory CardFactory { get; }
 
         protected virtual int TopIndex { get => _cards.Count - 1;}
@@ -22,11 +24,6 @@ namespace InterruptingCards.Models
         }
 
         public abstract object Clone();
-
-        public virtual int Count()
-        {
-            return _cards.Count;
-        }
 
         public virtual void Shuffle()
         {

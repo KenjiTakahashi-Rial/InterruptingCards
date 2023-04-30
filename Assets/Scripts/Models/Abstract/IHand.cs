@@ -1,7 +1,5 @@
 using System;
 
-using Unity.Netcode;
-
 namespace InterruptingCards.Models
 {
     public interface IHand : ICloneable

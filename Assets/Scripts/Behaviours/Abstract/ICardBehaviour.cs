@@ -6,12 +6,16 @@ namespace InterruptingCards.Behaviours
 { 
     public interface ICardBehaviour
     {
-        event Action OnCardClicked;
+        event Action OnClicked;
+
+        event Action OnValueChanged;
 
         bool IsFaceUp { get; set; }
 
         ICard Card { get; set; }
 
-        void UnsubscribeAllOnCardClicked();
+        void UnsubscribeAllOnClicked();
+
+        void UnsubscribeAllOnValueChanged();
     }
 }

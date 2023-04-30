@@ -19,7 +19,9 @@ namespace InterruptingCards.Behaviours
 
         private Vector3 _originalScale;
 
-        public event Action OnCardClicked;
+        public event Action OnClicked;
+
+        public event Action OnValueChanged;
 
         public bool IsFaceUp
         {
@@ -43,22 +45,51 @@ namespace InterruptingCards.Behaviours
 
         public override void OnNetworkSpawn()
         {
-            _card.OnValueChanged -= Refresh;
-            _isFaceUp.OnValueChanged -= Refresh;
+            _card.OnValueChanged -= HandleCardChanged;
+            _card.OnValueChanged += HandleCardChanged;
 
-            _card.OnValueChanged += Refresh;
-            _isFaceUp.OnValueChanged += Refresh;
+            _isFaceUp.OnValueChanged -= HandleFaceUpChanged;
+            _isFaceUp.OnValueChanged += HandleFaceUpChanged;
         }
 
         public override void OnNetworkDespawn()
         {
-            _card.OnValueChanged -= Refresh;
-            _isFaceUp.OnValueChanged -= Refresh;
+            _card.OnValueChanged -= HandleCardChanged;
+            _isFaceUp.OnValueChanged -= HandleFaceUpChanged;
         }
 
-        public void UnsubscribeAllOnCardClicked()
+        private void HandleCardChanged(PlayingCard oldValue, PlayingCard newValue)
         {
-            OnCardClicked = null;
+            var before = oldValue == null ? "null" : oldValue.ToString();
+            var after = newValue == null ? "null" : newValue.ToString();
+            Debug.Log($"Card changed ({before} -> {after})");
+
+            if (OnValueChanged == null)
+            {
+                Debug.Log("Card OnValueChanged has no subscribers");
+            }
+
+            OnValueChanged?.Invoke();
+            Refresh();
+        }
+
+        private void HandleFaceUpChanged(bool oldValue, bool newValue)
+        {
+            var before = oldValue ? "face-up" : "face-down";
+            var after = newValue ? "face-up" : "face-down";
+            Debug.Log($"Card changed ({before} -> {after})");
+
+            Refresh();
+        }
+
+        public void UnsubscribeAllOnClicked()
+        {
+            OnClicked = null;
+        }
+
+        public void UnsubscribeAllOnValueChanged()
+        {
+            OnValueChanged = null;
         }
 
         private void Refresh()
@@ -81,15 +112,6 @@ namespace InterruptingCards.Behaviours
             }
         }
 
-        private void Refresh<T>(T oldValue, T newValue)
-        {
-            var before = oldValue == null ? "null" : oldValue.ToString();
-            var after = newValue == null ? "null" : newValue.ToString();
-            Debug.Log($"Refreshing card ({before} -> {after})");
-
-            Refresh();
-        }
-
         private void Awake()
         {
             _originalScale = transform.localScale;
@@ -107,7 +129,7 @@ namespace InterruptingCards.Behaviours
         private void OnMouseDown()
         {
             Debug.Log("Mouse down on card");
-            OnCardClicked.Invoke();
+            OnClicked.Invoke();
         }
     }
 }

@@ -10,22 +10,11 @@ namespace InterruptingCards.Managers
 {
     public abstract class AbstractHandManager : MonoBehaviour, IHandManager
     {
-        protected IHand _hand;
-
         public event Action<ICard> OnCardClicked;
 
-        public virtual IHand Hand
-        {
-            get => _hand;
-            set
-            {
-                Debug.Log("Hand set");
-                _hand = value;
-                Refresh();
-            }
-        }
+        public virtual IHand Hand { get; set; }
 
-        public virtual int Count => _hand == null ? 0 : _hand.Count;
+        public virtual int Count => Hand == null ? 0 : Hand.Count;
 
         protected abstract IList<ICardBehaviour> CardSlots { get; }
 
@@ -38,24 +27,22 @@ namespace InterruptingCards.Managers
                 throw new TooManyCardsException();
             }
 
-            _hand.Add(card);
-            CardSlots[Count - 1].Card = card;
-
-            Refresh();
+            Hand.Add(card);
+            SetSlotCard(Count - 1);
         }
 
         public virtual ICard Remove(SuitEnum suit, RankEnum rank)
         {
             Debug.Log($"Removing {rank} | {suit} from hand");
 
-            var card = _hand.Remove(suit, rank);
-            Refresh();
+            var card = Hand.Remove(suit, rank);
+            SetAllSlotCards();
             return card;
         }
 
         public virtual ICard Get(int i)
         {
-            return _hand.Get(i);
+            return Hand.Get(i);
         }
 
         public virtual void SetIsFaceUp(int i)
@@ -70,34 +57,48 @@ namespace InterruptingCards.Managers
 
         protected virtual void OnEnable()
         {
-            Refresh();
+            for (var i = 0; i < CardSlots.Count; i++)
+            {
+                var j = i;
+                void HandleValueChanged() => RefreshCard(j);
+                CardSlots[i].OnValueChanged -= HandleValueChanged;
+                CardSlots[i].OnValueChanged += HandleValueChanged;
+            }
+
+            SetAllSlotCards();
         }
 
         protected virtual void OnDisable()
         {
             foreach (var cardSlot in CardSlots)
             {
-                cardSlot.UnsubscribeAllOnCardClicked();
+                cardSlot.UnsubscribeAllOnClicked();
+                cardSlot.UnsubscribeAllOnValueChanged();
                 cardSlot.Card = null;
             }
         }
 
-        protected virtual void Refresh()
+        protected virtual void RefreshCard(int i)
+        {
+            var cardSlot = CardSlots[i];
+            cardSlot.UnsubscribeAllOnClicked();
+
+            if (cardSlot.Card != null)
+            {
+                cardSlot.OnClicked += () => OnCardClicked.Invoke(cardSlot.Card);
+            }
+        }
+
+        protected virtual void SetSlotCard(int i)
+        {
+            CardSlots[i].Card = i >= Count ? null : Get(i); 
+        }
+
+        protected virtual void SetAllSlotCards()
         {
             for (var i = 0; i < CardSlots.Count; i++)
             {
-                var cardSlot = CardSlots[i];
-                cardSlot.UnsubscribeAllOnCardClicked();
-
-                if (i >= Count)
-                {
-                    cardSlot.Card = null;
-                    continue;
-                }
-
-                var card = Get(i);
-                cardSlot.Card = card;
-                cardSlot.OnCardClicked += () => OnCardClicked.Invoke(card);
+                SetSlotCard(i);
             }
         }
     }
