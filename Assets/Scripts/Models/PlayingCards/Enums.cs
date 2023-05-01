@@ -4,17 +4,17 @@ namespace InterruptingCards.Models
 #pragma warning disable S2344 // Enumeration type names should not have "Flags" or "Enum" suffixes
     public enum SuitEnum
     {
-        Invalid,
-        Clubs,
-        Diamonds,
-        Hearts,
-        Spades,
+        Invalid = 0,
+        Clubs = 1,
+        Diamonds = 2,
+        Hearts = 3,
+        Spades = 4,
     }
 
     public enum RankEnum
 #pragma warning restore S2344 // Enumeration type names should not have "Flags" or "Enum" suffixes
     {
-        Invalid,
+        Invalid = 0,
         Ace = 1,
         Two = 2,
         Three = 3,

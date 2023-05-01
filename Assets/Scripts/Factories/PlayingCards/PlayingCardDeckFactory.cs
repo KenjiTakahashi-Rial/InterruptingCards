@@ -26,7 +26,7 @@ namespace InterruptingCards.Factories
 
         public static IDeckFactory Singleton { get; private set; }
 
-        public IDeck Prototype { get => Clone(_prototype); set => _prototype = value; }
+        public IDeck Prototype { get => _prototype == null ? null : Clone(_prototype); set => _prototype = value; }
 
         private ICardFactory CardFactory => PlayingCardFactory.Singleton;
 

@@ -24,6 +24,13 @@ namespace InterruptingCards.Models
         public virtual RankEnum Rank { get => _rank; set => _rank = value; }
 #pragma warning restore S2292 // Trivial properties should be auto-implemented
 
+
+
+        public virtual bool Equals(ICard other)
+        {
+            return other != null && Suit == other.Suit && Rank == other.Rank;
+        }
+
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
             serializer.SerializeValue(ref _suit);
