@@ -21,7 +21,10 @@ namespace InterruptingCards.Models
 
         public virtual string Name => _name;
 
+// The inner field is necessary for network serialization
+#pragma warning disable S2292 // Trivial properties should be auto-implemented
         public virtual IHand Hand { get => _hand; set => _hand = value; }
+#pragma warning restore S2292 // Trivial properties should be auto-implemented
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
