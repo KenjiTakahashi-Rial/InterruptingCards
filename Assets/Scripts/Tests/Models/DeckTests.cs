@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 using NUnit.Framework;
 using UnityEngine;
@@ -31,10 +30,8 @@ namespace InterruptingCards.Tests
         public void OneTimeSetUp()
         {
             var factoriesObj = Object.Instantiate(Resources.Load<GameObject>("Prefabs/Factories"));
-            factoriesObj.SetActive(true);
             _cardFactory = factoriesObj.GetComponent<ICardFactory>();
             _deckFactory = factoriesObj.GetComponent<IDeckFactory>();
-            Thread.Sleep(3000);
         }
 
         [SetUp]
