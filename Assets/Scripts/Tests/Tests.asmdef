@@ -5,7 +5,9 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "InterruptingCards",
-        "Unity.Netcode.Runtime"
+        "Unity.Netcode.Runtime",
+        "Unity.Netcode.RuntimeTests",
+        "Unity.Netcode.TestHelpers.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

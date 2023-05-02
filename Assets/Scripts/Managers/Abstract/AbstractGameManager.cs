@@ -95,6 +95,11 @@ namespace InterruptingCards.Managers
 
         public static IGameManager Singleton { get; protected set; }
 
+        public string CurrentStateName
+        {
+            get => _stateMachineIdNameMap.GetValueOrDefault(CurrentStateId, "UnknownState");
+        }
+        
         protected abstract IPlayerFactory PlayerFactory { get; }
 
         protected abstract ICardFactory CardFactory { get; }
@@ -217,12 +222,12 @@ namespace InterruptingCards.Managers
 
         protected virtual void Update()
         {
-            if (_activePlayerNode == null)
+            if (_activePlayerNode == null || _tempInfoText == null)
             {
                 return;
             }
 
-            _tempInfoText.SetText($"{_activePlayerNode.Value.Id}\n{_stateMachineIdNameMap.GetValueOrDefault(CurrentStateId, "UnknownState")}");
+            _tempInfoText.SetText($"{_activePlayerNode.Value.Id}\n{CurrentStateName}");
         }
 
         [ClientRpc]
