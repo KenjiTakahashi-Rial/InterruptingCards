@@ -83,6 +83,7 @@ namespace InterruptingCards.Managers
         
         protected readonly LinkedList<IPlayer> _players = new();
         protected LinkedListNode<IPlayer> _activePlayerNode;
+        protected IPlayer _interruptingPlayer;
 
         [SerializeField] protected Animator _gameStateMachine;
         [SerializeField] protected TextMeshPro _tempInfoText;
@@ -301,6 +302,8 @@ namespace InterruptingCards.Managers
             }
         }
 
+        protected abstract void HandleEffect(Effect effect);
+
         [ServerRpc]
         protected virtual void AddPlayerServerRpc(ulong clientId)
         {
@@ -400,7 +403,7 @@ namespace InterruptingCards.Managers
         {
             Debug.Log("Trying to draw card");
 
-            if (IsSelfTurn && CurrentStateId == WaitingForDrawCardStateId)
+            if (IsSelfTurn && _interruptingPlayer == null && CurrentStateId == WaitingForDrawCardStateId)
             {
                 DrawCardServerRpc();
             }
@@ -464,6 +467,34 @@ namespace InterruptingCards.Managers
             DiscardManager.PlaceTop(CardFactory.Create(suit, rank));
 
             StateTriggerClientRpc(PlayCardTriggerId);
+        }
+
+        protected virtual void TryInterrupt(Effect effect)
+        {
+            if (!IsSelfTurn && _interruptingPlayer == null)
+            {
+                InterruptServerRpc(effect);
+            }
+        }
+
+        [ServerRpc]
+        protected virtual void InterruptServerRpc(Effect effect, ServerRpcParams serverRpcParams = default)
+        {
+            var senderId = serverRpcParams.Receive.SenderClientId;
+
+            if (IsSelfTurn)
+            {
+                Debug.Log($"Player ({senderId}) tried to interrupt their own turn");
+                return;
+            }
+
+            if (_interruptingPlayer != null)
+            {
+                Debug.Log($"Playing ({senderId}) tried to interrupt during another interrupt");
+                return;
+            }
+
+            HandleEffect(effect);
         }
     }
 }

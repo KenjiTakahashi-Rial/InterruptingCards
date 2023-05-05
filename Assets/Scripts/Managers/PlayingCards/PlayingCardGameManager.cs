@@ -1,6 +1,9 @@
-using InterruptingCards.Factories;
+using System;
 
 using UnityEngine;
+
+using InterruptingCards.Factories;
+using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
@@ -27,5 +30,16 @@ namespace InterruptingCards.Managers
         protected override int MaxPlayers => 2;
 
         protected override int StartingHandCardCount => 4;
+
+        protected override void HandleEffect(Effect effect)
+        {
+            switch (effect)
+            {
+                case Effect.PlayCard:
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
     }
 }

@@ -29,4 +29,11 @@ namespace InterruptingCards.Models
         Queen = 12,
         King = 13,
     }
+
+    public enum Effect
+    {
+        Invalid = 0,
+        DrawCard = 1,
+        PlayCard = 2,
+    }
 }
