@@ -587,7 +587,9 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols: {}
-  additionalCompilerArguments: {}
+  additionalCompilerArguments:
+    Standalone:
+    - -define:Unity.Netcode.TestHelpers
   platformArchitecture: {}
   scriptingBackend: {}
   il2cppCompilerConfiguration: {}

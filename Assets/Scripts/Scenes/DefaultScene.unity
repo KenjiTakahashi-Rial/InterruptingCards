@@ -385,6 +385,10 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1165967102464042378, guid: 8345f3add0f820a44aac365c74be067c, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1324850312524297713, guid: 8345f3add0f820a44aac365c74be067c, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 2620418102
@@ -521,9 +525,21 @@ PrefabInstance:
       propertyPath: GlobalObjectIdHash
       value: 3038425132
       objectReference: {fileID: 0}
+    - target: {fileID: 4101447420988157116, guid: 8345f3add0f820a44aac365c74be067c, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5684152461972221694, guid: 8345f3add0f820a44aac365c74be067c, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7236086588735391304, guid: 8345f3add0f820a44aac365c74be067c, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 1963726968
+      objectReference: {fileID: 0}
+    - target: {fileID: 7360912418842470344, guid: 8345f3add0f820a44aac365c74be067c, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []

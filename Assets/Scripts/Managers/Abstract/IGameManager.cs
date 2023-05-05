@@ -7,5 +7,7 @@ namespace InterruptingCards.Managers
         void StartGame();
 
         void ShiftTurn(int shifts = 1);
+
+        void EndGame();
     }
 }

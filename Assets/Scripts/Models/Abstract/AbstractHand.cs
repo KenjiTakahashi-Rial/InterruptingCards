@@ -35,6 +35,11 @@ namespace InterruptingCards.Models
             return _cards[i];
         }
 
+        public virtual void Clear()
+        {
+            _cards.Clear();
+        }
+
         public abstract object Clone();
     }
 }

@@ -135,7 +135,6 @@ namespace InterruptingCards.Managers
 
             if (IsServer)
             {
-                AddPlayerServerRpc(_selfId);
                 NetworkManager.OnClientConnectedCallback -= AddPlayerServerRpc;
                 NetworkManager.OnClientConnectedCallback += AddPlayerServerRpc;
                 NetworkManager.OnClientDisconnectCallback -= RemovePlayerServerRpc;
@@ -182,6 +181,7 @@ namespace InterruptingCards.Managers
             if (IsServer)
             {
                 DeckManager.Initialize();
+                DeckManager.Shuffle();
                 DeckManager.IsFaceUp = false;
                 DiscardManager.Clear();
                 DealHandsServerRpc();
@@ -197,6 +197,23 @@ namespace InterruptingCards.Managers
             for (var i = 0; i < shifts; i++)
             {
                 _activePlayerNode = _activePlayerNode.Next ?? _players.First;
+            }
+        }
+
+        public virtual void EndGame()
+        {
+            Debug.Log("Ending game");
+
+            _players.Clear();
+            _activePlayerNode = null;
+            _tempInfoText.SetText("Start the game");
+
+            DeckManager.Clear();
+            DiscardManager.Clear();
+
+            foreach (var handManager in HandManagers)
+            {
+                handManager.Clear();
             }
         }
 
@@ -302,8 +319,7 @@ namespace InterruptingCards.Managers
             }
 
             _lobby.Add(clientId);
-            
-            // TODO: Change this to a button or something
+
             if (_lobby.Count == MaxPlayers)
             {
                 _notReadyPlayers.UnionWith(_lobby);
@@ -322,13 +338,14 @@ namespace InterruptingCards.Managers
                 if (clientId == _activePlayerNode.Value.Id)
                 {
                     StateTriggerClientRpc(ForceEndTurnTriggerId);
-
                 }
+
                 Debug.LogWarning($"Player ({clientId}) removed while game is playing");
             }
 
-            // TODO: Continue game without player
+            // TODO: Continue game if enough players left
             StateTriggerClientRpc(ForceEndGameTriggerId);
+            _lobby.Remove(clientId);
         }
 
         [ClientRpc]
@@ -447,13 +464,6 @@ namespace InterruptingCards.Managers
             DiscardManager.PlaceTop(CardFactory.Create(suit, rank));
 
             StateTriggerClientRpc(PlayCardTriggerId);
-        }
-
-        protected virtual void EndGame()
-        {
-            Debug.Log("Ending game");
-
-            _activePlayerNode = null;
         }
     }
 }

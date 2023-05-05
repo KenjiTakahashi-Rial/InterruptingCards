@@ -11,5 +11,7 @@ namespace InterruptingCards.Models
         ICard Remove(SuitEnum suit, RankEnum rank);
 
         ICard Get(int i);
+
+        void Clear();
     }
 }

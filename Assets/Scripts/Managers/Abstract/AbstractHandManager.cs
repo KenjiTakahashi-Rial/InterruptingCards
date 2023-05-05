@@ -45,6 +45,12 @@ namespace InterruptingCards.Managers
             return Hand.Get(i);
         }
 
+        public virtual void Clear()
+        {
+            Hand.Clear();
+            SetAllSlotCards();
+        }
+
         public virtual void SetIsFaceUp(int i)
         {
             CardSlots[i].IsFaceUp = true;
@@ -91,7 +97,7 @@ namespace InterruptingCards.Managers
 
         protected virtual void SetSlotCard(int i)
         {
-            CardSlots[i].Card = i >= Count ? null : Get(i); 
+            CardSlots[i].Card = i >= Count ? null : Get(i);
         }
 
         protected virtual void SetAllSlotCards()

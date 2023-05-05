@@ -4,7 +4,6 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Factories
 {
-    // TODO: Are these factories still necessary?
     public class PlayingCardFactory : MonoBehaviour, ICardFactory
     {
         public static ICardFactory Singleton { get; private set; }

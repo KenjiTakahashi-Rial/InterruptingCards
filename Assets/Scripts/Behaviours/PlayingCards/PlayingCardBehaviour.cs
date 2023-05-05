@@ -128,8 +128,16 @@ namespace InterruptingCards.Behaviours
 
         private void OnMouseDown()
         {
-            Debug.Log("Mouse down on card");
-            OnClicked.Invoke();
+            if (OnClicked == null)
+            {
+                Debug.Log("Mouse down on card but OnClicked is null");
+            }
+            else
+            {
+                Debug.Log("Mouse down on card");
+            }
+
+            OnClicked?.Invoke();
         }
     }
 }

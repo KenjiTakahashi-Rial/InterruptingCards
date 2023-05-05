@@ -86,7 +86,6 @@ namespace InterruptingCards.Managers
         public virtual void Initialize()
         {
             _deck = DeckFactory.Prototype;
-            Shuffle();
             SetTopCard();
         }
 
@@ -100,6 +99,8 @@ namespace InterruptingCards.Managers
         {
             TopCard.OnClicked -= InvokeOnDeckClicked;
             TopCard.OnClicked += InvokeOnDeckClicked;
+
+            SetTopCard();
         }
 
         protected virtual void OnDisable()
@@ -109,14 +110,21 @@ namespace InterruptingCards.Managers
 
         protected virtual void SetTopCard()
         {
-            TopCard.Card = _deck.Count == 0 ? null : PeekTop();
+            TopCard.Card = _deck == null || _deck.Count == 0 ? null : PeekTop();
         }
 
         protected virtual void InvokeOnDeckClicked()
         {
-            Debug.Log("Deck clicked");
+            if (OnDeckClicked == null)
+            {
+                Debug.Log("Deck clicked, but OnDeckClicked is null");
+            }
+            else
+            {
+                Debug.Log("Deck clicked");
+            }
 
-            OnDeckClicked.Invoke();
+            OnDeckClicked?.Invoke();
         }
     }
 }
