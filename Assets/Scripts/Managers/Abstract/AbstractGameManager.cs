@@ -119,8 +119,6 @@ namespace InterruptingCards.Managers
 
         protected abstract int StartingHandCardCount { get; }
 
-        protected virtual bool IsSelfTurn => _activePlayerNode.Value.Id == _selfId;
-
         protected virtual int CurrentStateId =>
             _gameStateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash;
 
@@ -260,7 +258,7 @@ namespace InterruptingCards.Managers
         {
             var clientId = serverRpcParams.Receive.SenderClientId;
 
-            Debug.Log($"Getting self ({clientId})");
+            Debug.Log($"Getting self {clientId}");
 
             var clientRpcParams = new ClientRpcParams
             {
@@ -276,18 +274,18 @@ namespace InterruptingCards.Managers
         [ClientRpc]
         protected virtual void AssignSelfClientRpc(ulong selfId, ClientRpcParams clientRpcParams = default)
         {
-            Debug.Log($"Assigning self ({selfId})");
+            Debug.Log($"Assigning self {selfId}");
             _selfId = selfId;
         }
 
         protected virtual void AssignHands()
         {
-            Debug.Log("Assigning hands");
-
             if (_players.Count > HandManagers.Count())
             {
                 throw new TooManyPlayersException();
             }
+
+            Debug.Log("Assigning hands");
 
             if (!IsServer)
             {
@@ -307,17 +305,17 @@ namespace InterruptingCards.Managers
         [ServerRpc]
         protected virtual void AddPlayerServerRpc(ulong clientId)
         {
-            Debug.Log($"Adding player ({clientId})");
+            Debug.Log($"Adding player {clientId}");
 
             if (CurrentStateId != WaitingForClientsStateId)
             {
-                Debug.LogWarning($"Did not add player ({clientId}): game already started");
+                Debug.LogWarning($"Cannnot add player {clientId} while game already started");
                 return;
             }
 
             if (_lobby.Count >= MaxPlayers)
             {
-                Debug.LogWarning($"Did not add player ({clientId}): lobby is full");
+                Debug.LogWarning($"Cannnot add player {clientId} while lobby is full");
                 return;
             }
 
@@ -334,7 +332,7 @@ namespace InterruptingCards.Managers
         [ServerRpc]
         protected virtual void RemovePlayerServerRpc(ulong clientId)
         {
-            Debug.Log($"Removing player ({clientId})");
+            Debug.Log($"Removing player {clientId}");
 
             if (CurrentStateId != WaitingForClientsStateId)
             {
@@ -343,7 +341,7 @@ namespace InterruptingCards.Managers
                     StateTriggerClientRpc(ForceEndTurnTriggerId);
                 }
 
-                Debug.LogWarning($"Player ({clientId}) removed while game is playing");
+                Debug.LogWarning($"Player {clientId} removed while game is playing");
             }
 
             // TODO: Continue game if enough players left
@@ -376,19 +374,19 @@ namespace InterruptingCards.Managers
         [ServerRpc]
         protected virtual void DealHandsServerRpc()
         {
-            Debug.Log("Dealing hands");
-
             if (_players.Count < MinPlayers)
             {
-                Debug.Log($"Tried to deal hands before {MinPlayers} joined");
+                Debug.Log($"Cannot deal hands before {MinPlayers} joined");
                 return;
             }
 
             if (_activePlayerNode != null)
             {
-                Debug.Log("Tried to deal hands during a game");
+                Debug.Log("Cannot deal hands during a game");
                 return;
             }
+
+            Debug.Log("Dealing hands");
 
             for (var i = 0; i < StartingHandCardCount; i++)
             {
@@ -399,11 +397,38 @@ namespace InterruptingCards.Managers
             }
         }
 
+        protected virtual bool CanDrawCard(ulong id)
+        {
+            var playerTurn = id == _activePlayerNode.Value.Id;
+            var playerInterrupt = id == _interruptingPlayer?.Id;
+            var interruptInProgress = _interruptingPlayer != null;
+
+            if (!playerTurn && !playerInterrupt)
+            {
+                Debug.Log($"Player {id} cannot draw a card unless it is their turn or they are interrupting");
+                return false;
+            }
+
+            if (playerTurn && interruptInProgress)
+            {
+                Debug.Log($"Player {id} cannot draw a card while they are being interrupted");
+                return false;
+            }
+
+            if (CurrentStateId != WaitingForDrawCardStateId)
+            {
+                Debug.Log($"Player {id} cannot draw a card in the wrong state");
+                return false;
+            }
+
+            return true;
+        }
+
         protected virtual void TryDrawCard()
         {
             Debug.Log("Trying to draw card");
 
-            if (IsSelfTurn && _interruptingPlayer == null && CurrentStateId == WaitingForDrawCardStateId)
+            if (CanDrawCard(_selfId))
             {
                 DrawCardServerRpc();
             }
@@ -412,21 +437,12 @@ namespace InterruptingCards.Managers
         [ServerRpc(RequireOwnership = false)]
         protected virtual void DrawCardServerRpc(ServerRpcParams serverRpcParams = default)
         {
+            if (!CanDrawCard(serverRpcParams.Receive.SenderClientId))
+            {
+                return;
+            }
+
             Debug.Log("Drawing card");
-
-            var senderId = serverRpcParams.Receive.SenderClientId;
-
-            if (senderId != _activePlayerNode.Value.Id)
-            {
-                Debug.Log($"Player ({senderId}) tried to draw a card out of turn");
-                return;
-            }
-
-            if (CurrentStateId != WaitingForDrawCardStateId)
-            {
-                Debug.Log($"Player ({senderId}) tried to draw in the wrong state");
-                return;
-            }
 
             var card = DeckManager.DrawTop();
             _activePlayerNode.Value.Hand.Add(card);
@@ -434,11 +450,38 @@ namespace InterruptingCards.Managers
             StateTriggerClientRpc(DrawCardTriggerId);
         }
 
+        protected virtual bool CanPlayCard(ulong id)
+        {
+            var playerTurn = id == _activePlayerNode.Value.Id;
+            var playerInterrupt = id == _interruptingPlayer?.Id;
+            var interruptInProgress = _interruptingPlayer != null;
+
+            if (!playerTurn && !playerInterrupt)
+            {
+                Debug.Log($"Player {id} cannot play a card unless it is their turn or they are interrupting");
+                return false;
+            }
+
+            if (playerTurn && interruptInProgress)
+            {
+                Debug.Log($"Player {id} cannot play a card while they are being interrupted");
+                return false;
+            }
+
+            if (CurrentStateId != WaitingForPlayCardStateId)
+            {
+                Debug.Log($"Player {id} cannot play a card in the wrong state");
+                return false;
+            }
+
+            return true;
+        }
+
         protected virtual void TryPlayCard(ICard card)
         {
             Debug.Log($"Trying to play card {card}");
 
-            if (IsSelfTurn && CurrentStateId == WaitingForPlayCardStateId)
+            if (CanPlayCard(_selfId))
             {
                 PlayCardServerRpc(card.Suit, card.Rank);
             }
@@ -447,21 +490,12 @@ namespace InterruptingCards.Managers
         [ServerRpc(RequireOwnership = false)]
         protected virtual void PlayCardServerRpc(SuitEnum suit, RankEnum rank, ServerRpcParams serverRpcParams = default)
         {
+            if (!CanPlayCard(serverRpcParams.Receive.SenderClientId))
+            {
+                return;
+            }
+
             Debug.Log("Playing card");
-
-            var senderId = serverRpcParams.Receive.SenderClientId;
-
-            if (senderId != _activePlayerNode.Value.Id)
-            {
-                Debug.Log($"Player ({senderId}) tried to play a card out of turn");
-                return;
-            }
-
-            if (CurrentStateId != WaitingForPlayCardStateId)
-            {
-                Debug.Log($"Player ({senderId}) tried to play a card when they weren't allowed to");
-                return;
-            }
 
             _activePlayerNode.Value.Hand.Remove(suit, rank);
             DiscardManager.PlaceTop(CardFactory.Create(suit, rank));
@@ -469,9 +503,29 @@ namespace InterruptingCards.Managers
             StateTriggerClientRpc(PlayCardTriggerId);
         }
 
+        protected virtual bool CanInterrupt(ulong id)
+        {
+            var playerTurn = id == _activePlayerNode.Value.Id;
+            var interruptInProgress = _interruptingPlayer != null;
+
+            if (playerTurn)
+            {
+                Debug.Log($"Player {id} cannot interrupt their own turn");
+                return false;
+            }
+
+            if (interruptInProgress)
+            {
+                Debug.Log($"Player {id} cannot interrupt an interrupt");
+                return false;
+            }
+
+            return true;
+        }
+
         protected virtual void TryInterrupt(Effect effect)
         {
-            if (!IsSelfTurn && _interruptingPlayer == null)
+            if (CanInterrupt(_selfId))
             {
                 InterruptServerRpc(effect);
             }
@@ -480,19 +534,13 @@ namespace InterruptingCards.Managers
         [ServerRpc]
         protected virtual void InterruptServerRpc(Effect effect, ServerRpcParams serverRpcParams = default)
         {
-            var senderId = serverRpcParams.Receive.SenderClientId;
 
-            if (IsSelfTurn)
+            if (!CanInterrupt(serverRpcParams.Receive.SenderClientId))
             {
-                Debug.Log($"Player ({senderId}) tried to interrupt their own turn");
                 return;
             }
 
-            if (_interruptingPlayer != null)
-            {
-                Debug.Log($"Playing ({senderId}) tried to interrupt during another interrupt");
-                return;
-            }
+            Debug.Log($"Interrupting player {_activePlayerNode.Value.Id}'s turn");
 
             HandleEffect(effect);
         }
