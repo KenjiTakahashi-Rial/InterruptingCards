@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
+using InterruptingCards.Behaviours;
 using InterruptingCards.Factories;
 using InterruptingCards.Models;
-using TMPro;
 
 namespace InterruptingCards.Managers
 {
@@ -87,6 +88,7 @@ namespace InterruptingCards.Managers
 
         [SerializeField] protected Animator _gameStateMachine;
         [SerializeField] protected TextMeshPro _tempInfoText;
+        [SerializeField] protected ICardBehaviour _interruptCard;
 
         protected ulong _selfId; // The player that is on this device
 
@@ -125,7 +127,6 @@ namespace InterruptingCards.Managers
         /******************************************************************************************\
          * Public Methods                                                                         *
         \******************************************************************************************/
-
         public override void OnNetworkSpawn()
         {
             Debug.Log("Network spawned");
@@ -148,6 +149,9 @@ namespace InterruptingCards.Managers
                 handManager.OnCardClicked -= TryPlayCard;
                 handManager.OnCardClicked += TryPlayCard;
             }
+
+            _interruptCard.OnClicked -= TryInterruptPlayCard;
+            _interruptCard.OnClicked += TryInterruptPlayCard;
         }
 
         public override void OnNetworkDespawn()
@@ -529,6 +533,12 @@ namespace InterruptingCards.Managers
             {
                 InterruptServerRpc(effect);
             }
+        }
+
+        // TODO: Temporary
+        protected virtual void TryInterruptPlayCard()
+        {
+            TryInterrupt(Effect.PlayCard);
         }
 
         [ServerRpc]
