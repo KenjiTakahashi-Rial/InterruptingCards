@@ -8,7 +8,7 @@ namespace InterruptingCards.Behaviours
 {
     public class EndTurnStateBehaviour : StateMachineBehaviour
     {
-        private readonly Lazy<IGameManager> _gameManager = new(() => AbstractGameManager.Singleton);
+        private readonly Lazy<IGameManager> _gameManager = new(() => BasicGameManager.Singleton);
 
         override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {

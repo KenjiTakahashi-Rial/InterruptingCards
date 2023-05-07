@@ -6,7 +6,7 @@ namespace InterruptingCards.Models
 {
     public interface ICard : INetworkSerializable, IEquatable<ICard>, ICloneable
     {
-        SuitEnum Suit { get; set; }
-        RankEnum Rank { get; set; }
+        SuitEnum Suit { get; }
+        RankEnum Rank { get; }
     }
 }

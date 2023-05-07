@@ -46,14 +46,14 @@ namespace InterruptingCards.Tests
         [Test]
         public void TestEmpty()
         {
-            var hand = new PlayingCardHand(new List<ICard>());
+            var hand = new BasicHand(new List<ICard>());
             Assert.AreEqual(0, hand.Count, "Empty hand should have count 0");
         }
 
         [Test]
         public void TestAdd()
         {
-            var hand = new PlayingCardHand(new List<ICard>());
+            var hand = new BasicHand(new List<ICard>());
 
             for (var i = 0; i < _cards.Count; i++)
             {
@@ -65,7 +65,7 @@ namespace InterruptingCards.Tests
         [Test]
         public void TestRemove()
         {
-            var hand = new PlayingCardHand(_cards);
+            var hand = new BasicHand(_cards);
 
             for (var i = _cards.Count - 1; i >= 0; i--)
             {
@@ -79,7 +79,7 @@ namespace InterruptingCards.Tests
         [Test]
         public void TestClone()
         {
-            var hand = new PlayingCardHand(_cards);
+            var hand = new BasicHand(_cards);
             var clone = _handFactory.Clone(hand);
 
             for (var i = 0; i < hand.Count; i++)

@@ -27,11 +27,11 @@ namespace InterruptingCards.Tests
 
         private NetworkManager _hostNetworkManager;
         private NetworkManager _clientNetworkManager;
-        private PlayingCardGameManager _gameManager;
-        private PlayingCardDeckManager _deckManager;
-        private PlayingCardDeckManager _discardManager;
-        private PlayingCardHandManager _handManagerTop;
-        private PlayingCardHandManager _handManagerBottom;
+        private BasicGameManager _gameManager;
+        private BasicDeckManager _deckManager;
+        private BasicDeckManager _discardManager;
+        private BasicHandManager _handManagerTop;
+        private BasicHandManager _handManagerBottom;
 
         [SetUp]
         public void SetUp()
@@ -48,19 +48,19 @@ namespace InterruptingCards.Tests
 
             _hostNetworkManager = _hostNetworkManagerObj.GetComponent<NetworkManager>();
             _clientNetworkManager = _clientNetworkManagerObj.GetComponent<NetworkManager>();
-            _gameManager = _gameManagerObj.GetComponent<PlayingCardGameManager>();
-            _deckManager = _deckManagerObj.GetComponent<PlayingCardDeckManager>();
-            _discardManager = _discardManagerObj.GetComponent<PlayingCardDeckManager>();
-            _handManagerTop = _handManagerTopObj.GetComponent<PlayingCardHandManager>();
-            _handManagerBottom = _handManagerBottomObj.GetComponent<PlayingCardHandManager>();
+            _gameManager = _gameManagerObj.GetComponent<BasicGameManager>();
+            _deckManager = _deckManagerObj.GetComponent<BasicDeckManager>();
+            _discardManager = _discardManagerObj.GetComponent<BasicDeckManager>();
+            _handManagerTop = _handManagerTopObj.GetComponent<BasicHandManager>();
+            _handManagerBottom = _handManagerBottomObj.GetComponent<BasicHandManager>();
 
-            var deckFieldInfo = typeof(PlayingCardGameManager).GetField("_deckManager", _bindingFlags);
-            var discardFieldInfo = typeof(PlayingCardGameManager).GetField("_discardManager", _bindingFlags);
-            var handsFieldInfo = typeof(PlayingCardGameManager).GetField("_handManagers", _bindingFlags);
+            var deckFieldInfo = typeof(BasicGameManager).GetField("_deckManager", _bindingFlags);
+            var discardFieldInfo = typeof(BasicGameManager).GetField("_discardManager", _bindingFlags);
+            var handsFieldInfo = typeof(BasicGameManager).GetField("_handManagers", _bindingFlags);
 
             deckFieldInfo.SetValue(_gameManager, _deckManager);
             discardFieldInfo.SetValue(_gameManager, _discardManager);
-            handsFieldInfo.SetValue(_gameManager, new PlayingCardHandManager[] {_handManagerTop, _handManagerBottom});
+            handsFieldInfo.SetValue(_gameManager, new BasicHandManager[] {_handManagerTop, _handManagerBottom});
         }
 
         [TearDown]
