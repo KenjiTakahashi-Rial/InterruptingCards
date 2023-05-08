@@ -17,6 +17,8 @@ namespace InterruptingCards.Behaviours
         [SerializeField] protected TextMeshPro _cardText;
         [SerializeField] protected SpriteRenderer _cardSprite;
 
+        protected bool _offlineIsFaceUp;
+        protected BasicCard _offlineCard;
         protected Vector3 _originalScale;
 
         public event Action OnClicked;
@@ -25,24 +27,32 @@ namespace InterruptingCards.Behaviours
 
         public virtual bool IsFaceUp
         {
-            get => _isFaceUp.Value;
+            get => NetworkManager?.IsListening ?? false ? _isFaceUp.Value : _offlineIsFaceUp;
             set
             {
-                _isFaceUp.Value = value;
+                if (NetworkManager?.IsListening ?? false)
+                {
+                    _isFaceUp.Value = value;
+                }
+
+                _offlineIsFaceUp = value;
                 Refresh();
             }
         }
 
         public virtual ICard Card
         {
-            get => _card.Value;
+            get => NetworkManager?.IsListening ?? false ? _card.Value : _offlineCard;
             set
             {
-                if (NetworkManager.IsListening)
+                var val = (BasicCard)value;
+
+                if (NetworkManager?.IsListening ?? false)
                 {
-                    _card.Value = (BasicCard)value;
+                    _card.Value = val;
                 }
 
+                _offlineCard = val;
                 Refresh();
             }
         }
@@ -98,7 +108,7 @@ namespace InterruptingCards.Behaviours
 
         protected virtual void Refresh()
         {
-            if (_card.Value == null)
+            if (Card == null)
             {
                 _cardSprite.enabled = false;
                 _cardText.enabled = false;
@@ -110,7 +120,7 @@ namespace InterruptingCards.Behaviours
             }
             else
             {
-                _cardText.SetText(_card.Value.ToString()); // TODO: Change
+                _cardText.SetText(Card.ToString()); // TODO: Change
                 _cardSprite.enabled = true;
                 _cardText.enabled = true;
             }
