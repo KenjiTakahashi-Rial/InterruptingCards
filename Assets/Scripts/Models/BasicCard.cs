@@ -32,7 +32,7 @@ namespace InterruptingCards.Models
             return other != null && _suit == other.Suit && _rank == other.Rank;
         }
 
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        public virtual void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
             serializer.SerializeValue(ref _suit);
             serializer.SerializeValue(ref _rank);

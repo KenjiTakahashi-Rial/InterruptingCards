@@ -12,7 +12,7 @@ namespace InterruptingCards.Behaviours
     public class BasicCardBehaviour : NetworkBehaviour, ICardBehaviour
     {
         protected readonly NetworkVariable<bool> _isFaceUp = new(true);
-        protected readonly NetworkVariable<ICard> _card = new(null);
+        protected readonly NetworkVariable<BasicCard> _card = new(null);
 
         [SerializeField] protected TextMeshPro _cardText;
         [SerializeField] protected SpriteRenderer _cardSprite;
@@ -38,7 +38,11 @@ namespace InterruptingCards.Behaviours
             get => _card.Value;
             set
             {
-                _card.Value = value;
+                if (NetworkManager.IsListening)
+                {
+                    _card.Value = (BasicCard)value;
+                }
+
                 Refresh();
             }
         }
