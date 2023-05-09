@@ -27,10 +27,10 @@ namespace InterruptingCards.Behaviours
 
         public virtual bool IsFaceUp
         {
-            get => NetworkManager?.IsListening ?? false ? _isFaceUp.Value : _offlineIsFaceUp;
+            get => NetworkManager != null && NetworkManager.IsListening ? _isFaceUp.Value : _offlineIsFaceUp;
             set
             {
-                if (NetworkManager?.IsListening ?? false)
+                if (NetworkManager != null && NetworkManager.IsListening)
                 {
                     _isFaceUp.Value = value;
                 }
@@ -42,12 +42,12 @@ namespace InterruptingCards.Behaviours
 
         public virtual ICard Card
         {
-            get => NetworkManager?.IsListening ?? false ? _card.Value : _offlineCard;
+            get => NetworkManager != null && NetworkManager.IsListening ? _card.Value : _offlineCard;
             set
             {
                 var val = (BasicCard)value;
 
-                if (NetworkManager?.IsListening ?? false)
+                if (NetworkManager != null && NetworkManager.IsListening)
                 {
                     _card.Value = val;
                 }

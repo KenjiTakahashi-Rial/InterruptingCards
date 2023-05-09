@@ -60,7 +60,7 @@ namespace InterruptingCards.Behaviours
             _activatedRotation = transform.rotation;
             transform.rotation = _originalRotation;
 
-            //Card = _startingCard;
+            Card = _startingCard;
         }
 
         protected override void Refresh()

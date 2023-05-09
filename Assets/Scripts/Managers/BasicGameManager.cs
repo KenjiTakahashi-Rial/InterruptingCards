@@ -171,6 +171,11 @@ namespace InterruptingCards.Managers
             {
                 handManager.OnCardClicked -= TryPlayCard;
             }
+
+            if (CurrentStateId != WaitingForClientsStateId)
+            {
+                _gameStateMachine.SetTrigger(ForceEndGameTriggerId);
+            }
         }
 
         public virtual void StartGame()
@@ -297,7 +302,7 @@ namespace InterruptingCards.Managers
             var i = 0;
             foreach (var player in _players)
             {
-                _handManagers[i].Hand = HandFactory.Create(new List<ICard>());
+                _handManagers[i].Clear();
                 player.Hand = _handManagers[i++];
             }
         }

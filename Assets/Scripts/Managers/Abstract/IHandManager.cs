@@ -8,6 +8,6 @@ namespace InterruptingCards.Managers
     {
         event Action<ICard> OnCardClicked;
 
-        IHand Hand { get; set; }
+        IHand Hand { get; }
     }
 }

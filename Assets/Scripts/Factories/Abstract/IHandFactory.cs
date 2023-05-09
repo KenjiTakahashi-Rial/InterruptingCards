@@ -8,7 +8,7 @@ namespace InterruptingCards.Factories
     {
         public static IHandFactory Singleton { get; }
 
-        public IHand Create(IList<ICard> cards);
+        public IHand Create(IList<ICard> cards = null);
 
         public IHand Clone(IHand original);
     }

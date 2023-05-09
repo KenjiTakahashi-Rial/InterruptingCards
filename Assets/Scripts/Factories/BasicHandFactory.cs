@@ -10,9 +10,9 @@ namespace InterruptingCards.Factories
     {
         public static IHandFactory Singleton { get; private set; }
 
-        public IHand Create(IList<ICard> cards)
+        public IHand Create(IList<ICard> cards = null)
         {
-            return new BasicHand(cards);
+            return new BasicHand(cards ?? new List<ICard>());
         }
 
         public IHand Clone(IHand original)

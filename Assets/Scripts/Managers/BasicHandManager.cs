@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using InterruptingCards.Behaviours;
+using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
@@ -14,9 +15,9 @@ namespace InterruptingCards.Managers
 
         public event Action<ICard> OnCardClicked;
 
-        public virtual IHand Hand { get; set; }
+        public virtual IHand Hand { get; private set; }
 
-        public virtual int Count => Hand == null ? 0 : Hand.Count;
+        public virtual int Count => Hand.Count;
 
         public virtual void Add(ICard card)
         {
@@ -63,6 +64,8 @@ namespace InterruptingCards.Managers
 
         protected virtual void OnEnable()
         {
+            Hand = BasicHandFactory.Singleton.Create();
+
             for (var i = 0; i < _cardSlots.Count; i++)
             {
                 var j = i;
