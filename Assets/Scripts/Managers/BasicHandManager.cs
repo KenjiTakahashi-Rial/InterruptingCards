@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using InterruptingCards.Behaviours;
+using InterruptingCards.Config;
 using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
@@ -32,7 +33,7 @@ namespace InterruptingCards.Managers
             SetSlotCard(Count - 1);
         }
 
-        public virtual ICard Remove(SuitEnum suit, RankEnum rank)
+        public virtual ICard Remove(CardSuit suit, CardRank rank)
         {
             Debug.Log($"Removing {rank} | {suit} from hand");
 

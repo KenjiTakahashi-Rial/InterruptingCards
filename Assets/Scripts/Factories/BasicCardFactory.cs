@@ -1,5 +1,6 @@
 using UnityEngine;
 
+using InterruptingCards.Config;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Factories
@@ -8,7 +9,7 @@ namespace InterruptingCards.Factories
     {
         public static ICardFactory Singleton { get; private set; }
 
-        public ICard Create(SuitEnum suit, RankEnum rank)
+        public ICard Create(CardSuit suit, CardRank rank)
         {
             return new BasicCard(suit, rank);
         }

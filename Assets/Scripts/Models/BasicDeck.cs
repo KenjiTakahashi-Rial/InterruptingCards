@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+using InterruptingCards.Config;
 using InterruptingCards.Factories;
 
 namespace InterruptingCards.Models
@@ -71,7 +72,7 @@ namespace InterruptingCards.Models
             return PopAt(BottomIndex);
         }
 
-        public virtual ICard Remove(SuitEnum suit, RankEnum rank)
+        public virtual ICard Remove(CardSuit suit, CardRank rank)
         {
             return Utilities.Remove(_cards, suit, rank);
         }

@@ -1,5 +1,7 @@
 using System;
 
+using InterruptingCards.Config;
+
 namespace InterruptingCards.Models
 {
     public interface IDeck : ICloneable
@@ -20,6 +22,6 @@ namespace InterruptingCards.Models
 
         ICard DrawBottom();
 
-        ICard Remove(SuitEnum suit, RankEnum rank);
+        ICard Remove(CardSuit suit, CardRank rank);
     }
 }

@@ -5,7 +5,7 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
-using InterruptingCards.Behaviours;
+using InterruptingCards.Config;
 using InterruptingCards.Factories;
 using InterruptingCards.Models;
 using System;
@@ -504,7 +504,7 @@ namespace InterruptingCards.Managers
         }
 
         [ServerRpc(RequireOwnership = false)]
-        protected virtual void PlayCardServerRpc(SuitEnum suit, RankEnum rank, ServerRpcParams serverRpcParams = default)
+        protected virtual void PlayCardServerRpc(CardSuit suit, CardRank rank, ServerRpcParams serverRpcParams = default)
         {
             if (!CanPlayCard(serverRpcParams.Receive.SenderClientId))
             {

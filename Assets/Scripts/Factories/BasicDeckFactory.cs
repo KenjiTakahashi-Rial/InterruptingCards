@@ -4,22 +4,23 @@ using System.Linq;
 
 using UnityEngine;
 
+using InterruptingCards.Config;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Factories
 {
     public class BasicDeckFactory : MonoBehaviour, IDeckFactory
     {
-        private static readonly ICollection<SuitEnum> Suits =
-            Enum.GetValues(typeof(SuitEnum))
-                .Cast<SuitEnum>()
-                .Where(e => e >= SuitEnum.Clubs && e <= SuitEnum.Spades)
+        private static readonly ICollection<CardSuit> Suits =
+            Enum.GetValues(typeof(CardSuit))
+                .Cast<CardSuit>()
+                .Where(e => e >= CardSuit.Clubs && e <= CardSuit.Spades)
                 .ToList();
 
-        private static readonly ICollection<RankEnum> Ranks =
-            Enum.GetValues(typeof(RankEnum))
-                .Cast<RankEnum>()
-                .Where(e => e >= RankEnum.Ace && e <= RankEnum.King)
+        private static readonly ICollection<CardRank> Ranks =
+            Enum.GetValues(typeof(CardRank))
+                .Cast<CardRank>()
+                .Where(e => e >= CardRank.Ace && e <= CardRank.King)
                 .ToList();
 
         protected IDeck _prototype;

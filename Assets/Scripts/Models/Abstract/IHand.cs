@@ -1,5 +1,7 @@
 using System;
 
+using InterruptingCards.Config;
+
 namespace InterruptingCards.Models
 {
     public interface IHand : ICloneable
@@ -8,7 +10,7 @@ namespace InterruptingCards.Models
 
         void Add(ICard card);
 
-        ICard Remove(SuitEnum suit, RankEnum rank);
+        ICard Remove(CardSuit suit, CardRank rank);
 
         ICard Get(int i);
 

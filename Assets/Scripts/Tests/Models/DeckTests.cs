@@ -6,6 +6,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
+using InterruptingCards.Config;
 using InterruptingCards.Models;
 using InterruptingCards.Factories;
 
@@ -15,10 +16,10 @@ namespace InterruptingCards.Tests
     public class DeckTests
     {
         private const int DefaultCardCount = 10;
-        private const int SuitStart = (int)SuitEnum.Clubs;
-        private const int SuitEnd = (int)SuitEnum.Spades;
-        private const int RankStart = (int)RankEnum.Ace;
-        private const int RankEnd = (int)RankEnum.King;
+        private const int SuitStart = (int)CardSuit.Clubs;
+        private const int SuitEnd = (int)CardSuit.Spades;
+        private const int RankStart = (int)CardRank.Ace;
+        private const int RankEnd = (int)CardRank.King;
 
         private readonly System.Random _random = new();
 
@@ -39,7 +40,7 @@ namespace InterruptingCards.Tests
         {
             _cards = Enumerable.Range(1, DefaultCardCount).Select(
                 _ => _cardFactory.Create(
-                    (SuitEnum)_random.Next(SuitStart, SuitEnd), (RankEnum)_random.Next(RankStart, RankEnd)
+                    (CardSuit)_random.Next(SuitStart, SuitEnd), (CardRank)_random.Next(RankStart, RankEnd)
                 )
             ).ToList();
         }

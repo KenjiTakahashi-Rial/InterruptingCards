@@ -2,30 +2,27 @@ using System;
 
 using Unity.Netcode;
 
+using InterruptingCards.Config;
+
 namespace InterruptingCards.Models
 {
     public class BasicCard : ICard
     {
-        protected SuitEnum _suit;
-        protected RankEnum _rank;
+        protected CardSuit _suit;
+        protected CardRank _rank;
 
         // The empty constructor is necessary for network serialization
         public BasicCard() { }
 
-        public BasicCard(SuitEnum suit, RankEnum rank)
+        public BasicCard(CardSuit suit, CardRank rank)
         {
             _suit = suit;
             _rank = rank;
         }
 
-// The inner fields are necessary for network serialization
-#pragma warning disable S2292 // Trivial properties should be auto-implemented
-        public virtual SuitEnum Suit => _suit;
+        public virtual CardSuit Suit => _suit;
 
-        public virtual RankEnum Rank => _rank;
-#pragma warning restore S2292 // Trivial properties should be auto-implemented
-
-
+        public virtual CardRank Rank => _rank;
 
         public virtual bool Equals(ICard other)
         {
@@ -45,7 +42,7 @@ namespace InterruptingCards.Models
 
         public override string ToString()
         {
-            return $"{Enum.GetName(typeof(RankEnum), _rank)} | {Enum.GetName(typeof(SuitEnum), _suit)}";
+            return $"{Enum.GetName(typeof(CardRank), _rank)} | {Enum.GetName(typeof(CardSuit), _suit)}";
         }
     }
 }

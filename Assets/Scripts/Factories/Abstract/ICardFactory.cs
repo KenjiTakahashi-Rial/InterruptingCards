@@ -1,3 +1,4 @@
+using InterruptingCards.Config;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Factories
@@ -6,7 +7,7 @@ namespace InterruptingCards.Factories
     {
         public static ICardFactory Singleton { get; }
 
-        public ICard Create(SuitEnum suit, RankEnum rank);
+        public ICard Create(CardSuit suit, CardRank rank);
 
         public ICard Clone(ICard original);
     }

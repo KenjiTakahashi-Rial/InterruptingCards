@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using InterruptingCards.Behaviours;
+using InterruptingCards.Config;
 using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
@@ -76,7 +77,7 @@ namespace InterruptingCards.Managers
             return card;
         }
 
-        public virtual ICard Remove(SuitEnum suit, RankEnum rank)
+        public virtual ICard Remove(CardSuit suit, CardRank rank)
         {
             var card = _deck.Remove(suit, rank);
             SetTopCard();

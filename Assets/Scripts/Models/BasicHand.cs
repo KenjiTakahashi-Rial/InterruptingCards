@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 
+using InterruptingCards.Config;
+
 namespace InterruptingCards.Models
 {
     public class BasicHand : IHand
@@ -23,7 +25,7 @@ namespace InterruptingCards.Models
             _cards.Add(card);
         }
 
-        public virtual ICard Remove(SuitEnum suit, RankEnum rank)
+        public virtual ICard Remove(CardSuit suit, CardRank rank)
         {
             return Utilities.Remove(_cards, suit, rank);
         }

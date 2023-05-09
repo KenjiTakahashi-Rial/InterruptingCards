@@ -1,8 +1,6 @@
-namespace InterruptingCards.Models
+namespace InterruptingCards.Config
 {
-// The "Enum" suffix differentiates from the Suit and Enum properties of ICard
-#pragma warning disable S2344 // Enumeration type names should not have "Flags" or "Enum" suffixes
-    public enum SuitEnum
+    public enum CardSuit
     {
         Invalid,
         Clubs,
@@ -11,8 +9,7 @@ namespace InterruptingCards.Models
         Spades,
     }
 
-    public enum RankEnum
-#pragma warning restore S2344 // Enumeration type names should not have "Flags" or "Enum" suffixes
+    public enum CardRank
     {
         Invalid,
         Ace,
