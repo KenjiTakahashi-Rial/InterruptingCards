@@ -3,6 +3,7 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
+using InterruptingCards.Config;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
@@ -14,7 +15,7 @@ namespace InterruptingCards.Behaviours
         private readonly NetworkVariable<ActiveEffect> _effect = new(ActiveEffect.Invalid);
         private readonly NetworkVariable<bool> _isActivated = new(true);
 
-        [SerializeField] private BasicCard _startingCard;
+        [SerializeField] private ActiveEffect _startingEffect;
 
         private Quaternion _originalRotation;
         private Quaternion _activatedRotation;
@@ -35,14 +36,12 @@ namespace InterruptingCards.Behaviours
             }
         }
 
-        public override ICard Card
+        public new ICard Card
         {
             get => base.Card;
             set
             {
-                var asActive = value as IActiveEffect;
-
-                if (asActive != null)
+                if (value is not IActiveEffect)
                 {
                     throw new ArgumentException("Must use a card with an active effect");
                 }
@@ -59,8 +58,6 @@ namespace InterruptingCards.Behaviours
             transform.Rotate(Vector3.up, ActivateAngle);
             _activatedRotation = transform.rotation;
             transform.rotation = _originalRotation;
-
-            Card = _startingCard;
         }
 
         protected override void Refresh()
