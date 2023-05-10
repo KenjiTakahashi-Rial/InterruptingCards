@@ -3,28 +3,18 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
-using InterruptingCards.Config;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
 {
-    public class ActiveCardBehaviour : BasicCardBehaviour, IActiveEffect
+    public class ActiveCardBehaviour : BasicCardBehaviour, IActiveCardBehaviour
     {
-        private const float ActivateAngle = 90;
+        private const float ActivatedAngle = 90;
 
-        private readonly NetworkVariable<ActiveEffect> _effect = new(ActiveEffect.Invalid);
         private readonly NetworkVariable<bool> _isActivated = new(true);
-
-        [SerializeField] private ActiveEffect _startingEffect;
 
         private Quaternion _originalRotation;
         private Quaternion _activatedRotation;
-
-        public ActiveEffect Effect
-        {
-            get => _effect.Value;
-            set => _effect.Value = value;
-        }
 
         public bool IsActivated
         {
@@ -55,7 +45,7 @@ namespace InterruptingCards.Behaviours
             base.Awake();
 
             _originalRotation = transform.rotation;
-            transform.Rotate(Vector3.up, ActivateAngle);
+            transform.Rotate(Vector3.up, ActivatedAngle);
             _activatedRotation = transform.rotation;
             transform.rotation = _originalRotation;
         }

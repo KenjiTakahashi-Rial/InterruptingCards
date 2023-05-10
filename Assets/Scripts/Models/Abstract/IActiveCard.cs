@@ -1,8 +1,9 @@
+
 using InterruptingCards.Config;
 
 namespace InterruptingCards.Models
 {
-    public interface IActiveEffect
+    public interface IActiveCard : ICard
     {
         ActiveEffect Effect { get; }
     }
