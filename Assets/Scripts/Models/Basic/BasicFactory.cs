@@ -1,9 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
 using InterruptingCards.Config;
-using System;
 
 namespace InterruptingCards.Models
 {
@@ -12,7 +12,6 @@ namespace InterruptingCards.Models
         [SerializeField] private CardPack _cardPack;
 
         private ImmutableDictionary<int, BasicCard> _cards;
-        private ImmutableDictionary<int, PackCard> _packCards;
 
         public static IFactory Singleton { get; private set; }
 
@@ -44,7 +43,7 @@ namespace InterruptingCards.Models
             
             foreach ((var id, var card) in _cards)
             {
-                for (var i = 0; i < _packCards[id].Count; i++)
+                for (var i = 0; i < CardConfig.GetMetadataCard(id).Count; i++)
                 {
                     cards.Add(card);
                 }
@@ -60,22 +59,9 @@ namespace InterruptingCards.Models
 
         private void Awake()
         {
-            var cards = new Dictionary<int, BasicCard>();
-            var packCards = new Dictionary<int, PackCard>();
-            var pack = CardConfig.GetPack(_cardPack);
-
-            foreach (var packCard in pack)
-            {
-                var suit = (CardSuit)Enum.Parse(typeof(CardSuit), packCard.Suit);
-                var rank = (CardRank)Enum.Parse(typeof(CardRank), packCard.Rank);
-                var id = CardConfig.CardId(suit, rank);
-
-                cards[id] = new BasicCard(id, suit, rank, packCard.Name);
-                packCards[id] = packCard;
-            }
-
+            var packMetadata = CardConfig.GetPackMetadata(_cardPack);
+            var cards = packMetadata.ToDictionary(c => c.Id, c => new BasicCard(c));
             _cards = new ImmutableDictionary<int, BasicCard>(cards);
-            _packCards = new ImmutableDictionary<int, PackCard>(packCards);
 
             Singleton = this;
         }

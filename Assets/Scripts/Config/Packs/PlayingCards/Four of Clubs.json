@@ -1,6 +1,6 @@
 {
-    "Suit": "Clubs",
-    "Rank": "Four",
-    "Name": "Four of Clubs",
-    "Count": 1
+    "_suitName": "Clubs",
+    "_rankName": "Four",
+    "_name": "Four of Clubs",
+    "_count": 1
 }

@@ -4,6 +4,7 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
+using InterruptingCards.Config;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
@@ -11,13 +12,13 @@ namespace InterruptingCards.Behaviours
     public class BasicCardBehaviour : NetworkBehaviour, ICardBehaviour
     {
         protected readonly NetworkVariable<bool> _isFaceUp = new(true);
-        protected readonly NetworkVariable<int> _cardId = new();
+        protected readonly NetworkVariable<int> _cardId = new(CardConfig.InvalidId);
 
         [SerializeField] protected TextMeshPro _cardText;
         [SerializeField] protected SpriteRenderer _cardSprite;
 
         protected bool _offlineIsFaceUp;
-        protected BasicCard _offlineCard;
+        protected ICard _card;
         protected Vector3 _originalScale;
 
         public event Action OnClicked;
@@ -41,25 +42,26 @@ namespace InterruptingCards.Behaviours
 
         public virtual ICard Card
         {
-            get => NetworkManager != null && NetworkManager.IsListening ? _cardId.Value : _offlineCard;
+            get => _card;
             set
             {
-                var val = (BasicCard)value;
+                _card = value;
 
                 if (NetworkManager != null && NetworkManager.IsListening)
                 {
-                    _cardId.Value = val;
+                    _cardId.Value = value == null ? CardConfig.InvalidId : value.Id;
                 }
 
-                _offlineCard = val;
                 Refresh();
             }
         }
 
+        public IFactory Factory => BasicFactory.Singleton;
+
         public override void OnNetworkSpawn()
         {
-            _cardId.OnValueChanged -= HandleCardChanged;
-            _cardId.OnValueChanged += HandleCardChanged;
+            _cardId.OnValueChanged -= HandleCardIdChanged;
+            _cardId.OnValueChanged += HandleCardIdChanged;
 
             _isFaceUp.OnValueChanged -= HandleFaceUpChanged;
             _isFaceUp.OnValueChanged += HandleFaceUpChanged;
@@ -67,20 +69,20 @@ namespace InterruptingCards.Behaviours
 
         public override void OnNetworkDespawn()
         {
-            _cardId.OnValueChanged -= HandleCardChanged;
+            _cardId.OnValueChanged -= HandleCardIdChanged;
             _isFaceUp.OnValueChanged -= HandleFaceUpChanged;
         }
 
-        protected void HandleCardChanged(ICard oldValue, ICard newValue)
+        protected void HandleCardIdChanged(int oldValue, int newValue)
         {
-            var before = oldValue == null ? "null" : oldValue.ToString();
-            var after = newValue == null ? "null" : newValue.ToString();
-            Debug.Log($"Card changed ({before} -> {after})");
+            Debug.Log($"Card changed ({oldValue} -> {newValue})");
 
             if (OnValueChanged == null)
             {
                 Debug.Log("Card OnValueChanged has no subscribers");
             }
+
+            _card = newValue == CardConfig.InvalidId ? null : Factory.CreateCard(newValue);
 
             OnValueChanged?.Invoke();
             Refresh();

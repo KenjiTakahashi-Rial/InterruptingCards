@@ -1,6 +1,6 @@
 {
-    "Suit": "Diamonds",
-    "Rank": "Nine",
-    "Name": "Nine of Diamonds",
-    "Count": 1
+    "_suitName": "Diamonds",
+    "_rankName": "Nine",
+    "_name": "Nine of Diamonds",
+    "_count": 1
 }

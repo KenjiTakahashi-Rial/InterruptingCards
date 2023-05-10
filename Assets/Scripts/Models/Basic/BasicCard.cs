@@ -4,21 +4,21 @@ namespace InterruptingCards.Models
 {
     public class BasicCard : ICard
     {
-        internal BasicCard(int id, CardSuit suit, CardRank rank, string name)
+        public BasicCard(MetadataCard metadataCard)
         {
-            Id = id;
-            Suit = suit;
-            Rank = rank;
-            Name = name;
+            Id = metadataCard.Id;
+            Suit = metadataCard.Suit;
+            Rank = metadataCard.Rank;
+            Name = metadataCard.Name;
         }
 
-        public virtual int Id { get; }
+        public virtual int Id { get; private set; }
 
-        public virtual CardSuit Suit { get; }
+        public virtual CardSuit Suit { get; private set; }
 
-        public virtual CardRank Rank { get; }
+        public virtual CardRank Rank { get; private set; }
 
-        public virtual string Name { get; }
+        public virtual string Name { get; private set; }
 
         public virtual bool Equals(ICard other)
         {

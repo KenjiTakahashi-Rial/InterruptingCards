@@ -1,17 +1,57 @@
+using System;
+
+using UnityEngine;
+
+using InterruptingCards.Config;
+
 namespace InterruptingCards.Models
 {
-    [System.Serializable]
-    public class PackCard
+    [Serializable]
+    public class MetadataCard
     {
-// Must be public for JSON deserialization
-#pragma warning disable S1104 // Fields should not have public accessibility
-        public string Suit;
+        [SerializeField] private string _suitName;
 
-        public string Rank;
+        [SerializeField] private string _rankName;
 
-        public string Name;
+        [SerializeField] private string _name;
 
-        public int Count;
-#pragma warning restore S1104 // Fields should not have public accessibility
+        [SerializeField] private int _count;
+
+        private Lazy<int> _id;
+
+        private Lazy<CardSuit> _suit;
+
+        private Lazy<CardRank> _rank;
+
+        public int Id
+        {
+            get
+            {
+                _id ??= new(() => CardConfig.GetCardId(Suit, Rank));
+                return _id.Value;
+            }
+        }
+
+        public CardSuit Suit
+        {
+            get
+            {
+                _suit ??= new(() => (CardSuit)Enum.Parse(typeof(CardSuit), _suitName));
+                return _suit.Value;
+            }
+        }
+
+        public CardRank Rank
+        {
+            get
+            {
+                _rank ??= new(() => (CardRank)Enum.Parse(typeof(CardRank), _rankName));
+                return _rank.Value;
+            }
+        }
+
+        public string Name => _name;
+
+        public int Count => _count;
     }
 }
