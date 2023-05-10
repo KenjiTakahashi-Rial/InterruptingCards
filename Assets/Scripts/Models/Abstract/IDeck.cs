@@ -22,6 +22,6 @@ namespace InterruptingCards.Models
 
         ICard DrawBottom();
 
-        ICard Remove(CardSuit suit, CardRank rank);
+        ICard Remove(int cardId);
     }
 }

@@ -10,7 +10,7 @@ namespace InterruptingCards.Models
 
         void Add(ICard card);
 
-        ICard Remove(CardSuit suit, CardRank rank);
+        ICard Remove(int cardId);
 
         ICard Get(int i);
 

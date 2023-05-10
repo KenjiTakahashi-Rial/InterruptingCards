@@ -5,7 +5,6 @@ using UnityEngine;
 
 using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
-using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
@@ -18,9 +17,7 @@ namespace InterruptingCards.Managers
 
         public event Action OnDeckClicked;
 
-        protected virtual ICardFactory CardFactory => BasicCardFactory.Singleton;
-
-        protected virtual IDeckFactory DeckFactory => BasicDeckFactory.Singleton;
+        protected virtual IFactory Factory => BasicFactory.Singleton;
         
         public virtual bool IsFaceUp
         {
@@ -77,22 +74,22 @@ namespace InterruptingCards.Managers
             return card;
         }
 
-        public virtual ICard Remove(CardSuit suit, CardRank rank)
+        public virtual ICard Remove(int cardId)
         {
-            var card = _deck.Remove(suit, rank);
+            var card = _deck.Remove(cardId);
             SetTopCard();
             return card;
         }
 
         public virtual void Initialize()
         {
-            _deck = DeckFactory.Prototype;
+            _deck = Factory.CreateFullDeck();
             SetTopCard();
         }
 
         public virtual void Clear()
         {
-            _deck = DeckFactory.Create(new List<ICard>());
+            _deck = Factory.CreateDeck();
             SetTopCard();
         }
 

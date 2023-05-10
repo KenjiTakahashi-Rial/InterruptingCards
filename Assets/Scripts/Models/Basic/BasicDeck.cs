@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using InterruptingCards.Config;
-using InterruptingCards.Factories;
-
 namespace InterruptingCards.Models
 {
     public class BasicDeck : IDeck
@@ -13,7 +10,7 @@ namespace InterruptingCards.Models
 
         public virtual int Count => _cards.Count;
 
-        protected virtual ICardFactory CardFactory => BasicCardFactory.Singleton;
+        protected virtual IFactory Factory => BasicFactory.Singleton;
 
         protected virtual int TopIndex { get => _cards.Count - 1;}
 
@@ -59,7 +56,7 @@ namespace InterruptingCards.Models
         public virtual ICard PeekTop()
         {
             CheckEmpty();
-            return CardFactory.Clone(_cards[TopIndex]);
+            return Factory.CreateCard(_cards[TopIndex].Id);
         }
 
         public virtual ICard DrawTop()
@@ -72,9 +69,9 @@ namespace InterruptingCards.Models
             return PopAt(BottomIndex);
         }
 
-        public virtual ICard Remove(CardSuit suit, CardRank rank)
+        public virtual ICard Remove(int cardId)
         {
-            return Utilities.Remove(_cards, suit, rank);
+            return Utilities.Remove(_cards, cardId);
         }
 
         protected virtual void CheckEmpty()

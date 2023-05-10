@@ -5,14 +5,8 @@ namespace InterruptingCards.Models
     [System.Serializable]
     public class BasicCard : ICard
     {
-        // This should never be called directly. Use a card factory instead
-        public BasicCard(string name, CardSuit suit, CardRank rank)
-        {
-            Name = name;
-            Suit = suit;
-            Rank = rank;
-        }
-
+        public virtual int Id => CardConfig.CardId(this);
+        
         public virtual string Name { get; }
 
         public virtual CardSuit Suit { get; }
@@ -21,7 +15,7 @@ namespace InterruptingCards.Models
 
         public virtual bool Equals(ICard other)
         {
-            return CardConfig.CardId(this) == CardConfig.CardId(other);
+            return Id == other.Id;
         }
 
         public override string ToString()

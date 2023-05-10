@@ -1,5 +1,11 @@
 namespace InterruptingCards.Config
 {
+    public enum CardPack
+    {
+        Invalid,
+        PlayingCards,
+    }
+
     public enum CardSuit
     {
         Invalid,

@@ -6,7 +6,6 @@ using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
-using InterruptingCards.Factories;
 using InterruptingCards.Models;
 using System;
 
@@ -107,11 +106,7 @@ namespace InterruptingCards.Managers
             get => _stateMachineIdNameMap.GetValueOrDefault(CurrentStateId, "UnknownState");
         }
 
-        protected virtual IPlayerFactory PlayerFactory => BasicPlayerFactory.Singleton;
-
-        protected virtual ICardFactory CardFactory => BasicCardFactory.Singleton;
-
-        protected virtual IHandFactory HandFactory => BasicHandFactory.Singleton;
+        protected virtual IFactory Factory => BasicFactory.Singleton;
 
         protected virtual int MinPlayers => 2;
 
@@ -370,7 +365,7 @@ namespace InterruptingCards.Managers
         {
             foreach (var playerId in playerIds)
             {
-               _players.AddLast(PlayerFactory.Create(playerId, playerId.ToString()));
+               _players.AddLast(Factory.CreatePlayer(playerId, playerId.ToString()));
             }
 
             PlayerReadyServerRpc();
@@ -499,12 +494,12 @@ namespace InterruptingCards.Managers
 
             if (CanPlayCard(_selfId))
             {
-                PlayCardServerRpc(card.Suit, card.Rank);
+                PlayCardServerRpc(card.Id);
             }
         }
 
         [ServerRpc(RequireOwnership = false)]
-        protected virtual void PlayCardServerRpc(CardSuit suit, CardRank rank, ServerRpcParams serverRpcParams = default)
+        protected virtual void PlayCardServerRpc(int cardId, ServerRpcParams serverRpcParams = default)
         {
             if (!CanPlayCard(serverRpcParams.Receive.SenderClientId))
             {
@@ -513,8 +508,8 @@ namespace InterruptingCards.Managers
 
             Debug.Log("Playing card");
 
-            _activePlayerNode.Value.Hand.Remove(suit, rank);
-            _discardManager.PlaceTop(CardFactory.Create(suit, rank));
+            _activePlayerNode.Value.Hand.Remove(cardId);
+            _discardManager.PlaceTop(Factory.CreateCard(cardId));
 
             StateTriggerClientRpc(PlayCardTriggerId);
         }

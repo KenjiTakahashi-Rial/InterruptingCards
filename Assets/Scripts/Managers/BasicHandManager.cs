@@ -5,7 +5,6 @@ using UnityEngine;
 
 using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
-using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
@@ -33,11 +32,11 @@ namespace InterruptingCards.Managers
             SetSlotCard(Count - 1);
         }
 
-        public virtual ICard Remove(CardSuit suit, CardRank rank)
+        public virtual ICard Remove(int cardId)
         {
-            Debug.Log($"Removing {rank} | {suit} from hand");
+            Debug.Log($"Removing {cardId} from hand");
 
-            var card = Hand.Remove(suit, rank);
+            var card = Hand.Remove(cardId);
             SetAllSlotCards();
             return card;
         }
@@ -65,7 +64,7 @@ namespace InterruptingCards.Managers
 
         protected virtual void OnEnable()
         {
-            Hand = BasicHandFactory.Singleton.Create();
+            Hand = BasicFactory.Singleton.CreateHand();
 
             for (var i = 0; i < _cardSlots.Count; i++)
             {

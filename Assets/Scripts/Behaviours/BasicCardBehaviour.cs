@@ -17,8 +17,6 @@ namespace InterruptingCards.Behaviours
 
         [SerializeField] protected TextMeshPro _cardText;
         [SerializeField] protected SpriteRenderer _cardSprite;
-        [SerializeField] protected CardSuit _startingSuit = CardSuit.Invalid;
-        [SerializeField] protected CardRank _startingRank = CardRank.Invalid;
 
         protected bool _offlineIsFaceUp;
         protected BasicCard _offlineCard;
