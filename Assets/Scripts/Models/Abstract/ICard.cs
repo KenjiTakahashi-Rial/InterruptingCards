@@ -6,7 +6,7 @@ using InterruptingCards.Config;
 
 namespace InterruptingCards.Models
 {
-    public interface ICard : INetworkSerializable, IEquatable<ICard>, ICloneable
+    public interface ICard : IEquatable<ICard>
     {
         string Name { get; }
 
