@@ -1,11 +1,9 @@
 using System;
 
 using TMPro;
-
 using Unity.Netcode;
 using UnityEngine;
 
-using InterruptingCards.Config;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
@@ -13,7 +11,7 @@ namespace InterruptingCards.Behaviours
     public class BasicCardBehaviour : NetworkBehaviour, ICardBehaviour
     {
         protected readonly NetworkVariable<bool> _isFaceUp = new(true);
-        protected readonly NetworkVariable<BasicCard> _card = new(null);
+        protected readonly NetworkVariable<int> _cardId = new();
 
         [SerializeField] protected TextMeshPro _cardText;
         [SerializeField] protected SpriteRenderer _cardSprite;
@@ -43,14 +41,14 @@ namespace InterruptingCards.Behaviours
 
         public virtual ICard Card
         {
-            get => NetworkManager != null && NetworkManager.IsListening ? _card.Value : _offlineCard;
+            get => NetworkManager != null && NetworkManager.IsListening ? _cardId.Value : _offlineCard;
             set
             {
                 var val = (BasicCard)value;
 
                 if (NetworkManager != null && NetworkManager.IsListening)
                 {
-                    _card.Value = val;
+                    _cardId.Value = val;
                 }
 
                 _offlineCard = val;
@@ -60,8 +58,8 @@ namespace InterruptingCards.Behaviours
 
         public override void OnNetworkSpawn()
         {
-            _card.OnValueChanged -= HandleCardChanged;
-            _card.OnValueChanged += HandleCardChanged;
+            _cardId.OnValueChanged -= HandleCardChanged;
+            _cardId.OnValueChanged += HandleCardChanged;
 
             _isFaceUp.OnValueChanged -= HandleFaceUpChanged;
             _isFaceUp.OnValueChanged += HandleFaceUpChanged;
@@ -69,7 +67,7 @@ namespace InterruptingCards.Behaviours
 
         public override void OnNetworkDespawn()
         {
-            _card.OnValueChanged -= HandleCardChanged;
+            _cardId.OnValueChanged -= HandleCardChanged;
             _isFaceUp.OnValueChanged -= HandleFaceUpChanged;
         }
 

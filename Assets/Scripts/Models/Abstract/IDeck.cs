@@ -1,10 +1,6 @@
-using System;
-
-using InterruptingCards.Config;
-
 namespace InterruptingCards.Models
 {
-    public interface IDeck : ICloneable
+    public interface IDeck
     {
         int Count { get; }
 

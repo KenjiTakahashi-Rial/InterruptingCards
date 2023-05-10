@@ -6,7 +6,7 @@ namespace InterruptingCards.Models
     {
         protected readonly IList<ICard> _cards;
 
-        public BasicHand(IList<ICard> cards)
+        internal BasicHand(IList<ICard> cards)
         {
             _cards = cards;
         }
@@ -36,11 +36,6 @@ namespace InterruptingCards.Models
         public virtual void Clear()
         {
             _cards.Clear();
-        }
-
-        public virtual object Clone()
-        {
-            return new BasicHand(_cards);
         }
     }
 }

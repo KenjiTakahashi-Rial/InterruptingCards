@@ -1,6 +1,6 @@
 {
+    "Suit": "Hearts",
+    "Rank": "King",
     "Name": "King of Hearts",
-    "Suit": 3,
-    "Rank": 13,
     "Count": 1
 }

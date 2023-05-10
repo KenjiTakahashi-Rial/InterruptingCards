@@ -1,6 +1,6 @@
 {
+    "Suit": "Spades",
+    "Rank": "Five",
     "Name": "Five of Spades",
-    "Suit": 4,
-    "Rank": 5,
     "Count": 1
 }

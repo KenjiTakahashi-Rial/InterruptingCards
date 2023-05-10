@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4328646814464670092}
   - component: {fileID: 6050427178117261016}
-  - component: {fileID: -5497380918002740872}
   - component: {fileID: 4328646814464670093}
   - component: {fileID: 4328646814464670091}
   m_Layer: 0
@@ -52,19 +51,6 @@ MonoBehaviour:
   _discardManager: {fileID: 0}
   _handManagers: []
   _tempInfoText: {fileID: 0}
---- !u!114 &-5497380918002740872
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4328646814464670090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e69699e3e8ff1446b639e4150a7dbe5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _cardPack: 1
 --- !u!114 &4328646814464670093
 MonoBehaviour:
   m_ObjectHideFlags: 0

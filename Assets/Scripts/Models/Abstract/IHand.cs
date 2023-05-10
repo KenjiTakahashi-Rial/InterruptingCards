@@ -1,10 +1,6 @@
-using System;
-
-using InterruptingCards.Config;
-
 namespace InterruptingCards.Models
 {
-    public interface IHand : ICloneable
+    public interface IHand
     {
         int Count { get; }
 

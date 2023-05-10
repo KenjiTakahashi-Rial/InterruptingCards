@@ -25,9 +25,9 @@ namespace InterruptingCards.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            var basicGameManagerPrefab = Resources.Load<GameObject>("Prefabs/BasicGameManager");
-            var basicGameManagerObj = Object.Instantiate(basicGameManagerPrefab);
-            _factory = basicGameManagerObj.GetComponent<IFactory>();
+            var basicFactoryPrefab = Resources.Load<GameObject>("Prefabs/BasicFactory");
+            var basicFactoryObj = Object.Instantiate(basicFactoryPrefab);
+            _factory = basicFactoryObj.GetComponent<IFactory>();
         }
 
         [UnitySetUp]

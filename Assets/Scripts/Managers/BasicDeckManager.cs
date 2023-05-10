@@ -27,11 +27,6 @@ namespace InterruptingCards.Managers
 
         public virtual int Count => _deck.Count;
 
-        public virtual object Clone()
-        {
-            throw new NotImplementedException("DeckManager should not be cloned");
-        }
-
         public virtual void Shuffle()
         {
             _deck.Shuffle();

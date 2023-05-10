@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using InterruptingCards.Config;
+using System;
 
 namespace InterruptingCards.Models
 {
@@ -11,7 +12,7 @@ namespace InterruptingCards.Models
         [SerializeField] private CardPack _cardPack;
 
         private ImmutableDictionary<int, BasicCard> _cards;
-        private ImmutableDictionary<int, int> _counts;
+        private ImmutableDictionary<int, PackCard> _packCards;
 
         public static IFactory Singleton { get; private set; }
 
@@ -34,7 +35,7 @@ namespace InterruptingCards.Models
 
         public IDeck CreateDeck(IList<ICard> cards = null)
         {
-            return new BasicDeck(cards);
+            return cards == null ? new BasicDeck(new List<ICard>()) : new BasicDeck(cards);
         }
 
         public IDeck CreateFullDeck()
@@ -43,7 +44,7 @@ namespace InterruptingCards.Models
             
             foreach ((var id, var card) in _cards)
             {
-                for (var i = 0; i < _counts[id]; i++)
+                for (var i = 0; i < _packCards[id].Count; i++)
                 {
                     cards.Add(card);
                 }
@@ -54,14 +55,27 @@ namespace InterruptingCards.Models
 
         public IHand CreateHand(IList<ICard> cards = null)
         {
-            return new BasicHand(cards);
+            return cards == null ? new BasicHand(new List<ICard>()) : new BasicHand(cards);
         }
 
         private void Awake()
         {
-            var cardCounts = CardConfig.GetCardCounts<BasicCard>(_cardPack);
-            _cards = cardCounts.ToDictionary(c => c.Key.Id, c => c.Key);
-            _counts = cardCounts.ToDictionary(c => c.Key.Id, c => c.Value);
+            var cards = new Dictionary<int, BasicCard>();
+            var packCards = new Dictionary<int, PackCard>();
+            var pack = CardConfig.GetPack(_cardPack);
+
+            foreach (var packCard in pack)
+            {
+                var suit = (CardSuit)Enum.Parse(typeof(CardSuit), packCard.Suit);
+                var rank = (CardRank)Enum.Parse(typeof(CardRank), packCard.Rank);
+                var id = CardConfig.CardId(suit, rank);
+
+                cards[id] = new BasicCard(id, suit, rank, packCard.Name);
+                packCards[id] = packCard;
+            }
+
+            _cards = new ImmutableDictionary<int, BasicCard>(cards);
+            _packCards = new ImmutableDictionary<int, PackCard>(packCards);
 
             Singleton = this;
         }

@@ -8,10 +8,10 @@ namespace InterruptingCards.Models
     {
         int Id { get; }
 
-        string Name { get; }
-
         CardSuit Suit { get; }
 
         CardRank Rank { get; }
+
+        string Name { get; }
     }
 }

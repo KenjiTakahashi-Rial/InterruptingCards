@@ -25,9 +25,9 @@ namespace InterruptingCards.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            var basicGameManagerPrefab = Resources.Load<GameObject>("Prefabs/BasicGameManager");
-            var basicGameManagerObj = Object.Instantiate(basicGameManagerPrefab);
-            _factory = basicGameManagerObj.GetComponent<IFactory>();
+            var basicFactoryPrefab = Resources.Load<GameObject>("Prefabs/BasicFactory");
+            var basicFactoryObj = Object.Instantiate(basicFactoryPrefab);
+            _factory = basicFactoryObj.GetComponent<IFactory>();
         }
 
         [UnitySetUp]
@@ -48,14 +48,14 @@ namespace InterruptingCards.Tests
         [Test]
         public void TestEmpty()
         {
-            var hand = new BasicHand(new List<ICard>());
+            var hand = _factory.CreateHand();
             Assert.AreEqual(0, hand.Count, "Empty hand should have count 0");
         }
 
         [Test]
         public void TestAdd()
         {
-            var hand = new BasicHand(new List<ICard>());
+            var hand = _factory.CreateHand();
 
             for (var i = 0; i < _cards.Count; i++)
             {
@@ -67,7 +67,7 @@ namespace InterruptingCards.Tests
         [Test]
         public void TestRemove()
         {
-            var hand = new BasicHand(_cards);
+            var hand = _factory.CreateHand(_cards);
 
             for (var i = _cards.Count - 1; i >= 0; i--)
             {

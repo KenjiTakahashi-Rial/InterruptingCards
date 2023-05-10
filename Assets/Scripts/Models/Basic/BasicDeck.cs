@@ -16,14 +16,9 @@ namespace InterruptingCards.Models
 
         protected virtual int BottomIndex { get; } = 0;
 
-        public BasicDeck(IList<ICard> cards)
+        internal BasicDeck(IList<ICard> cards)
         {
             _cards = cards;
-        }
-
-        public virtual object Clone()
-        {
-            return new BasicDeck(_cards);
         }
 
         public virtual void Shuffle()

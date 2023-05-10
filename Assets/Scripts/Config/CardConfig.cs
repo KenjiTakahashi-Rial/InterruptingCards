@@ -19,27 +19,26 @@ namespace InterruptingCards.Config
         private static readonly int SuitBitMask = ~0 << (IdBitCount - SuitBitCount);
         private static readonly int RankBitMask = (1 << RankBitCount) - 1;
 
-        public static int CardId(ICard card)
+        public static int CardId(CardSuit suit, CardRank rank)
         {
-            return ((int)card.Suit & SuitBitMask) | ((int)card.Rank & RankBitMask);
+            return ((int)suit & SuitBitMask) | ((int)rank & RankBitMask);
         }
 
-        public static ImmutableDictionary<C, int> GetCardCounts<C>(CardPack pack) where C : ICard
+        public static PackCard[] GetPack(CardPack pack)
         {
             var packName = pack.ToString();
             var packPath = Path.Combine(PackDirectory, packName);
             var cardPaths = Directory.GetFiles(packPath, "*." + PackFileExtension);
-            var counts = new Dictionary<C, int>(cardPaths.Length);
+            var cards = new PackCard[cardPaths.Length];
 
             for (var i = 0; i < cardPaths.Length; i++)
             {
                 var json = File.ReadAllText(cardPaths[i]);
-                var metadata = JsonUtility.FromJson<MetadataCard>(json);
-                var card = JsonUtility.FromJson<C>(json);
-                counts[card] = metadata.Count;
+                var card = JsonUtility.FromJson<PackCard>(json);
+                cards[i] = card;
             }
 
-            return new ImmutableDictionary<C, int>(counts);
+            return cards;
         }
     }
 }

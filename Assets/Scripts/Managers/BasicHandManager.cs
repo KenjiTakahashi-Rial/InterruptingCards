@@ -57,11 +57,6 @@ namespace InterruptingCards.Managers
             _cardSlots[i].IsFaceUp = true;
         }
 
-        public virtual object Clone()
-        {
-            throw new NotImplementedException("HandManager should not be cloned");
-        }
-
         protected virtual void OnEnable()
         {
             Hand = BasicFactory.Singleton.CreateHand();
