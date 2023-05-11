@@ -110,7 +110,7 @@ namespace InterruptingCards.Managers
         {
             if (OnDeckClicked == null)
             {
-                Debug.Log("Deck clicked, but OnDeckClicked is null");
+                Debug.Log("OnDeckClicked has no subscribers");
             }
             else
             {

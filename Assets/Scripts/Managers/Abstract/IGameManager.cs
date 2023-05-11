@@ -4,10 +4,12 @@ namespace InterruptingCards.Managers
     {
         static IGameManager Singleton { get; }
 
-        void StartGame();
+        void HandleInGame();
 
-        void ShiftTurn(int shifts = 1);
+        void HandleStartTurn();
 
-        void EndGame();
+        void HandleEndTurn(int shifts = 1);
+
+        void HandleEndGame();
     }
 }

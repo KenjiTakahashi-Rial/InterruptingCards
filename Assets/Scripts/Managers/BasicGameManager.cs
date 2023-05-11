@@ -6,6 +6,7 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
+using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
 using InterruptingCards.Factories;
 using InterruptingCards.Models;
@@ -97,7 +98,7 @@ namespace InterruptingCards.Managers
         [SerializeField] protected BasicDeckManager _discardManager;
         [SerializeField] protected BasicHandManager[] _handManagers;
         [SerializeField] protected TextMeshPro _tempInfoText;
-        //[SerializeField] protected ActiveCardBehaviour _interruptCard;
+        [SerializeField] protected InterruptingCardBehaviour _interruptCard;
 
         protected ulong _selfId; // The player that is on this device
 
@@ -147,8 +148,8 @@ namespace InterruptingCards.Managers
                 handManager.OnCardClicked += TryPlayCard;
             }
 
-            //_interruptCard.OnClicked -= TryInterruptPlayCard;
-            //_interruptCard.OnClicked += TryInterruptPlayCard;
+            _interruptCard.OnClicked -= TryInterruptPlayCard;
+            _interruptCard.OnClicked += TryInterruptPlayCard;
         }
 
         public override void OnNetworkDespawn()
@@ -193,6 +194,11 @@ namespace InterruptingCards.Managers
             }
 
             _activePlayerNode = _players.First;
+        }
+
+        public virtual void HandleStartTurn()
+        {
+            _interruptCard.IsActivated = false;
         }
 
         public virtual void HandleEndTurn(int shifts = 1)
@@ -311,6 +317,7 @@ namespace InterruptingCards.Managers
             switch (effect)
             {
                 case CardActiveEffect.PlayCard:
+                    Debug.Log("PlayCard active effect");
                     break;
                 default:
                     throw new NotImplementedException();
@@ -549,20 +556,22 @@ namespace InterruptingCards.Managers
         // TODO: Temporary
         protected virtual void TryInterruptPlayCard()
         {
-            TryInterrupt(CardActiveEffect.PlayCard);
+            TryInterrupt(_interruptCard.Card.ActiveEffect);
         }
 
         [ServerRpc]
         protected virtual void InterruptServerRpc(CardActiveEffect effect, ServerRpcParams serverRpcParams = default)
         {
+            var senderId = serverRpcParams.Receive.SenderClientId;
 
-            if (!CanInterrupt(serverRpcParams.Receive.SenderClientId))
+            if (!CanInterrupt(senderId))
             {
                 return;
             }
 
-            Debug.Log($"Interrupting player {_activePlayerNode.Value.Id}'s turn");
+            Debug.Log($"Player {senderId} interrupting player {_activePlayerNode.Value.Id}'s turn");
 
+            _interruptCard.IsActivated = true;
             HandleEffect(effect);
         }
     }

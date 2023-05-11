@@ -51,6 +51,12 @@ namespace InterruptingCards.Behaviours
             var after = newValue ? "activated" : "not activated";
             Debug.Log($"Active card changed ({before} -> {after})");
 
+            if (OnActivated == null)
+            {
+                Debug.Log("OnActivated has no subscribers");
+            }
+
+            OnActivated?.Invoke();
             Refresh();
         }
 

@@ -94,7 +94,7 @@ namespace InterruptingCards.Behaviours
 
             if (OnValueChanged == null)
             {
-                Debug.Log("Card OnValueChanged has no subscribers");
+                Debug.Log("OnValueChanged has no subscribers");
             }
 
             _card = newValue == CardConfig.InvalidId ? null : CardFactory.Create(newValue);
@@ -155,7 +155,7 @@ namespace InterruptingCards.Behaviours
         {
             if (OnClicked == null)
             {
-                Debug.Log("Mouse down on card but OnClicked is null");
+                Debug.Log("OnClicked has no subscribers");
             }
             else
             {
