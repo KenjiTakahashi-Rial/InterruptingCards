@@ -7,7 +7,7 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
 {
-    public class ActiveCardBehaviour : BasicCardBehaviour, IActiveCardBehaviour
+    public class InterruptingCardBehaviour : BasicCardBehaviour, IActiveCardBehaviour<BasicCard>
     {
         private const float ActivatedAngle = 90;
 
@@ -36,7 +36,7 @@ namespace InterruptingCards.Behaviours
             {
                 _card = value;
 
-                base.Card = value;
+                base.Card = (BasicCard)value;
             }
         }
 

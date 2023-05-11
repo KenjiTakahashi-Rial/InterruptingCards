@@ -4,7 +4,7 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
 { 
-    public interface ICardBehaviour
+    public interface ICardBehaviour<C> where C : ICard
     {
         event Action OnClicked;
 
@@ -12,7 +12,7 @@ namespace InterruptingCards.Behaviours
 
         bool IsFaceUp { get; set; }
 
-        ICard Card { get; set; }
+        C Card { get; set; }
 
         void UnsubscribeAllOnClicked();
 

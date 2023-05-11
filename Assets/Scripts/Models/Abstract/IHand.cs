@@ -1,14 +1,14 @@
 namespace InterruptingCards.Models
 {
-    public interface IHand
+    public interface IHand<C> where C : ICard
     {
         int Count { get; }
 
-        void Add(ICard card);
+        void Add(C card);
 
-        ICard Remove(int cardId);
+        C Remove(int cardId);
 
-        ICard Get(int i);
+        C Get(int i);
 
         void Clear();
     }

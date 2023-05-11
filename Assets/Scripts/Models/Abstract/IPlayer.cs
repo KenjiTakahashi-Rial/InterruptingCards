@@ -2,12 +2,12 @@ using Unity.Netcode;
 
 namespace InterruptingCards.Models
 {
-    public interface IPlayer : INetworkSerializable
+    public interface IPlayer<C, H> : INetworkSerializable where C : ICard where H : IHand<C>
     {
         ulong Id { get; }
 
         string Name { get; }
 
-        IHand Hand { get; set; }
+        H Hand { get; set; }
     }
 }

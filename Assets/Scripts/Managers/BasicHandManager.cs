@@ -4,22 +4,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using InterruptingCards.Behaviours;
-using InterruptingCards.Config;
+using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public class BasicHandManager : MonoBehaviour, IHandManager
+    public class BasicHandManager : MonoBehaviour, IHandManager<BasicCard, BasicHand>
     {
         [SerializeField] private List<BasicCardBehaviour> _cardSlots;
 
-        public event Action<ICard> OnCardClicked;
+        public event Action<BasicCard> OnCardClicked;
 
-        public virtual IHand Hand { get; private set; }
+        public virtual BasicHand Hand { get; private set; }
 
         public virtual int Count => Hand.Count;
 
-        public virtual void Add(ICard card)
+        public virtual void Add(BasicCard card)
         {
             Debug.Log($"Adding card to hand ({card})");
 
@@ -32,7 +32,7 @@ namespace InterruptingCards.Managers
             SetSlotCard(Count - 1);
         }
 
-        public virtual ICard Remove(int cardId)
+        public virtual BasicCard Remove(int cardId)
         {
             Debug.Log($"Removing {cardId} from hand");
 
@@ -41,7 +41,7 @@ namespace InterruptingCards.Managers
             return card;
         }
 
-        public virtual ICard Get(int i)
+        public virtual BasicCard Get(int i)
         {
             return Hand.Get(i);
         }
@@ -59,7 +59,7 @@ namespace InterruptingCards.Managers
 
         protected virtual void OnEnable()
         {
-            Hand = BasicFactory.Singleton.CreateHand();
+            Hand = BasicHandFactory.Singleton.Create();
 
             for (var i = 0; i < _cardSlots.Count; i++)
             {

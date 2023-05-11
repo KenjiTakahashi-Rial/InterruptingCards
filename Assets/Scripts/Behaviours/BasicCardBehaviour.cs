@@ -5,11 +5,12 @@ using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
+using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
 {
-    public class BasicCardBehaviour : NetworkBehaviour, ICardBehaviour
+    public class BasicCardBehaviour : NetworkBehaviour, ICardBehaviour<BasicCard>
     {
         protected readonly NetworkVariable<bool> _isFaceUp = new(true);
         protected readonly NetworkVariable<int> _cardId = new(CardConfig.InvalidId);
@@ -20,7 +21,7 @@ namespace InterruptingCards.Behaviours
         [SerializeField] protected CardRank _startingRank;
 
         protected bool _offlineIsFaceUp;
-        protected ICard _card;
+        protected BasicCard _card;
         protected Vector3 _originalScale;
 
         public event Action OnClicked;
@@ -42,7 +43,7 @@ namespace InterruptingCards.Behaviours
             }
         }
 
-        public virtual ICard Card
+        public virtual BasicCard Card
         {
             get => _card;
             set
@@ -60,7 +61,7 @@ namespace InterruptingCards.Behaviours
 
         protected virtual int StartingCardId => CardConfig.GetCardId(_startingSuit, _startingRank);
 
-        protected virtual IFactory Factory => BasicFactory.Singleton;
+        protected virtual ICardFactory<BasicCard> CardFactory => BasicCardFactory.Singleton;
 
         public override void OnNetworkSpawn()
         {
@@ -96,7 +97,7 @@ namespace InterruptingCards.Behaviours
                 Debug.Log("Card OnValueChanged has no subscribers");
             }
 
-            _card = newValue == CardConfig.InvalidId ? null : Factory.CreateCard(newValue);
+            _card = newValue == CardConfig.InvalidId ? null : CardFactory.Create(newValue);
 
             OnValueChanged?.Invoke();
             Refresh();
@@ -137,7 +138,7 @@ namespace InterruptingCards.Behaviours
 
             if (_startingSuit != CardSuit.Invalid && _startingRank != CardRank.Invalid)
             {
-                Card = Factory.CreateCard(StartingCardId);
+                Card = CardFactory.Create(StartingCardId);
             }
         }
 

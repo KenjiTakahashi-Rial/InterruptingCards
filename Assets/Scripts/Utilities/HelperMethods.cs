@@ -4,9 +4,9 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Utilities
 {
-    public static class Utilities
+    public static class HelperMethods
     {
-        public static ICard Remove(IList<ICard> cards, int cardId)
+        public static C Remove<C>(IList<C> cards, int cardId) where C : ICard
         {
             for (var i = 0; i < cards.Count; i++)
             {

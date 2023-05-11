@@ -1,23 +1,23 @@
 namespace InterruptingCards.Models
 {
-    public interface IDeck
+    public interface IDeck<C> where C : ICard
     {
         int Count { get; }
 
         void Shuffle();
 
-        void PlaceTop(ICard card);
+        void PlaceTop(C card);
 
-        void PlaceBottom(ICard card);
+        void PlaceBottom(C card);
 
-        void InsertRandom(ICard card);
+        void InsertRandom(C card);
 
-        ICard PeekTop();
+        C PeekTop();
 
-        ICard DrawTop();
+        C DrawTop();
 
-        ICard DrawBottom();
+        C DrawBottom();
 
-        ICard Remove(int cardId);
+        C Remove(int cardId);
     }
 }

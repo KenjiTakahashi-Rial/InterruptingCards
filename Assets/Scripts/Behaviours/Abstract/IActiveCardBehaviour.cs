@@ -4,9 +4,9 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
 {
-    public interface IActiveCardBehaviour : ICardBehaviour
+    public interface IActiveCardBehaviour<C> : ICardBehaviour<C> where C : ICard
     {
         event Action OnActivated;
-        new ICard Card { get; set; }
+        new IActiveCard Card { get; set; }
     }
 }

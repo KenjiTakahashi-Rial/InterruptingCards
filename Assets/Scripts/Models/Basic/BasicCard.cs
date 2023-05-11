@@ -4,6 +4,7 @@ namespace InterruptingCards.Models
 {
     public class BasicCard : ICard
     {
+        // Do not call directly; use a factory
         public BasicCard(MetadataCard metadataCard)
         {
             Id = metadataCard.Id;

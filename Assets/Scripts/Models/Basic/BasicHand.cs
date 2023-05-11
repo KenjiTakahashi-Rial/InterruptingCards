@@ -1,34 +1,37 @@
 using System.Collections.Generic;
 
+using InterruptingCards.Utilities;
+
 namespace InterruptingCards.Models
 {
-    public class BasicHand : IHand
+    public class BasicHand : IHand<BasicCard>
     {
-        protected readonly IList<ICard> _cards;
+        protected readonly IList<BasicCard> _cards;
 
-        internal BasicHand(IList<ICard> cards)
+        // Do not call directly; use a factory
+        public BasicHand(IList<BasicCard> cards)
         {
             _cards = cards;
         }
 
         public virtual int Count => _cards.Count;
 
-        public virtual void Insert(int i, ICard card)
+        public virtual void Insert(int i, BasicCard card)
         {
             _cards.Insert(i, card);
         }
 
-        public virtual void Add(ICard card)
+        public virtual void Add(BasicCard card)
         {
             _cards.Add(card);
         }
 
-        public virtual ICard Remove(int cardId)
+        public virtual BasicCard Remove(int cardId)
         {
-            return Utilities.Remove(_cards, cardId);
+            return HelperMethods.Remove(_cards, cardId);
         }
 
-        public virtual ICard Get(int i)
+        public virtual BasicCard Get(int i)
         {
             return _cards[i];
         }

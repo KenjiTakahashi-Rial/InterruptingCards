@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,8 +7,8 @@ using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
+using InterruptingCards.Factories;
 using InterruptingCards.Models;
-using System;
 
 namespace InterruptingCards.Managers
 {
@@ -78,14 +79,19 @@ namespace InterruptingCards.Managers
             { WaitForReadyTriggerId, WaitForReadyTriggerName },
         };
 
+        protected readonly ICardFactory<BasicCard> _cardFactory = BasicCardFactory.Singleton;
+        protected readonly IPlayerFactory<BasicCard, IHand<BasicCard>, BasicPlayer>
+            _playerFactory = BasicPlayerFactory.Singleton;
+
         // Server-only
         protected readonly List<ulong> _lobby = new();
         protected readonly HashSet<ulong> _notReadyPlayers = new();
         
-        protected readonly LinkedList<IPlayer> _players = new();
-        protected LinkedListNode<IPlayer> _activePlayerNode;
-        protected IPlayer _interruptingPlayer;
+        protected readonly LinkedList<BasicPlayer> _players = new();
+        protected LinkedListNode<BasicPlayer> _activePlayerNode;
+        protected BasicPlayer _interruptingPlayer;
 
+        [SerializeField] protected CardPack _cardPack;
         [SerializeField] protected Animator _gameStateMachine;
         [SerializeField] protected BasicDeckManager _deckManager;
         [SerializeField] protected BasicDeckManager _discardManager;
@@ -105,8 +111,6 @@ namespace InterruptingCards.Managers
         {
             get => _stateMachineIdNameMap.GetValueOrDefault(CurrentStateId, "UnknownState");
         }
-
-        protected virtual IFactory Factory => BasicFactory.Singleton;
 
         protected virtual int MinPlayers => 2;
 
@@ -181,7 +185,7 @@ namespace InterruptingCards.Managers
             
             if (IsServer)
             {
-                _deckManager.Initialize();
+                _deckManager.Initialize(_cardPack);
                 _deckManager.Shuffle();
                 _deckManager.IsFaceUp = false;
                 _discardManager.Clear();
@@ -365,7 +369,7 @@ namespace InterruptingCards.Managers
         {
             foreach (var playerId in playerIds)
             {
-               _players.AddLast(Factory.CreatePlayer(playerId, playerId.ToString()));
+               _players.AddLast(_playerFactory.Create(playerId, playerId.ToString()));
             }
 
             PlayerReadyServerRpc();
@@ -509,7 +513,7 @@ namespace InterruptingCards.Managers
             Debug.Log("Playing card");
 
             _activePlayerNode.Value.Hand.Remove(cardId);
-            _discardManager.PlaceTop(Factory.CreateCard(cardId));
+            _discardManager.PlaceTop(_cardFactory.Create(cardId));
 
             StateTriggerClientRpc(PlayCardTriggerId);
         }

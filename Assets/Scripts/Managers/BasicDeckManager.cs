@@ -1,23 +1,23 @@
 using System;
-using System.Collections.Generic;
 
 using UnityEngine;
 
 using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
+using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public class BasicDeckManager : MonoBehaviour, IDeckManager
+    public class BasicDeckManager : MonoBehaviour, IDeckManager<BasicCard>
     {
         [SerializeField] protected BasicCardBehaviour _topCard;
 
-        protected IDeck _deck;
+        protected BasicDeck _deck;
 
         public event Action OnDeckClicked;
 
-        protected virtual IFactory Factory => BasicFactory.Singleton;
+        protected virtual IDeckFactory<BasicCard, BasicDeck> DeckFactory => BasicDeckFactory.Singleton;
         
         public virtual bool IsFaceUp
         {
@@ -32,59 +32,59 @@ namespace InterruptingCards.Managers
             _deck.Shuffle();
             SetTopCard();
         }
-        public virtual void PlaceTop(ICard card)
+        public virtual void PlaceTop(BasicCard card)
         {
             _deck.PlaceTop(card);
             SetTopCard();
         }
 
-        public virtual void PlaceBottom(ICard card)
+        public virtual void PlaceBottom(BasicCard card)
         {
             _deck.PlaceBottom(card);
             SetTopCard();
         }
 
-        public virtual void InsertRandom(ICard card)
+        public virtual void InsertRandom(BasicCard card)
         {
             _deck.InsertRandom(card);
             SetTopCard();
         }
 
-        public virtual ICard PeekTop()
+        public virtual BasicCard PeekTop()
         {
             return _deck.PeekTop();
         }
 
-        public virtual ICard DrawTop()
+        public virtual BasicCard DrawTop()
         {
             var card = _deck.DrawTop();
             SetTopCard();
             return card;
         }
 
-        public virtual ICard DrawBottom()
+        public virtual BasicCard DrawBottom()
         {
             var card = _deck.DrawBottom();
             SetTopCard();
             return card;
         }
 
-        public virtual ICard Remove(int cardId)
+        public virtual BasicCard Remove(int cardId)
         {
             var card = _deck.Remove(cardId);
             SetTopCard();
             return card;
         }
 
-        public virtual void Initialize()
+        public virtual void Initialize(CardPack cardPack)
         {
-            _deck = Factory.CreateFullDeck();
+            _deck = DeckFactory.Create(cardPack);
             SetTopCard();
         }
 
         public virtual void Clear()
         {
-            _deck = Factory.CreateDeck();
+            _deck = DeckFactory.Create();
             SetTopCard();
         }
 

@@ -4,16 +4,16 @@ using System.IO;
 using UnityEngine;
 
 using InterruptingCards.Models;
+using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Config
 {
-    public static class CardConfig
+    public class CardConfig
     {
         private const string PackFileExtension = "json";
 
+        public static readonly CardConfig Singleton = new();
         public static readonly int InvalidId = GetCardId(CardSuit.Invalid, CardRank.Invalid);
-
-        private static readonly string PackDirectory = Path.Combine("Assets", "Scripts", "Config", "Packs");
 
         private static readonly int IdBitCount = 32;
         private static readonly int SuitBitCount = IdBitCount / 2;
@@ -21,21 +21,41 @@ namespace InterruptingCards.Config
         private static readonly int SuitBitMask = ~0 << (IdBitCount - SuitBitCount);
         private static readonly int RankBitMask = (1 << RankBitCount) - 1;
 
-        private static readonly Dictionary<int, MetadataCard> _cards = new();
+        private readonly string PackDirectory = Path.Combine("Assets", "Scripts", "Config", "Packs");
+
+        private readonly Dictionary<int, MetadataCard> _cards = new();
+        private readonly Dictionary<CardPack, ImmutableList<MetadataCard>> _packs = new();
+
+        private CardConfig() { }
 
         public static int GetCardId(CardSuit suit, CardRank rank)
         {
             return ((int)suit << RankBitCount & SuitBitMask) | ((int)rank & RankBitMask);
         }
 
-        public static MetadataCard GetMetadataCard(int id)
+        public MetadataCard GetMetadataCard(int id)
         {
+            if (!_cards.ContainsKey(id))
+            {
+                Debug.LogWarning($"Card {id} not found. Is the card pack loaded?");
+            }
+
             return _cards[id];
         }
 
-        public static MetadataCard[] GetPackMetadata(CardPack pack)
+        public ImmutableList<MetadataCard> GetCardPack(CardPack cardPack)
         {
-            var packName = pack.ToString();
+            if (!_packs.ContainsKey(cardPack))
+            {
+                Load(cardPack);
+            }
+            
+            return _packs[cardPack];
+        }
+
+        private void Load(CardPack cardPack)
+        {
+            var packName = cardPack.ToString();
             var packPath = Path.Combine(PackDirectory, packName);
             var cardPaths = Directory.GetFiles(packPath, "*." + PackFileExtension);
             var cards = new MetadataCard[cardPaths.Length];
@@ -49,7 +69,7 @@ namespace InterruptingCards.Config
                 cards[i] = card;
             }
 
-            return cards;
+            _packs[cardPack] = new ImmutableList<MetadataCard>(cards);
         }
     }
 }

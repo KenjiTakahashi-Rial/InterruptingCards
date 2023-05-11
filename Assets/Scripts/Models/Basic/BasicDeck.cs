@@ -1,22 +1,26 @@
 using System;
 using System.Collections.Generic;
 
+using InterruptingCards.Factories;
+using InterruptingCards.Utilities;
+
 namespace InterruptingCards.Models
 {
-    public class BasicDeck : IDeck
+    public class BasicDeck : IDeck<BasicCard>
     {
         protected readonly Random _random = new();
-        protected IList<ICard> _cards;
+        protected IList<BasicCard> _cards;
 
         public virtual int Count => _cards.Count;
 
-        protected virtual IFactory Factory => BasicFactory.Singleton;
+        protected virtual ICardFactory<BasicCard> CardFactory => BasicCardFactory.Singleton;
 
         protected virtual int TopIndex { get => _cards.Count - 1;}
 
         protected virtual int BottomIndex { get; } = 0;
 
-        internal BasicDeck(IList<ICard> cards)
+        // Do not call directly; use a factory
+        public BasicDeck(IList<BasicCard> cards)
         {
             _cards = cards;
         }
@@ -32,41 +36,41 @@ namespace InterruptingCards.Models
             }
         }
 
-        public virtual void PlaceTop(ICard card)
+        public virtual void PlaceTop(BasicCard card)
         {
             _cards.Add(card);
         }
 
-        public virtual void PlaceBottom(ICard card)
+        public virtual void PlaceBottom(BasicCard card)
         {
             _cards.Insert(0, card);
         }
 
-        public virtual void InsertRandom(ICard card)
+        public virtual void InsertRandom(BasicCard card)
         {
             var i = _random.Next(0, _cards.Count + 1);
             _cards.Insert(i, card);
         }
 
-        public virtual ICard PeekTop()
+        public virtual BasicCard PeekTop()
         {
             CheckEmpty();
-            return Factory.CreateCard(_cards[TopIndex].Id);
+            return CardFactory.Create(_cards[TopIndex].Id);
         }
 
-        public virtual ICard DrawTop()
+        public virtual BasicCard DrawTop()
         {
             return PopAt(TopIndex);
         }
 
-        public virtual ICard DrawBottom()
+        public virtual BasicCard DrawBottom()
         {
             return PopAt(BottomIndex);
         }
 
-        public virtual ICard Remove(int cardId)
+        public virtual BasicCard Remove(int cardId)
         {
-            return Utilities.Remove(_cards, cardId);
+            return HelperMethods.Remove(_cards, cardId);
         }
 
         protected virtual void CheckEmpty()
@@ -77,7 +81,7 @@ namespace InterruptingCards.Models
             }
         }
 
-        protected virtual ICard PopAt(int i)
+        protected virtual BasicCard PopAt(int i)
         {
             CheckEmpty();
             var card = _cards[i];
