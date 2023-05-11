@@ -4,20 +4,28 @@ namespace InterruptingCards.Config
     {
         Invalid,
         PlayingCards,
+        InterruptingCards,
     }
 
     public enum CardSuit
     {
         Invalid,
+
+        // Playing cards
         Clubs,
         Diamonds,
         Hearts,
         Spades,
+
+        // Interrupting cards
+        InterruptingSuit,
     }
 
     public enum CardRank
     {
         Invalid,
+
+        // Playing cards
         Ace,
         Two,
         Three,
@@ -31,9 +39,12 @@ namespace InterruptingCards.Config
         Jack,
         Queen,
         King,
+
+        // Interrupting cards
+        InterruptingRank,
     }
 
-    public enum ActiveEffect
+    public enum CardActiveEffect
     {
         Invalid,
         PlayCard,

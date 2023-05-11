@@ -5,6 +5,6 @@ namespace InterruptingCards.Models
 {
     public interface IActiveCard : ICard
     {
-        ActiveEffect Effect { get; }
+        CardActiveEffect ActiveEffect { get; }
     }
 }

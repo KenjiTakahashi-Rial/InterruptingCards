@@ -14,8 +14,6 @@ namespace InterruptingCards.Behaviours
 
         ICard Card { get; set; }
 
-        IFactory Factory { get; }
-
         void UnsubscribeAllOnClicked();
 
         void UnsubscribeAllOnValueChanged();

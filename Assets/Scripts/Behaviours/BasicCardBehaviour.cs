@@ -16,6 +16,8 @@ namespace InterruptingCards.Behaviours
 
         [SerializeField] protected TextMeshPro _cardText;
         [SerializeField] protected SpriteRenderer _cardSprite;
+        [SerializeField] protected CardSuit _startingSuit;
+        [SerializeField] protected CardRank _startingRank;
 
         protected bool _offlineIsFaceUp;
         protected ICard _card;
@@ -56,7 +58,9 @@ namespace InterruptingCards.Behaviours
             }
         }
 
-        public IFactory Factory => BasicFactory.Singleton;
+        protected virtual int StartingCardId => CardConfig.GetCardId(_startingSuit, _startingRank);
+
+        protected virtual IFactory Factory => BasicFactory.Singleton;
 
         public override void OnNetworkSpawn()
         {
@@ -71,6 +75,16 @@ namespace InterruptingCards.Behaviours
         {
             _cardId.OnValueChanged -= HandleCardIdChanged;
             _isFaceUp.OnValueChanged -= HandleFaceUpChanged;
+        }
+
+        public void UnsubscribeAllOnClicked()
+        {
+            OnClicked = null;
+        }
+
+        public void UnsubscribeAllOnValueChanged()
+        {
+            OnValueChanged = null;
         }
 
         protected void HandleCardIdChanged(int oldValue, int newValue)
@@ -97,16 +111,6 @@ namespace InterruptingCards.Behaviours
             Refresh();
         }
 
-        public void UnsubscribeAllOnClicked()
-        {
-            OnClicked = null;
-        }
-
-        public void UnsubscribeAllOnValueChanged()
-        {
-            OnValueChanged = null;
-        }
-
         protected virtual void Refresh()
         {
             if (Card == null)
@@ -130,6 +134,11 @@ namespace InterruptingCards.Behaviours
         protected virtual void Awake()
         {
             _originalScale = transform.localScale;
+
+            if (_startingSuit != CardSuit.Invalid && _startingRank != CardRank.Invalid)
+            {
+                Card = Factory.CreateCard(StartingCardId);
+            }
         }
 
         protected void Update()

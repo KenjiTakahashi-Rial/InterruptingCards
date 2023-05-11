@@ -12,13 +12,13 @@ namespace InterruptingCards.Models
             Name = metadataCard.Name;
         }
 
-        public virtual int Id { get; private set; }
+        public virtual int Id { get; }
 
-        public virtual CardSuit Suit { get; private set; }
+        public virtual CardSuit Suit { get; }
 
-        public virtual CardRank Rank { get; private set; }
+        public virtual CardRank Rank { get; }
 
-        public virtual string Name { get; private set; }
+        public virtual string Name { get; }
 
         public virtual bool Equals(ICard other)
         {

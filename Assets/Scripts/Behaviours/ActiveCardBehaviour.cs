@@ -13,8 +13,11 @@ namespace InterruptingCards.Behaviours
 
         private readonly NetworkVariable<bool> _isActivated = new(true);
 
+        private new IActiveCard _card;
         private Quaternion _originalRotation;
         private Quaternion _activatedRotation;
+
+        public event Action OnActivated;
 
         public bool IsActivated
         {
@@ -26,18 +29,29 @@ namespace InterruptingCards.Behaviours
             }
         }
 
-        public new ICard Card
+        public new IActiveCard Card
         {
-            get => base.Card;
+            get => _card;
             set
             {
-                if (value is not IActiveEffect)
-                {
-                    throw new ArgumentException("Must use a card with an active effect");
-                }
+                _card = value;
 
                 base.Card = value;
             }
+        }
+
+        public void UnsubscribeAllOnActivated()
+        {
+            OnActivated = null;
+        }
+
+        protected void HandleActivatedChanged(bool oldValue, bool newValue)
+        {
+            var before = oldValue ? "activated" : "not activated";
+            var after = newValue ? "activated" : "not activated";
+            Debug.Log($"Active card changed ({before} -> {after})");
+
+            Refresh();
         }
 
         protected override void Awake()

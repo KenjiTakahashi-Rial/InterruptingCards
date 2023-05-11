@@ -302,11 +302,11 @@ namespace InterruptingCards.Managers
             }
         }
 
-        protected virtual void HandleEffect(ActiveEffect effect)
+        protected virtual void HandleEffect(CardActiveEffect effect)
         {
             switch (effect)
             {
-                case ActiveEffect.PlayCard:
+                case CardActiveEffect.PlayCard:
                     break;
                 default:
                     throw new NotImplementedException();
@@ -534,7 +534,7 @@ namespace InterruptingCards.Managers
             return true;
         }
 
-        protected virtual void TryInterrupt(ActiveEffect effect)
+        protected virtual void TryInterrupt(CardActiveEffect effect)
         {
             if (CanInterrupt(_selfId))
             {
@@ -545,11 +545,11 @@ namespace InterruptingCards.Managers
         // TODO: Temporary
         protected virtual void TryInterruptPlayCard()
         {
-            TryInterrupt(ActiveEffect.PlayCard);
+            TryInterrupt(CardActiveEffect.PlayCard);
         }
 
         [ServerRpc]
-        protected virtual void InterruptServerRpc(ActiveEffect effect, ServerRpcParams serverRpcParams = default)
+        protected virtual void InterruptServerRpc(CardActiveEffect effect, ServerRpcParams serverRpcParams = default)
         {
 
             if (!CanInterrupt(serverRpcParams.Receive.SenderClientId))
