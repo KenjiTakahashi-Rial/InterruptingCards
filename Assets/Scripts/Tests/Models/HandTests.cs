@@ -5,9 +5,10 @@ using System.Reflection;
 
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 using InterruptingCards.Models;
-using UnityEngine.TestTools;
+using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Tests
 {

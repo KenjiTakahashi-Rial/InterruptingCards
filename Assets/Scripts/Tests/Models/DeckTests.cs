@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 using InterruptingCards.Models;
+using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Tests
 {
