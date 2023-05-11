@@ -177,7 +177,7 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public virtual void StartGame()
+        public virtual void HandleInGame()
         {
             Debug.Log("Starting Game");
 
@@ -195,7 +195,7 @@ namespace InterruptingCards.Managers
             _activePlayerNode = _players.First;
         }
 
-        public virtual void ShiftTurn(int shifts = 1)
+        public virtual void HandleEndTurn(int shifts = 1)
         {
             Debug.Log($"Shifting turn {shifts} times");
 
@@ -205,7 +205,7 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public virtual void EndGame()
+        public virtual void HandleEndGame()
         {
             Debug.Log("Ending game");
 

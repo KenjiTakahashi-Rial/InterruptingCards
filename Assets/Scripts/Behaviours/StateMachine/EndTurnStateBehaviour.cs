@@ -12,7 +12,7 @@ namespace InterruptingCards.Behaviours
 
         override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            _gameManager.Value.ShiftTurn();
+            _gameManager.Value.HandleEndTurn();
         }
     }
 }

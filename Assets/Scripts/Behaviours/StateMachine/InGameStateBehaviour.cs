@@ -12,7 +12,7 @@ namespace InterruptingCards.Behaviours
 
         public override void OnStateMachineEnter(Animator animator, int stateMachinePathHash)
         {
-            _gameManager.Value.StartGame();
+            _gameManager.Value.HandleInGame();
         }
     }
 }
