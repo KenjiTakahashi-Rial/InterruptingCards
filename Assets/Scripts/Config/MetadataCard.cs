@@ -10,7 +10,7 @@ namespace InterruptingCards.Models
     public class MetadataCard
     {
         /******************************************************************************************\
-         * JSON keys                                                                              *
+         * JSON Keys                                                                              *
         \******************************************************************************************/
 
         [SerializeField] private string _suitName;
@@ -24,7 +24,7 @@ namespace InterruptingCards.Models
         [SerializeField] private string _activeEffectName;
 
         /******************************************************************************************\
-         * Lazy backing fields                                                                    *
+         * Lazy Backing Fields                                                                    *
         \******************************************************************************************/
 
         private Lazy<int> _id;
@@ -36,7 +36,7 @@ namespace InterruptingCards.Models
         private Lazy<CardActiveEffect> _activeEffect;
 
         /******************************************************************************************\
-         * Public getters                                                                         *
+         * Public Getters                                                                         *
         \******************************************************************************************/
 
         public int Id
@@ -80,7 +80,7 @@ namespace InterruptingCards.Models
         }
 
         /******************************************************************************************\
-         * Helper methods                                                                         *
+         * Helper Methods                                                                         *
         \******************************************************************************************/
 
         private Func<E> EnumValueFactory<E>(string name)
