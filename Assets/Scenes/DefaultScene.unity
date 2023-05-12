@@ -375,6 +375,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9541d86e2fd84c1d9990edf0852d74ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &985133705 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9196304801424939676, guid: 8345f3add0f820a44aac365c74be067c, type: 3}
+  m_PrefabInstance: {fileID: 2058083998825954502}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 561eb0189335fbe48a9ac0bc3370fd75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!212 &1018392368 stripped
 SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 5684152461235836607, guid: 8345f3add0f820a44aac365c74be067c, type: 3}
@@ -1160,6 +1171,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 6050427178117261016, guid: 9024fb1d93185e14bb4fad2f53cff158, type: 3}
+      propertyPath: _cardPack
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6050427178117261016, guid: 9024fb1d93185e14bb4fad2f53cff158, type: 3}
       propertyPath: _deckManager
       value: 
       objectReference: {fileID: 2058083998825954505}
@@ -1170,11 +1185,15 @@ PrefabInstance:
     - target: {fileID: 6050427178117261016, guid: 9024fb1d93185e14bb4fad2f53cff158, type: 3}
       propertyPath: _interruptCard
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 985133705}
     - target: {fileID: 6050427178117261016, guid: 9024fb1d93185e14bb4fad2f53cff158, type: 3}
       propertyPath: _discardManager
       value: 
       objectReference: {fileID: 2058083998825954504}
+    - target: {fileID: 6050427178117261016, guid: 9024fb1d93185e14bb4fad2f53cff158, type: 3}
+      propertyPath: _interruptingCard
+      value: 
+      objectReference: {fileID: 985133705}
     - target: {fileID: 6050427178117261016, guid: 9024fb1d93185e14bb4fad2f53cff158, type: 3}
       propertyPath: _handManagers.Array.size
       value: 2

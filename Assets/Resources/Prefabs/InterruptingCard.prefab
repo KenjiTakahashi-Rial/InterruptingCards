@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 1075542451944468006}
   - component: {fileID: 7656292452901944702}
   m_Layer: 5
-  m_Name: ActiveCard
+  m_Name: InterruptingCard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -11,6 +11,6 @@ namespace InterruptingCards.Factories
 
         public D Create(IList<C> cards = null);
 
-        public D Create(CardPack pack);
+        public D Create(CardPack cardPack);
     }
 }

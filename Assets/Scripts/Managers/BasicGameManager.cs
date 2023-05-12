@@ -98,7 +98,7 @@ namespace InterruptingCards.Managers
         [SerializeField] protected BasicDeckManager _discardManager;
         [SerializeField] protected BasicHandManager[] _handManagers;
         [SerializeField] protected TextMeshPro _tempInfoText;
-        [SerializeField] protected InterruptingCardBehaviour _interruptCard;
+        [SerializeField] protected InterruptingCardBehaviour _interruptingCard;
 
         protected ulong _selfId; // The player that is on this device
 
@@ -148,8 +148,8 @@ namespace InterruptingCards.Managers
                 handManager.OnCardClicked += TryPlayCard;
             }
 
-            _interruptCard.OnClicked -= TryInterruptPlayCard;
-            _interruptCard.OnClicked += TryInterruptPlayCard;
+            _interruptingCard.OnClicked -= TryInterruptPlayCard;
+            _interruptingCard.OnClicked += TryInterruptPlayCard;
         }
 
         public override void OnNetworkDespawn()
@@ -198,7 +198,9 @@ namespace InterruptingCards.Managers
 
         public virtual void HandleStartTurn()
         {
-            _interruptCard.IsActivated = false;
+            Debug.Log($"Starting player {_activePlayerNode.Value.Id} turn");
+
+            _interruptingCard.IsActivated = false;
         }
 
         public virtual void HandleEndTurn(int shifts = 1)

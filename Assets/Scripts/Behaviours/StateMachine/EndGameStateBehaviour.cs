@@ -10,7 +10,7 @@ namespace InterruptingCards.Behaviours
     {
         private readonly Lazy<IGameManager> _gameManager = new(() => BasicGameManager.Singleton);
 
-        override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+        public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             _gameManager.Value.HandleEndGame();
         }
