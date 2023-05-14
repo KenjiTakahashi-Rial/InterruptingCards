@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using InterruptingCards.Behaviours;
+using InterruptingCards.Config;
 using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
@@ -11,6 +12,8 @@ namespace InterruptingCards.Managers
 {
     public class BasicHandManager : MonoBehaviour, IHandManager<BasicCard, BasicHand>
     {
+        protected CardConfig _cardConfig = CardConfig.Singleton;
+
         [SerializeField] private List<BasicCardBehaviour> _cardSlots;
 
         public event Action<BasicCard> OnCardClicked;
@@ -34,7 +37,7 @@ namespace InterruptingCards.Managers
 
         public virtual BasicCard Remove(int cardId)
         {
-            Debug.Log($"Removing {cardId} from hand");
+            Debug.Log($"Removing {_cardConfig.GetCardString(cardId)} from hand");
 
             var card = Hand.Remove(cardId);
             SetAllSlotCards();

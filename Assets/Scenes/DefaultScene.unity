@@ -1039,6 +1039,14 @@ PrefabInstance:
       propertyPath: <IsLocalPlayer>k__BackingField
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9196304801424939676, guid: 8345f3add0f820a44aac365c74be067c, type: 3}
+      propertyPath: _startingRank
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 9196304801424939676, guid: 8345f3add0f820a44aac365c74be067c, type: 3}
+      propertyPath: _startingSuit
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 9207369008748872315, guid: 8345f3add0f820a44aac365c74be067c, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 915610384

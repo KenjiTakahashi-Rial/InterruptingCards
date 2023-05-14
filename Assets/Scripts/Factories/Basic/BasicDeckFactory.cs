@@ -9,6 +9,8 @@ namespace InterruptingCards.Factories
     public class BasicDeckFactory : IDeckFactory<BasicCard, BasicDeck>
     {
         protected static readonly IDeckFactory<BasicCard, BasicDeck> Instance = new BasicDeckFactory();
+        protected readonly ICardFactory<BasicCard> _cardFactory = BasicCardFactory.Singleton;
+        protected readonly CardConfig _cardConfig = CardConfig.Singleton;
         protected readonly Dictionary<CardPack, IList<BasicCard>> _packs = new();
 
         private BasicDeckFactory() { }
@@ -32,14 +34,16 @@ namespace InterruptingCards.Factories
 
         protected void Load(CardPack cardPack)
         {
+            _cardFactory.Load(cardPack);
+
             var cards = new List<BasicCard>();
-            var pack = CardConfig.Singleton.GetCardPack(cardPack);
+            var pack = _cardConfig.GetCardPack(cardPack);
 
             foreach (var id in pack.Select(c => c.Id))
             {
-                for (var i = 0; i < CardConfig.Singleton.GetMetadataCard(id).Count; i++)
+                for (var i = 0; i < _cardConfig.GetMetadataCard(id).Count; i++)
                 {
-                    cards.Add(BasicCardFactory.Singleton.Create(id));
+                    cards.Add(_cardFactory.Create(id));
                 }
             }
 

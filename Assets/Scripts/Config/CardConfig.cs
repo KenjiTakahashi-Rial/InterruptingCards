@@ -21,7 +21,7 @@ namespace InterruptingCards.Config
         private static readonly int SuitBitMask = ~0 << (IdBitCount - SuitBitCount);
         private static readonly int RankBitMask = (1 << RankBitCount) - 1;
 
-        private readonly string PackDirectory = Path.Combine("Assets", "Scripts", "Config", "Packs");
+        private readonly string _packDirectory = Path.Combine("Assets", "Scripts", "Config", "Packs");
 
         private readonly Dictionary<int, MetadataCard> _cards = new();
         private readonly Dictionary<CardPack, ImmutableList<MetadataCard>> _packs = new();
@@ -30,14 +30,21 @@ namespace InterruptingCards.Config
 
         public static int GetCardId(CardSuit suit, CardRank rank)
         {
-            return ((int)suit << RankBitCount & SuitBitMask) | ((int)rank & RankBitMask);
+            return (((int)suit << RankBitCount) & SuitBitMask) | ((int)rank & RankBitMask);
+        }
+
+        public string GetCardString(int id)
+        {
+            var suit = (CardSuit)((id & SuitBitMask) >> RankBitCount);
+            var rank = (CardRank)(id & RankBitMask);
+            return $"{rank} | {suit}";
         }
 
         public MetadataCard GetMetadataCard(int id)
         {
             if (!_cards.ContainsKey(id))
             {
-                Debug.LogWarning($"Card {id} not found. Is the card pack loaded?");
+                Debug.LogWarning($"Card {GetCardString(id)} not found. Is the card pack loaded?");
             }
 
             return _cards[id];
@@ -55,8 +62,10 @@ namespace InterruptingCards.Config
 
         private void Load(CardPack cardPack)
         {
+            Debug.Log($"CardConfig loading {cardPack}");
+
             var packName = cardPack.ToString();
-            var packPath = Path.Combine(PackDirectory, packName);
+            var packPath = Path.Combine(_packDirectory, packName);
             var cardPaths = Directory.GetFiles(packPath, "*." + PackFileExtension);
             var cards = new MetadataCard[cardPaths.Length];
 

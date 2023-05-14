@@ -238,6 +238,8 @@ namespace InterruptingCards.Managers
         {
             Debug.Log("Waking game manager");
 
+            _cardFactory.Load(_cardPack);
+
             Singleton = this;
         }
 
@@ -558,7 +560,7 @@ namespace InterruptingCards.Managers
         // TODO: Temporary
         protected virtual void TryInterruptPlayCard()
         {
-            TryInterrupt(_interruptCard.Card.ActiveEffect);
+            TryInterrupt(_interruptingCard.Card.ActiveEffect);
         }
 
         [ServerRpc]
@@ -573,7 +575,7 @@ namespace InterruptingCards.Managers
 
             Debug.Log($"Player {senderId} interrupting player {_activePlayerNode.Value.Id}'s turn");
 
-            _interruptCard.IsActivated = true;
+            _interruptingCard.IsActivated = true;
             HandleEffect(effect);
         }
     }

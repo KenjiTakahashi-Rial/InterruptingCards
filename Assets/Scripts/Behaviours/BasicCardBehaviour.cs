@@ -59,8 +59,6 @@ namespace InterruptingCards.Behaviours
             }
         }
 
-        protected virtual int StartingCardId => CardConfig.GetCardId(_startingSuit, _startingRank);
-
         protected virtual ICardFactory<BasicCard> CardFactory => BasicCardFactory.Singleton;
 
         public override void OnNetworkSpawn()
@@ -70,6 +68,11 @@ namespace InterruptingCards.Behaviours
 
             _isFaceUp.OnValueChanged -= HandleFaceUpChanged;
             _isFaceUp.OnValueChanged += HandleFaceUpChanged;
+
+// Assign to self to set NetworkVariable and 
+#pragma warning disable S1656 // Variables should not be self-assigned
+            Card = Card;
+#pragma warning restore S1656 // Variables should not be self-assigned
         }
 
         public override void OnNetworkDespawn()
@@ -135,14 +138,20 @@ namespace InterruptingCards.Behaviours
         protected virtual void Awake()
         {
             _originalScale = transform.localScale;
+        }
 
+        protected virtual void Start()
+        {
+            // Duplicated in other card behaviours since NetworkBehaviour doesn't work with generics :(
+            // Must happen after awake so factory can be loaded by game manager
             if (_startingSuit != CardSuit.Invalid && _startingRank != CardRank.Invalid)
             {
-                Card = CardFactory.Create(StartingCardId);
+                var cardId = CardConfig.GetCardId(_startingSuit, _startingRank);
+                Card = CardFactory.Create(cardId);
             }
         }
 
-        protected void Update()
+        protected virtual void Update()
         {
             // TODO: NetworkManager spawns the objects at wrong scale. Figure out why and find a better solution
             if (transform.localScale != _originalScale)

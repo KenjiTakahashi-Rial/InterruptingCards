@@ -4,16 +4,18 @@ using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Models;
+using InterruptingCards.Config;
+using InterruptingCards.Factories;
 
 namespace InterruptingCards.Behaviours
 {
-    public class InterruptingCardBehaviour : BasicCardBehaviour, IActiveCardBehaviour<BasicCard>
+    public class InterruptingCardBehaviour : BasicCardBehaviour, IActiveCardBehaviour<InterruptingCard>
     {
         private const float ActivatedAngle = 90;
 
         private readonly NetworkVariable<bool> _isActivated = new(true);
 
-        private new IActiveCard _card;
+        private new InterruptingCard _card;
         private Quaternion _originalRotation;
         private Quaternion _activatedRotation;
 
@@ -29,15 +31,36 @@ namespace InterruptingCards.Behaviours
             }
         }
 
-        public new IActiveCard Card
+        public new InterruptingCard Card
         {
             get => _card;
             set
             {
                 _card = value;
-
-                base.Card = (BasicCard)value;
+                base.Card = value;
             }
+        }
+
+        protected new ICardFactory<InterruptingCard> CardFactory => InterruptingCardFactory.Singleton;
+
+        public override void OnNetworkSpawn()
+        {
+            _isActivated.OnValueChanged -= HandleActivatedChanged;
+            _isActivated.OnValueChanged += HandleActivatedChanged;
+
+// Assign to self to set NetworkVariable and refresh
+#pragma warning disable S1656 // Variables should not be self-assigned
+            Card = Card;
+#pragma warning restore S1656 // Variables should not be self-assigned
+
+            base.OnNetworkDespawn();
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            _isActivated.OnValueChanged -= HandleActivatedChanged;
+
+            base.OnNetworkDespawn();
         }
 
         public void UnsubscribeAllOnActivated()
@@ -68,6 +91,19 @@ namespace InterruptingCards.Behaviours
             transform.Rotate(Vector3.up, ActivatedAngle);
             _activatedRotation = transform.rotation;
             transform.rotation = _originalRotation;
+        }
+
+        protected override void Start()
+        {
+            // Duplicated in other card behaviours since NetworkBehaviour doesn't work with generics :(
+            // Must happen after awake so factory can be loaded by game manager
+            if (_startingSuit != CardSuit.Invalid && _startingRank != CardRank.Invalid)
+            {
+                var cardId = CardConfig.GetCardId(_startingSuit, _startingRank);
+                Card = CardFactory.Create(cardId);
+            }
+
+            base.Start();
         }
 
         protected override void Refresh()
