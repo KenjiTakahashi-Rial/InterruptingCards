@@ -8,7 +8,7 @@ namespace InterruptingCards.Behaviours
 {
     public class InGameStateBehaviour : StateMachineBehaviour
     {
-        private readonly Lazy<IGameManager> _gameManager = new(() => BasicGameManager.Singleton);
+        private readonly Lazy<AbstractGameManager> _gameManager = new(() => AbstractGameManager.Singleton);
 
         public override void OnStateMachineEnter(Animator animator, int stateMachinePathHash)
         {

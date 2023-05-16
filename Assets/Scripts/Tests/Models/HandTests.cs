@@ -1,6 +1,5 @@
 using NUnit.Framework;
 
-using InterruptingCards.Factories;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Tests
@@ -8,7 +7,7 @@ namespace InterruptingCards.Tests
     [TestFixture]
     public class HandTests : AbstractModelTests
     {
-        private readonly IHandFactory<BasicCard, BasicHand> _handFactory = BasicHandFactory.Singleton;
+        private readonly HandFactory _handFactory = HandFactory.Singleton;
         
         [Test]
         public void TestEmpty()

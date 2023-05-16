@@ -83,9 +83,13 @@ namespace InterruptingCards.Models
          * Helper Methods                                                                         *
         \******************************************************************************************/
 
-        private Func<E> EnumValueFactory<E>(string name)
+        private Func<E> EnumValueFactory<E>(string name) where E : struct
         {
-            return () => (E)Enum.Parse(typeof(E), name);
+            return () => 
+            {
+                Enum.TryParse(name, out E outValue);
+                return outValue;
+            };
         }
     }
 }

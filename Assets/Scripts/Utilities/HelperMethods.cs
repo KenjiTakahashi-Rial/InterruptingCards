@@ -6,7 +6,7 @@ namespace InterruptingCards.Utilities
 {
     public static class HelperMethods
     {
-        public static C Remove<C>(IList<C> cards, int cardId) where C : ICard
+        public static Card Remove(IList<Card> cards, int cardId)
         {
             for (var i = 0; i < cards.Count; i++)
             {

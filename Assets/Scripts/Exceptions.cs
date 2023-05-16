@@ -14,19 +14,7 @@ namespace InterruptingCards
 
         protected NetworkManagerException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
-
-    [Serializable]
-    public class ObjectManagerException : Exception
-    {
-        public ObjectManagerException() { }
-
-        public ObjectManagerException(string message) : base(message) { }
-
-        public ObjectManagerException(string message, Exception inner) : base(message, inner) { }
-
-        protected ObjectManagerException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-    }
-
+    
     [Serializable]
     public class CardNotFoundException : Exception
     {
@@ -52,18 +40,6 @@ namespace InterruptingCards
     }
 
     [Serializable]
-    public class PlayerNotFoundException : Exception
-    {
-        public PlayerNotFoundException() { }
-
-        public PlayerNotFoundException(string message) : base(message) { }
-
-        public PlayerNotFoundException(string message, Exception inner) : base(message, inner) { }
-
-        protected PlayerNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-    }
-
-    [Serializable]
     public class TooManyCardsException : Exception
     {
         public TooManyCardsException() { }
@@ -85,29 +61,5 @@ namespace InterruptingCards
         public TooManyPlayersException(string message, Exception inner) : base(message, inner) { }
 
         protected TooManyPlayersException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-    }
-
-    [Serializable]
-    public class InvalidOperationException : Exception
-    {
-        public InvalidOperationException() { }
-
-        public InvalidOperationException(string message) : base(message) { }
-
-        public InvalidOperationException(string message, Exception inner) : base(message, inner) { }
-
-        protected InvalidOperationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-    }
-
-    [Serializable]
-    public class StateBehaviourNotFoundException : Exception
-    {
-        public StateBehaviourNotFoundException() { }
-
-        public StateBehaviourNotFoundException(string message) : base(message) { }
-
-        public StateBehaviourNotFoundException(string message, Exception inner) : base(message, inner) { }
-
-        protected StateBehaviourNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }

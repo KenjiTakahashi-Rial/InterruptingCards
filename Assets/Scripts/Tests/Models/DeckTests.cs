@@ -1,14 +1,22 @@
 using NUnit.Framework;
 
+using InterruptingCards.Config;
 using InterruptingCards.Models;
-using InterruptingCards.Factories;
 
 namespace InterruptingCards.Tests
 {
     [TestFixture]
     public class DeckTests : AbstractModelTests
     {
-        private readonly IDeckFactory<BasicCard, BasicDeck> _deckFactory = BasicDeckFactory.Singleton;
+        private readonly DeckFactory _deckFactory = DeckFactory.Singleton;
+
+        [OneTimeSetUp]
+        public override void OneTimeSetUp()
+        {
+            base.OneTimeSetUp();
+
+            _deckFactory.Load(Pack);
+        }
 
         [Test]
         public void TestShuffle()
