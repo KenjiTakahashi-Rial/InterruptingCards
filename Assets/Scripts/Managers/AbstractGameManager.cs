@@ -109,9 +109,9 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public virtual void HandleInGame()
+        public virtual void HandleInitializeGame()
         {
-            Debug.Log("Starting Game");
+            Debug.Log("Initializing Game");
 
             AssignHands();
             
@@ -125,6 +125,8 @@ namespace InterruptingCards.Managers
             }
 
             _activePlayerIndex = 0;
+
+            StateTriggerClientRpc(StateMachine.StartGameTrigger);
         }
 
         public abstract void HandleStartTurn();
@@ -242,18 +244,6 @@ namespace InterruptingCards.Managers
             }
         }
 
-        protected virtual void HandleEffect(CardActiveEffect effect)
-        {
-            switch (effect)
-            {
-                case CardActiveEffect.PlayCard:
-                    Debug.Log("PlayCard active effect");
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
         [ServerRpc]
         protected virtual void AddPlayerServerRpc(ulong clientId)
         {
@@ -319,7 +309,7 @@ namespace InterruptingCards.Managers
             
             if (_notReadyPlayers.Count == 0)
             {
-                StateTriggerClientRpc(StateMachine.StartGameTrigger);
+                StateTriggerClientRpc(StateMachine.AllReadyTrigger);
             }
         }
 
@@ -328,13 +318,13 @@ namespace InterruptingCards.Managers
         {
             if (_players.Count < MinPlayers)
             {
-                Debug.Log($"Cannot deal hands before {MinPlayers} joined");
+                Debug.LogWarning($"Cannot deal hands before {MinPlayers} joined");
                 return;
             }
 
-            if (_activePlayerNode != null)
+            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.InitializingGameState))
             {
-                Debug.Log("Cannot deal hands during a game");
+                Debug.LogWarning("Cannot deal hands outside of game initialization state");
                 return;
             }
 

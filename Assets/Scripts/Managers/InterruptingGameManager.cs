@@ -31,9 +31,9 @@ namespace InterruptingCards.Managers
             _interruptingCard.OnClicked -= TryInterruptPlayCard;
         }
 
-        public override void HandleInGame()
+        public override void HandleInitializeGame()
         {
-            base.HandleInGame();
+            base.HandleInitializeGame();
 
             if (IsServer)
             {
@@ -45,11 +45,36 @@ namespace InterruptingCards.Managers
 
         public override void HandleStartTurn()
         {
-            Debug.Log($"Starting player {_activePlayerNode.Value.Id} turn");
+            Debug.Log($"Starting player {ActivePlayer.Id} turn");
 
             if (IsServer)
             {
                 _interruptingCard.IsActivated = false;
+            }
+        }
+
+        public override void HandleEndGame()
+        {
+            base.HandleEndGame();
+
+            if (IsServer)
+            {
+                _interruptingCard.Card = null;
+            }
+        }
+
+
+        protected virtual void HandleEffect(CardActiveEffect effect)
+        {
+            Debug.Log($"{effect} active effect");
+
+            switch (effect)
+            {
+                case CardActiveEffect.PlayCard:
+                    StateTriggerClientRpc(StateMachine.PlayCardActiveEffectTrigger);
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
         }
 

@@ -1947,6 +1947,10 @@ PrefabInstance:
       propertyPath: _handManagers.Array.data[1]
       value: 
       objectReference: {fileID: 2058083998825954511}
+    - target: {fileID: 62487364915421670, guid: 235811e1ed9e6a04ba4c4027b6c89949, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 7a8c5d900bb71854398779eb3073b50d, type: 2}
     - target: {fileID: 62487364915421671, guid: 235811e1ed9e6a04ba4c4027b6c89949, type: 3}
       propertyPath: m_Name
       value: InterruptingGameManager

@@ -1,5 +1,6 @@
 namespace InterruptingCards.Config
 {
+    // TODO: Make state tense consistent
     public enum StateMachine
     {
         Invalid,
@@ -7,6 +8,7 @@ namespace InterruptingCards.Config
         // States
         WaitingForClientsState,
         WaitingForAllReadyState,
+        InitializingGameState,
         EndGameState,
         StartTurnState,
         WaitingForDrawCardState,
@@ -14,6 +16,7 @@ namespace InterruptingCards.Config
         EndTurnState,
 
         // Triggers
+        AllReadyTrigger,
         DrawCardTrigger,
         ForceEndTurnTrigger,
         ForceEndGameTrigger,

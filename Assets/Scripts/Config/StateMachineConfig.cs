@@ -14,6 +14,7 @@ namespace InterruptingCards.Config
             // States
             { StateMachine.WaitingForAllReadyState, "Base." +               "WaitingForAllReady" },
             { StateMachine.WaitingForClientsState,  "Base." +               "WaitingForClients"  },
+            { StateMachine.InitializingGameState,   "Base." +               "InitializingGame"   },
             { StateMachine.EndGameState,            "Base.InGame." +        "EndGame"            },
             { StateMachine.StartTurnState,          "Base.InGame.PlayerTurns.StartTurn"          },
             { StateMachine.EndTurnState,            "Base.InGame.PlayerTurns.EndTurn"            },
@@ -21,6 +22,7 @@ namespace InterruptingCards.Config
             { StateMachine.WaitingForPlayCardState, "Base.InGame.PlayerTurns.WaitingForPlayCard" },
 
             // Triggers
+            { StateMachine.AllReadyTrigger,             "allReady"             },
             { StateMachine.DrawCardTrigger,             "drawCard"             },
             { StateMachine.ForceEndTurnTrigger,         "forceEndTurn"         },
             { StateMachine.ForceEndGameTrigger,         "forceEndGame"         },

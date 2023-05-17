@@ -14,6 +14,7 @@ namespace InterruptingCards.Models
             ActiveEffect = metadataCard.ActiveEffect;
         }
 
+        // TODO: Make an instance ID too
         public int Id { get; }
 
         public CardSuit Suit { get; }
