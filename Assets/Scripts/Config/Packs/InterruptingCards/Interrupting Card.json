@@ -3,5 +3,5 @@
     "_rankName": "InterruptingRank",
     "_name": "Interrupting Card",
     "_count": 0,
-    "_activeEffect": "PlayCard"
+    "_activeEffectName": "PlayCard"
 }

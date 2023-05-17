@@ -11,7 +11,7 @@ namespace InterruptingCards.Behaviours
 {
     public class CardBehaviour : NetworkBehaviour
     {
-        private const float ActivatedAngle = 90;
+        private const float ActivatedAngle = -90;
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
         private readonly CardFactory _cardFactory = CardFactory.Singleton;
@@ -170,10 +170,9 @@ namespace InterruptingCards.Behaviours
         private void Awake()
         {
             _originalScale = transform.localScale;
-
             _originalRotation = transform.rotation;
-            transform.Rotate(Vector3.up, ActivatedAngle);
-            _activatedRotation = transform.rotation;
+            var angles = _originalRotation.eulerAngles;
+            _activatedRotation = Quaternion.Euler(angles.x, angles.y, angles.z + ActivatedAngle);
             transform.rotation = _originalRotation;
 
             _cardSprite.enabled = false;
