@@ -1,10 +1,12 @@
+using System.Linq;
+
+using Unity.Netcode;
+using UnityEngine;
+
 using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
 using InterruptingCards.Models;
-
-using Unity.Netcode;
-
-using UnityEngine;
+using System;
 
 namespace InterruptingCards.Managers
 {
@@ -53,7 +55,7 @@ namespace InterruptingCards.Managers
 
         protected override bool CanDrawCard(ulong id)
         {
-            var playerTurn = id == _activePlayerNode.Value.Id;
+            var playerTurn = id == ActivePlayer.Id;
             var playerInterrupt = id == _interruptingPlayer?.Id;
             var interruptInProgress = _interruptingPlayer != null;
 
@@ -80,7 +82,7 @@ namespace InterruptingCards.Managers
 
         protected override bool CanPlayCard(ulong id)
         {
-            var playerTurn = id == _activePlayerNode.Value.Id;
+            var playerTurn = id == ActivePlayer.Id;
             var playerInterrupt = id == _interruptingPlayer?.Id;
             var interruptInProgress = _interruptingPlayer != null;
 
@@ -107,7 +109,7 @@ namespace InterruptingCards.Managers
 
         protected virtual bool CanInterrupt(ulong id)
         {
-            var playerTurn = id == _activePlayerNode.Value.Id;
+            var playerTurn = id == ActivePlayer.Id;
             var interruptInProgress = _interruptingPlayer != null;
 
             if (playerTurn)
@@ -149,9 +151,10 @@ namespace InterruptingCards.Managers
                 return;
             }
 
-            Debug.Log($"Player {senderId} interrupting player {_activePlayerNode.Value.Id}'s turn");
+            Debug.Log($"Player {senderId} interrupting player {ActivePlayer.Id}'s turn");
 
             _interruptingCard.IsActivated = true;
+            _interruptingPlayer = _players.Single(p => p.Id == senderId);
             HandleEffect(effect);
         }
     }

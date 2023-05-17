@@ -6,6 +6,7 @@ using UnityEngine;
 
 using InterruptingCards.Config;
 using InterruptingCards.Models;
+using System.Linq;
 
 namespace InterruptingCards.Managers
 {
@@ -26,8 +27,7 @@ namespace InterruptingCards.Managers
         protected readonly List<ulong> _lobby = new();
         protected readonly HashSet<ulong> _notReadyPlayers = new();
         
-        protected readonly LinkedList<Player> _players = new();
-        protected LinkedListNode<Player> _activePlayerNode;
+        protected readonly List<Player> _players = new();
 
         [SerializeField] protected CardPack _cardPack;
         [SerializeField] protected Animator _gameStateMachine;
@@ -36,6 +36,7 @@ namespace InterruptingCards.Managers
         [SerializeField] protected HandManager[] _handManagers;
         [SerializeField] protected TextMeshPro _tempInfoText;
 
+        protected int _activePlayerIndex;
         protected ulong _selfId; // The player that is on this device
 
         /******************************************************************************************\
@@ -54,6 +55,8 @@ namespace InterruptingCards.Managers
 
         protected virtual int CurrentStateId =>
             _gameStateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash;
+
+        protected virtual Player ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex];
 
         /******************************************************************************************\
          * Public Methods                                                                         *
@@ -93,8 +96,6 @@ namespace InterruptingCards.Managers
                 NetworkManager.OnClientDisconnectCallback -= RemovePlayerServerRpc;
             }
 
-            _activePlayerNode = null;
-
             _deckManager.OnDeckClicked -= TryDrawCard;
 
             foreach (var handManager in _handManagers)
@@ -123,7 +124,7 @@ namespace InterruptingCards.Managers
                 DealHandsServerRpc();
             }
 
-            _activePlayerNode = _players.First;
+            _activePlayerIndex = 0;
         }
 
         public abstract void HandleStartTurn();
@@ -134,7 +135,7 @@ namespace InterruptingCards.Managers
 
             for (var i = 0; i < shifts; i++)
             {
-                _activePlayerNode = _activePlayerNode.Next ?? _players.First;
+                _activePlayerIndex = ++_activePlayerIndex == _players.Count ? 0 : _activePlayerIndex;
             }
         }
 
@@ -143,7 +144,6 @@ namespace InterruptingCards.Managers
             Debug.Log("Ending game");
 
             _players.Clear();
-            _activePlayerNode = null;
             _tempInfoText.SetText("Start the game");
 
             _deckManager.Clear();
@@ -180,12 +180,12 @@ namespace InterruptingCards.Managers
 
         protected virtual void Update()
         {
-            if (_activePlayerNode == null || _tempInfoText == null)
+            if (ActivePlayer == null || _tempInfoText == null)
             {
                 return;
             }
 
-            _tempInfoText.SetText($"{_activePlayerNode.Value.Id}\n{CurrentStateName}");
+            _tempInfoText.SetText($"{ActivePlayer.Id}\n{CurrentStateName}");
         }
 
         [ClientRpc]
@@ -288,7 +288,7 @@ namespace InterruptingCards.Managers
 
             if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForClientsState))
             {
-                if (clientId == _activePlayerNode.Value.Id)
+                if (clientId == ActivePlayer.Id)
                 {
                     StateTriggerClientRpc(StateMachine.ForceEndTurnTrigger);
                 }
@@ -306,7 +306,7 @@ namespace InterruptingCards.Managers
         {
             foreach (var playerId in playerIds)
             {
-               _players.AddLast(_playerFactory.Create(playerId, playerId.ToString()));
+               _players.Add(_playerFactory.Create(playerId, playerId.ToString()));
             }
 
             PlayerReadyServerRpc();
@@ -351,7 +351,7 @@ namespace InterruptingCards.Managers
 
         protected virtual bool CanDrawCard(ulong id)
         {
-            if (id != _activePlayerNode.Value.Id)
+            if (id != ActivePlayer.Id)
             {
                 Debug.Log($"Player {id} cannot draw a card unless it is their turn");
                 return false;
@@ -387,14 +387,14 @@ namespace InterruptingCards.Managers
             Debug.Log("Drawing card");
 
             var card = _deckManager.DrawTop();
-            _activePlayerNode.Value.Hand.Add(card);
+            ActivePlayer.Hand.Add(card);
 
             StateTriggerClientRpc(StateMachine.DrawCardTrigger);
         }
 
-        protected virtual bool CanPlayCard(ulong id)
+        protected virtual bool CanPlayCard(ulong id, int cardId)
         {
-            if (id != _activePlayerNode.Value.Id)
+            if (id != ActivePlayer.Id)
             {
                 Debug.Log($"Player {id} cannot play a card unless it is their turn or they are interrupting");
                 return false;
@@ -429,7 +429,8 @@ namespace InterruptingCards.Managers
 
             Debug.Log("Playing card");
 
-            var card = _activePlayerNode.Value.Hand.Remove(cardId);
+            var player = _players.Single(p => p.Id == senderId);
+            var card = player.Hand.Remove(cardId);
             _discardManager.PlaceTop(card);
 
             StateTriggerClientRpc(StateMachine.PlayCardTrigger);
