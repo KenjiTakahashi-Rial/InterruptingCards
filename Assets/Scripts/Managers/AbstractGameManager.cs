@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
-using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
 using InterruptingCards.Models;
 
@@ -14,70 +12,12 @@ namespace InterruptingCards.Managers
     public abstract class AbstractGameManager : NetworkBehaviour
     {
         /******************************************************************************************\
-         * Constants                                                                              *
-        \******************************************************************************************/
-
-        protected const int GameStateMachineLayer = 0;
-
-        protected const string WaitingForClientsStateName = "Base.WaitingForClients";
-        protected const string WaitingForAllReadyStateName = "Base.WaitingForAllReady";
-
-        protected const string EndGameStateName = "Base.InGame.EndGame";
-
-        protected const string StartTurnStateName = "Base.InGame.PlayerTurns.StartTurn";
-        protected const string WaitingForDrawCardStateName = "Base.InGame.PlayerTurns.WaitingForDrawCard";
-        protected const string WaitingForPlayCardStateName = "Base.InGame.PlayerTurns.WaitingForPlayCard";
-        protected const string EndTurnStateName = "Base.InGame.PlayerTurns.EndTurn";
-
-        protected const string DrawCardTriggerName = "drawCard";
-        protected const string ForceEndTurnTriggerName = "forceEndTurn";
-        protected const string ForceEndGameTriggerName = "forceEndGame";
-        protected const string PlayCardTriggerName = "playCard";
-        protected const string StartGameTriggerName = "startGame";
-        protected const string WaitForReadyTriggerName = "waitForReady";
-
-        /******************************************************************************************\
          * Fields                                                                                 *
         \******************************************************************************************/
+        
+        protected const int GameStateMachineLayer = 0;
 
-        protected static readonly int WaitingForClientsStateId = Animator.StringToHash(WaitingForClientsStateName);
-        protected static readonly int WaitingForAllReadyStateId = Animator.StringToHash(WaitingForAllReadyStateName);
-
-        protected static readonly int EndGameStateId = Animator.StringToHash(EndGameStateName);
-
-        protected static readonly int StartTurnStateId = Animator.StringToHash(StartTurnStateName);
-        protected static readonly int WaitingForDrawCardStateId = Animator.StringToHash(WaitingForDrawCardStateName);
-        protected static readonly int WaitingForPlayCardStateId = Animator.StringToHash(WaitingForPlayCardStateName);
-        protected static readonly int EndTurnStateId = Animator.StringToHash(EndTurnStateName);
-
-        protected static readonly int DrawCardTriggerId = Animator.StringToHash(DrawCardTriggerName);
-        protected static readonly int ForceEndTurnTriggerId = Animator.StringToHash(ForceEndTurnTriggerName);
-        protected static readonly int ForceEndGameTriggerId = Animator.StringToHash(ForceEndGameTriggerName);
-        protected static readonly int PlayCardTriggerId = Animator.StringToHash(PlayCardTriggerName);
-        protected static readonly int StartGameTriggerId = Animator.StringToHash(StartGameTriggerName);
-        protected static readonly int WaitForReadyTriggerId = Animator.StringToHash(WaitForReadyTriggerName);
-
-
-        protected readonly Dictionary<int, string> _stateMachineIdNameMap = new()
-        {
-            { WaitingForClientsStateId, WaitingForClientsStateName },
-            { WaitingForAllReadyStateId, WaitingForAllReadyStateName },
-
-            { EndGameStateId, EndGameStateName },
-
-            { StartTurnStateId, StartTurnStateName },
-            { WaitingForDrawCardStateId, WaitingForDrawCardStateName },
-            { WaitingForPlayCardStateId, WaitingForPlayCardStateName },
-            { EndTurnStateId, EndTurnStateName },
-
-            { DrawCardTriggerId, DrawCardTriggerName },
-            { ForceEndTurnTriggerId, ForceEndTurnTriggerName },
-            { ForceEndGameTriggerId, ForceEndGameTriggerName },
-            { PlayCardTriggerId, PlayCardTriggerName },
-            { StartGameTriggerId, StartGameTriggerName },
-            { WaitForReadyTriggerId, WaitForReadyTriggerName },
-        };
-
+        protected readonly StateMachineConfig _stateMachineConfig = StateMachineConfig.Singleton;
         protected readonly PlayerFactory _playerFactory = PlayerFactory.Singleton;
         protected readonly CardFactory _cardFactory = CardFactory.Singleton;
         protected readonly DeckFactory _deckFactory = DeckFactory.Singleton;
@@ -104,10 +44,7 @@ namespace InterruptingCards.Managers
 
         public static AbstractGameManager Singleton { get; protected set; }
 
-        public string CurrentStateName
-        {
-            get => _stateMachineIdNameMap.GetValueOrDefault(CurrentStateId, "UnknownState");
-        }
+        public string CurrentStateName => _stateMachineConfig.GetName(CurrentStateId);
 
         protected virtual int MinPlayers => 2;
 
@@ -165,9 +102,9 @@ namespace InterruptingCards.Managers
                 handManager.OnCardClicked -= TryPlayCard;
             }
 
-            if (CurrentStateId != WaitingForClientsStateId)
+            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForClientsState))
             {
-                _gameStateMachine.SetTrigger(ForceEndGameTriggerId);
+                _gameStateMachine.SetTrigger(_stateMachineConfig.GetId(StateMachine.ForceEndGameTrigger));
             }
         }
 
@@ -252,9 +189,10 @@ namespace InterruptingCards.Managers
         }
 
         [ClientRpc]
-        protected virtual void StateTriggerClientRpc(int triggerId, ClientRpcParams clientRpcParams = default)
+        protected virtual void StateTriggerClientRpc(StateMachine trigger, ClientRpcParams clientRpcParams = default)
         {
-            Debug.Log($"Triggering {_stateMachineIdNameMap.GetValueOrDefault(triggerId, "UnknownTrigger")}");
+            var triggerId = _stateMachineConfig.GetId(trigger);
+            Debug.Log($"Triggering {trigger}");
             _gameStateMachine.SetTrigger(triggerId);
         }
 
@@ -321,7 +259,7 @@ namespace InterruptingCards.Managers
         {
             Debug.Log($"Adding player {clientId}");
 
-            if (CurrentStateId != WaitingForClientsStateId)
+            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForClientsState))
             {
                 Debug.LogWarning($"Cannnot add player {clientId} while game already started");
                 return;
@@ -338,7 +276,7 @@ namespace InterruptingCards.Managers
             if (_lobby.Count == MaxPlayers)
             {
                 _notReadyPlayers.UnionWith(_lobby);
-                StateTriggerClientRpc(WaitForReadyTriggerId);
+                StateTriggerClientRpc(StateMachine.WaitForReadyTrigger);
                 SetPlayersClientRpc(_lobby.ToArray());
             }
         }
@@ -348,18 +286,18 @@ namespace InterruptingCards.Managers
         {
             Debug.Log($"Removing player {clientId}");
 
-            if (CurrentStateId != WaitingForClientsStateId)
+            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForClientsState))
             {
                 if (clientId == _activePlayerNode.Value.Id)
                 {
-                    StateTriggerClientRpc(ForceEndTurnTriggerId);
+                    StateTriggerClientRpc(StateMachine.ForceEndTurnTrigger);
                 }
 
                 Debug.LogWarning($"Player {clientId} removed while game is playing");
             }
 
             // TODO: Continue game if enough players left
-            StateTriggerClientRpc(ForceEndGameTriggerId);
+            StateTriggerClientRpc(StateMachine.ForceEndGameTrigger);
             _lobby.Remove(clientId);
         }
 
@@ -381,7 +319,7 @@ namespace InterruptingCards.Managers
             
             if (_notReadyPlayers.Count == 0)
             {
-                StateTriggerClientRpc(StartGameTriggerId);
+                StateTriggerClientRpc(StateMachine.StartGameTrigger);
             }
         }
 
@@ -419,7 +357,7 @@ namespace InterruptingCards.Managers
                 return false;
             }
 
-            if (CurrentStateId != WaitingForDrawCardStateId)
+            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForDrawCardState))
             {
                 Debug.Log($"Player {id} cannot draw a card in the wrong state");
                 return false;
@@ -451,7 +389,7 @@ namespace InterruptingCards.Managers
             var card = _deckManager.DrawTop();
             _activePlayerNode.Value.Hand.Add(card);
 
-            StateTriggerClientRpc(DrawCardTriggerId);
+            StateTriggerClientRpc(StateMachine.DrawCardTrigger);
         }
 
         protected virtual bool CanPlayCard(ulong id)
@@ -462,7 +400,7 @@ namespace InterruptingCards.Managers
                 return false;
             }
 
-            if (CurrentStateId != WaitingForPlayCardStateId)
+            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForPlayCardState))
             {
                 Debug.Log($"Player {id} cannot play a card in the wrong state");
                 return false;
@@ -494,7 +432,7 @@ namespace InterruptingCards.Managers
             var card = _activePlayerNode.Value.Hand.Remove(cardId);
             _discardManager.PlaceTop(card);
 
-            StateTriggerClientRpc(PlayCardTriggerId);
+            StateTriggerClientRpc(StateMachine.PlayCardTrigger);
         }
     }
 }

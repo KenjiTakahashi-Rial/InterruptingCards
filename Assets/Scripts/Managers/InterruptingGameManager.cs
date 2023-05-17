@@ -69,7 +69,7 @@ namespace InterruptingCards.Managers
                 return false;
             }
 
-            if (CurrentStateId != WaitingForDrawCardStateId)
+            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForDrawCardState))
             {
                 Debug.Log($"Player {id} cannot draw a card in the wrong state");
                 return false;
@@ -96,7 +96,7 @@ namespace InterruptingCards.Managers
                 return false;
             }
 
-            if (CurrentStateId != WaitingForPlayCardStateId)
+            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForPlayCardState))
             {
                 Debug.Log($"Player {id} cannot play a card in the wrong state");
                 return false;
