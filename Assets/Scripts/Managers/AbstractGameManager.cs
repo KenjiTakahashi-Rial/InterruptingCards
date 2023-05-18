@@ -175,12 +175,15 @@ namespace InterruptingCards.Managers
             _players.Clear();
             _tempInfoText.SetText("Start the game");
 
-            _deckManager.Clear();
-            _discardManager.Clear();
-
-            foreach (var handManager in _handManagers)
+            if (IsServer)
             {
-                handManager.Clear();
+                _deckManager.Clear();
+                _discardManager.Clear();
+
+                foreach (var handManager in _handManagers)
+                {
+                    handManager.Clear();
+                }
             }
         }
 

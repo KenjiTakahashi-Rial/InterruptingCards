@@ -12,7 +12,7 @@ namespace InterruptingCards.Managers
 {
     public class InterruptingGameManager : AbstractGameManager
     {
-        protected Player _interruptingPlayer;
+        protected NetworkVariable<PlayerId> _interruptingPlayer = new(null);
 
         [SerializeField] protected CardBehaviour _interruptingCard;
 
@@ -37,6 +37,7 @@ namespace InterruptingCards.Managers
             if (IsServer)
             {
                 _interruptingCard.CardId = CardConfig.GetCardId(CardSuit.InterruptingSuit, CardRank.InterruptingRank);
+                _interruptingPlayer.Value = null;
             }
         }
 
@@ -78,8 +79,8 @@ namespace InterruptingCards.Managers
         protected override bool CanDrawCard(ulong id)
         {
             var playerTurn = id == ActivePlayer.Id;
-            var playerInterrupt = id == _interruptingPlayer?.Id;
-            var interruptInProgress = _interruptingPlayer != null;
+            var playerInterrupt = id == _interruptingPlayer.Value?.Id;
+            var interruptInProgress = _interruptingPlayer.Value != null;
 
             if (!playerTurn && !playerInterrupt)
             {
@@ -105,10 +106,10 @@ namespace InterruptingCards.Managers
         protected override bool CanPlayCard(ulong id, int handManagerIndex)
         {
             var isPlayerTurn = id == ActivePlayer.Id;
-            var isPlayerInterrupting = id == _interruptingPlayer?.Id;
-            var isInterruptInProgress = _interruptingPlayer != null;
+            var isPlayerInterrupting = id == _interruptingPlayer.Value?.Id;
+            var isInterruptInProgress = _interruptingPlayer.Value != null;
             var hand = _handManagers[handManagerIndex];
-            var isPlayerHand = (isPlayerTurn && hand == ActivePlayer.Hand) || (isPlayerInterrupting && hand == _interruptingPlayer.Hand);
+            var isPlayerHand = hand == _players.Single(p => p.Id == id).Hand;
 
             if (!isPlayerTurn && !isPlayerInterrupting)
             {
@@ -137,10 +138,17 @@ namespace InterruptingCards.Managers
             return true;
         }
 
+        [ServerRpc(RequireOwnership = false)]
+        protected override void PlayCardServerRpc(int handManagerIndex, int cardIndex, ServerRpcParams serverRpcParams = default)
+        {
+            base.PlayCardServerRpc(handManagerIndex, cardIndex, serverRpcParams);
+            _interruptingPlayer.Value = null;
+        }
+
         protected virtual bool CanInterrupt(ulong id)
         {
             var playerTurn = id == ActivePlayer.Id;
-            var interruptInProgress = _interruptingPlayer != null;
+            var interruptInProgress = _interruptingPlayer.Value != null;
 
             if (playerTurn)
             {
@@ -171,7 +179,7 @@ namespace InterruptingCards.Managers
             TryInterrupt(_cardConfig[_interruptingCard.CardId].ActiveEffect);
         }
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         protected virtual void InterruptServerRpc(CardActiveEffect effect, ServerRpcParams serverRpcParams = default)
         {
             var senderId = serverRpcParams.Receive.SenderClientId;
@@ -184,8 +192,28 @@ namespace InterruptingCards.Managers
             Debug.Log($"Player {senderId} interrupting player {ActivePlayer.Id}'s turn");
 
             _interruptingCard.IsActivated = true;
-            _interruptingPlayer = _players.Single(p => p.Id == senderId);
+            _interruptingPlayer.Value = new PlayerId(senderId);
             HandleEffect(effect);
+        }
+
+        protected class PlayerId : INetworkSerializable
+        {
+            private ulong _id;
+
+            // Empty constructor required for INetworkSerializable
+            public PlayerId() { }
+
+            public PlayerId(ulong id)
+            {
+                _id = id;
+            }
+
+            public ulong Id => _id;
+
+            public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+            {
+                serializer.SerializeValue(ref _id);
+            }
         }
     }
 }

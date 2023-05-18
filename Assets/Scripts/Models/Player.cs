@@ -4,14 +4,10 @@ using InterruptingCards.Managers;
 
 namespace InterruptingCards.Models
 {
-    public class Player : INetworkSerializable
+    public class Player
     {
         private ulong _id;
         private string _name;
-
-        // The empty constructor is necessary for network seriaization
-        // TODO: Try making not public
-        public Player() { }
 
         internal Player(ulong id, string name)
         {
@@ -24,11 +20,5 @@ namespace InterruptingCards.Models
         public string Name => _name;
 
         public HandManager Hand { get; set; }
-
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref _id);
-            serializer.SerializeValue(ref _name);
-        }
     }
 }
