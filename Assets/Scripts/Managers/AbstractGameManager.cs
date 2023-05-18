@@ -90,7 +90,7 @@ namespace InterruptingCards.Managers
                 NetworkManager.OnClientDisconnectCallback += RemovePlayerServerRpc;
             }
 
-            _deckManager.OnDeckClicked += TryDrawCard;
+            _deckManager.OnClicked += TryDrawCard;
 
             for (var i = 0; i < _handManagers.Length; i++)
             {
@@ -110,7 +110,7 @@ namespace InterruptingCards.Managers
                 NetworkManager.OnClientDisconnectCallback -= RemovePlayerServerRpc;
             }
 
-            _deckManager.OnDeckClicked -= TryDrawCard;
+            _deckManager.OnClicked -= TryDrawCard;
 
             foreach (var handManager in _handManagers)
             {

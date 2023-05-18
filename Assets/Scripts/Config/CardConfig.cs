@@ -71,12 +71,9 @@ namespace InterruptingCards.Config
             }
         }
 
-        public int[] GenerateDeck()
+        public List<int> GenerateDeck()
         {
-            var values = _cards.Values;
-            var expanded = values.SelectMany(c => Enumerable.Repeat(c.Id, c.Count));
-            var asArr = expanded.ToArray();
-            return asArr;
+            return _cards.Values.SelectMany(c => Enumerable.Repeat(c.Id, c.Count)).ToList();
         }
     }
 }
