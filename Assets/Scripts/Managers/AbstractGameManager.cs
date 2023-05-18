@@ -19,9 +19,7 @@ namespace InterruptingCards.Managers
         protected const int GameStateMachineLayer = 0;
 
         protected readonly StateMachineConfig _stateMachineConfig = StateMachineConfig.Singleton;
-        protected readonly PlayerFactory _playerFactory = PlayerFactory.Singleton;
-        protected readonly CardFactory _cardFactory = CardFactory.Singleton;
-        protected readonly DeckFactory _deckFactory = DeckFactory.Singleton;
+        protected readonly CardConfig _cardConfig = CardConfig.Singleton;
 
         // Server-only
         protected readonly List<ulong> _lobby = new();
@@ -59,8 +57,27 @@ namespace InterruptingCards.Managers
         protected virtual Player ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex];
 
         /******************************************************************************************\
-         * Public Methods                                                                         *
+         * Unity Methods                                                                          *
         \******************************************************************************************/
+
+        public virtual void Awake()
+        {
+            Debug.Log("Waking game manager");
+
+            _cardConfig.Load(_cardPack);
+            Singleton = this;
+        }
+
+        public virtual void Update()
+        {
+            if (ActivePlayer == null || _tempInfoText == null)
+            {
+                return;
+            }
+
+            _tempInfoText.SetText($"{ActivePlayer.Id}\n{CurrentStateName}");
+        }
+
         public override void OnNetworkSpawn()
         {
             Debug.Log("Network spawned");
@@ -69,19 +86,16 @@ namespace InterruptingCards.Managers
 
             if (IsServer)
             {
-                NetworkManager.OnClientConnectedCallback -= AddPlayerServerRpc;
                 NetworkManager.OnClientConnectedCallback += AddPlayerServerRpc;
-                NetworkManager.OnClientDisconnectCallback -= RemovePlayerServerRpc;
                 NetworkManager.OnClientDisconnectCallback += RemovePlayerServerRpc;
             }
 
-            _deckManager.OnDeckClicked -= TryDrawCard;
             _deckManager.OnDeckClicked += TryDrawCard;
 
-            foreach (var handManager in _handManagers)
+            for (var i = 0; i < _handManagers.Length; i++)
             {
-                handManager.OnCardClicked -= TryPlayCard;
-                handManager.OnCardClicked += TryPlayCard;
+                var j = i;
+                _handManagers[i].OnCardClicked += (int k) => TryPlayCard(j, k);
             }
         }
 
@@ -100,7 +114,7 @@ namespace InterruptingCards.Managers
 
             foreach (var handManager in _handManagers)
             {
-                handManager.OnCardClicked -= TryPlayCard;
+                handManager.OnCardClicked = null;
             }
 
             if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForClientsState))
@@ -108,6 +122,19 @@ namespace InterruptingCards.Managers
                 _gameStateMachine.SetTrigger(_stateMachineConfig.GetId(StateMachine.ForceEndGameTrigger));
             }
         }
+
+        public override void OnDestroy()
+        {
+            Debug.Log("Destroying game manager");
+
+            Singleton = null;
+            _players.Clear();
+            base.OnDestroy();
+        }
+
+        /******************************************************************************************\
+         * State Machine Methods                                                                  *
+        \******************************************************************************************/
 
         public virtual void HandleInitializeGame()
         {
@@ -117,7 +144,7 @@ namespace InterruptingCards.Managers
             
             if (IsServer)
             {
-                _deckManager.Initialize(_cardPack);
+                _deckManager.Initialize();
                 _deckManager.Shuffle();
                 _deckManager.IsFaceUp = false;
                 _discardManager.Clear();
@@ -158,37 +185,8 @@ namespace InterruptingCards.Managers
         }
 
         /******************************************************************************************\
-         * Protected Methods                                                                      *
+         * Game Flow Methods                                                                      *
         \******************************************************************************************/
-
-        protected virtual void Awake()
-        {
-            Debug.Log("Waking game manager");
-
-            _cardFactory.Load(_cardPack);
-            _deckFactory.Load(_cardPack);
-
-            Singleton = this;
-        }
-
-        protected virtual new void OnDestroy()
-        {
-            Debug.Log("Destroying game manager");
-
-            Singleton = null;
-            _players.Clear();
-            base.OnDestroy();
-        }
-
-        protected virtual void Update()
-        {
-            if (ActivePlayer == null || _tempInfoText == null)
-            {
-                return;
-            }
-
-            _tempInfoText.SetText($"{ActivePlayer.Id}\n{CurrentStateName}");
-        }
 
         [ClientRpc]
         protected virtual void StateTriggerClientRpc(StateMachine trigger, ClientRpcParams clientRpcParams = default)
@@ -230,17 +228,12 @@ namespace InterruptingCards.Managers
                 throw new TooManyPlayersException();
             }
 
-            if (!IsServer)
-            {
-                return;
-            }
-
             Debug.Log("Assigning hands");
 
             var i = 0;
             foreach (var player in _players)
             {
-                player.Hand = _handManagers[i++].Hand;
+                player.Hand = _handManagers[i++];
             }
         }
 
@@ -296,7 +289,7 @@ namespace InterruptingCards.Managers
         {
             foreach (var playerId in playerIds)
             {
-               _players.Add(_playerFactory.Create(playerId, playerId.ToString()));
+               _players.Add(new Player(playerId, playerId.ToString()));
             }
 
             PlayerReadyServerRpc();
@@ -382,11 +375,17 @@ namespace InterruptingCards.Managers
             StateTriggerClientRpc(StateMachine.DrawCardTrigger);
         }
 
-        protected virtual bool CanPlayCard(ulong id, int cardId)
+        protected virtual bool CanPlayCard(ulong id, int handManagerIndex)
         {
             if (id != ActivePlayer.Id)
             {
                 Debug.Log($"Player {id} cannot play a card unless it is their turn or they are interrupting");
+                return false;
+            }
+
+            if (_handManagers[handManagerIndex] != ActivePlayer.Hand)
+            {
+                Debug.Log($"Player {id} can only play cards from their own hand");
                 return false;
             }
 
@@ -399,29 +398,32 @@ namespace InterruptingCards.Managers
             return true;
         }
 
-        protected virtual void TryPlayCard(Card card)
+        protected virtual void TryPlayCard(int handManagerIndex, int cardIndex)
         {
-            Debug.Log($"Trying to play card {card}");
+            var cardId = _handManagers[handManagerIndex][cardIndex];
 
-            if (CanPlayCard(_selfId))
+            Debug.Log($"Trying to play card {_cardConfig.GetCardString(cardId)}");
+
+            if (CanPlayCard(_selfId, handManagerIndex))
             {
-                PlayCardServerRpc(card.Id);
+                PlayCardServerRpc(handManagerIndex, cardIndex);
             }
         }
 
         [ServerRpc(RequireOwnership = false)]
-        protected virtual void PlayCardServerRpc(int cardId, ServerRpcParams serverRpcParams = default)
+        protected virtual void PlayCardServerRpc(int handManagerIndex, int cardIndex, ServerRpcParams serverRpcParams = default)
         {
-            if (!CanPlayCard(serverRpcParams.Receive.SenderClientId))
+            var senderId = serverRpcParams.Receive.SenderClientId;
+
+            if (!CanPlayCard(senderId, handManagerIndex))
             {
                 return;
             }
 
             Debug.Log("Playing card");
 
-            var player = _players.Single(p => p.Id == senderId);
-            var card = player.Hand.Remove(cardId);
-            _discardManager.PlaceTop(card);
+            var cardId = _handManagers[handManagerIndex].RemoveAt(cardIndex);
+            _discardManager.PlaceTop(cardId);
 
             StateTriggerClientRpc(StateMachine.PlayCardTrigger);
         }

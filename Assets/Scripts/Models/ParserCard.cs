@@ -7,7 +7,7 @@ using InterruptingCards.Config;
 namespace InterruptingCards.Models
 {
     [Serializable]
-    public class MetadataCard
+    public class ParserCard
     {
         /******************************************************************************************\
          * JSON Keys                                                                              *

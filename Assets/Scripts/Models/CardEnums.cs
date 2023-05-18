@@ -1,4 +1,5 @@
-namespace InterruptingCards.Config
+namespace InterruptingCards.Models
+
 {
     public enum CardPack
     {

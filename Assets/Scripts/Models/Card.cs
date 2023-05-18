@@ -4,15 +4,17 @@ namespace InterruptingCards.Models
 {
     public class Card
     {
-        // Do not call directly; use a factory
-        internal Card(MetadataCard metadataCard)
+        public Card(ParserCard metadataCard)
         {
             Id = metadataCard.Id;
             Suit = metadataCard.Suit;
             Rank = metadataCard.Rank;
             Name = metadataCard.Name;
+            Count = metadataCard.Count;
             ActiveEffect = metadataCard.ActiveEffect;
         }
+
+        // All attributes must be readonly
 
         // TODO: Make an instance ID too
         public int Id { get; }
@@ -22,6 +24,8 @@ namespace InterruptingCards.Models
         public CardRank Rank { get; }
 
         public string Name { get; }
+
+        public int Count { get; }
 
         public CardActiveEffect ActiveEffect { get; }
 

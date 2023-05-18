@@ -14,91 +14,49 @@ namespace InterruptingCards.Behaviours
         private const float ActivatedAngle = -90;
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
-        private readonly CardFactory _cardFactory = CardFactory.Singleton;
 
-        private readonly NetworkVariable<int> _cardId = new(CardConfig.InvalidId);
-        private readonly NetworkVariable<bool> _isFaceUp = new(true);
-        private readonly NetworkVariable<bool> _isActivated = new(false);
+        private readonly NetworkVariable<int> _cardId = new(CardConfig.GetCardId(s_defaultSuit, s_defaultRank));
+        private readonly NetworkVariable<bool> _isFaceUp = new(s_defaultIsFaceUp);
+        private readonly NetworkVariable<bool> _isActivated = new(s_defaultIsActivated);
+
+        [SerializeField] private static CardSuit s_defaultSuit = CardSuit.Invalid;
+        [SerializeField] private static CardRank s_defaultRank = CardRank.Invalid;
+        [SerializeField] private static bool s_defaultIsFaceUp = true;
+        [SerializeField] private static bool s_defaultIsActivated = false;
 
         [SerializeField] private TextMeshPro _cardText;
         [SerializeField] private SpriteRenderer _cardSprite;
-
-        private Card _card;
-        private bool _offlineIsFaceUp = true;
-        private bool _offlineIsActivated;
 
         private Vector3 _originalScale;
         private Quaternion _originalRotation;
         private Quaternion _activatedRotation;
 
-        public event Action OnClicked;
-        public event Action OnCardChanged;
-        public event Action OnActivated;
+        public Action OnClicked { get; set; }
+        public Action OnActivated { get; set; }
 
-        public Card Card
+        public int CardId
         {
-            get => _card;
-            set
-            {
-                if (IsNetworking)
-                {
-                    _cardId.Value = value == null ? CardConfig.InvalidId : value.Id;
-                }
-                else
-                {
-                    _card = value;
-                }
-            }
+            get => _cardId.Value;
+            set => _cardId.Value = value;
         }
 
         public bool IsFaceUp
         {
-            get => IsNetworking ? _isFaceUp.Value : _offlineIsFaceUp;
-            set
-            {
-                if (IsNetworking)
-                {
-                    _isFaceUp.Value = value;
-                }
-                else
-                {
-                    _offlineIsFaceUp = value;
-                }
-            }
+            get => _isFaceUp.Value;
+            set => _isFaceUp.Value = value;
         }
 
         public bool IsActivated
         {
-            get => NetworkManager ? _isActivated.Value : _offlineIsActivated;
-            set
-            {
-                if (IsNetworking)
-                {
-                    _isActivated.Value = value;
-                }
-                else
-                {
-                    _offlineIsActivated = value;
-                }
-            }
+            get => _isActivated.Value;
+            set => _isActivated.Value = value;
         }
-
-        private bool IsNetworking => NetworkManager != null && NetworkManager.IsListening;
 
         public override void OnNetworkSpawn()
         {
-            _cardId.OnValueChanged -= HandleCardIdChanged;
-            _isFaceUp.OnValueChanged -= HandleFaceUpChanged;
-            _isActivated.OnValueChanged -= HandleActivatedChanged;
-
             _cardId.OnValueChanged += HandleCardIdChanged;
             _isFaceUp.OnValueChanged += HandleFaceUpChanged;
             _isActivated.OnValueChanged += HandleActivatedChanged;
-
-            if (IsServer)
-            {
-                _cardId.Value = _card == null ? CardConfig.InvalidId : _card.Id;
-            }
         }
 
         public override void OnNetworkDespawn()
@@ -108,38 +66,15 @@ namespace InterruptingCards.Behaviours
             _isActivated.OnValueChanged -= HandleActivatedChanged;
         }
 
-        public void UnsubscribeAllOnClicked()
-        {
-            OnClicked = null;
-        }
-
-        public void UnsubscribeAllOnCardChanged()
-        {
-            OnCardChanged = null;
-        }
-
-        public void UnsubscribeAllOnActivated()
-        {
-            OnActivated = null;
-        }
-
         private void HandleCardIdChanged(int oldValue, int newValue)
         {
             var oldCard = _cardConfig.GetCardString(oldValue);
             var newCard = _cardConfig.GetCardString(newValue);
             Debug.Log($"Card changed ({oldCard} -> {newCard})");
 
-            _card = newValue == CardConfig.InvalidId ? null : _cardFactory.Create(newValue);
-            _cardSprite.enabled = _card != null;
-            _cardText.enabled = _card != null;
-            _cardText.SetText(_card?.ToString()); // TODO: Change
-
-            if (OnCardChanged == null)
-            {
-                Debug.Log("OnCardChanged has no subscribers");
-            }
-
-            OnCardChanged?.Invoke();
+            _cardSprite.enabled = newValue != CardConfig.InvalidId;
+            _cardText.enabled = newValue != CardConfig.InvalidId && IsFaceUp;
+            _cardText.SetText(_cardConfig.GetCardString(newValue)); // TODO: Change
         }
 
         private void HandleFaceUpChanged(bool oldValue, bool newValue)
@@ -148,7 +83,7 @@ namespace InterruptingCards.Behaviours
             var after = newValue ? "face-up" : "face-down";
             Debug.Log($"Card changed ({before} -> {after})");
 
-            _cardText.enabled = _card != null && newValue;
+            _cardText.enabled = (_cardId.Value != CardConfig.InvalidId) && newValue;
         }
 
         private void HandleActivatedChanged(bool oldValue, bool newValue)
@@ -196,7 +131,7 @@ namespace InterruptingCards.Behaviours
             }
             else
             {
-                Debug.Log($"{_card} clicked");
+                Debug.Log($"{_cardConfig.GetCardString(_cardId.Value)} clicked");
             }
 
             OnClicked?.Invoke();

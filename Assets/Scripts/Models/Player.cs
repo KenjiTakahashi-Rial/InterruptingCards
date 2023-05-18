@@ -1,5 +1,7 @@
 using Unity.Netcode;
 
+using InterruptingCards.Managers;
+
 namespace InterruptingCards.Models
 {
     public class Player : INetworkSerializable
@@ -21,13 +23,12 @@ namespace InterruptingCards.Models
 
         public string Name => _name;
 
-        public Hand Hand { get; set; }
+        public HandManager Hand { get; set; }
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
             serializer.SerializeValue(ref _id);
             serializer.SerializeValue(ref _name);
-            // Do not serialize hand since the cards are sync'd by NetworkVariable
         }
     }
 }

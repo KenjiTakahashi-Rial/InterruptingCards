@@ -1,21 +1,20 @@
 using System;
+using System.Linq;
 
 using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
-using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
     public class DeckManager : NetworkBehaviour
     {
-        private readonly DeckFactory _deckFactory = DeckFactory.Singleton;
+        private readonly CardConfig _cardConfig = CardConfig.Singleton;
+        public NetworkList<int> _cardIds;
 
         [SerializeField] private CardBehaviour _topCard;
-
-        private Deck _deck;
 
         public event Action OnDeckClicked;
         
@@ -25,58 +24,98 @@ namespace InterruptingCards.Managers
             set => _topCard.IsFaceUp = value;
         }
 
-        public int Count => _deck.Count;
+        private int TopIndex => _cardIds.Count - 1;
+
+        public void Awake()
+        {
+            _cardIds = new();
+            _topCard.OnClicked += InvokeOnDeckClicked;
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+
+            if (IsServer)
+            {
+                _cardIds.OnListChanged += HandleCardIdsChanged;
+            }
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            if (IsServer)
+            {
+                _cardIds.OnListChanged -= HandleCardIdsChanged;
+            }
+
+            base.OnNetworkDespawn();
+        }
+
+        public override void OnDestroy()
+        {
+            _topCard.OnClicked -= InvokeOnDeckClicked;
+            base.OnDestroy();
+        }
 
         public void Shuffle()
         {
-            _deck.Shuffle();
+            CheckEmpty();
+
+            var cards = new int[_cardIds.Count];
+
+            for (var i = 0; i < _cardIds.Count; i++)
+            {
+                cards[i] = _cardIds[i];
+            }
+
+            var shuffled = cards.OrderBy(x => Guid.NewGuid());
+            _cardIds.Clear();
+
+            foreach (var id in shuffled)
+            {
+                _cardIds.Add(id);
+            }
         }
 
-        public void PlaceTop(Card card)
+        public void PlaceTop(int cardId)
         {
-            _deck.PlaceTop(card);
+            _cardIds.Insert(TopIndex + 1, cardId);
         }
 
-        public Card DrawTop()
+        public int DrawTop()
         {
-            var card = _deck.DrawTop();
-            return card;
+            var cardId = _cardIds[TopIndex];
+            _cardIds.RemoveAt(TopIndex);
+            return cardId;
         }
 
-        public void Initialize(CardPack cardPack)
+        public void Initialize()
         {
-            _deck = _deckFactory.Create(cardPack);
-            SetTop();
+            var deck = _cardConfig.GenerateDeck();
+
+            foreach (var id in deck)
+            {
+                _cardIds.Add(id);
+            }
         }
 
         public void Clear()
         {
-            _deck.Clear();
+            _cardIds.Clear();
         }
 
-        private void Awake()
+        private void CheckEmpty()
         {
-            _deck = _deckFactory.Create();
-        }
-
-        private void OnEnable()
-        {
-            _topCard.OnClicked -= InvokeOnDeckClicked;
-            _deck.OnChanged -= SetTop;
-
-            _topCard.OnClicked += InvokeOnDeckClicked;
-            _deck.OnChanged += SetTop;
-        }
-
-        private void OnDisable()
-        {
-            _topCard.OnClicked -= InvokeOnDeckClicked;
-            _deck.OnChanged -= SetTop;
+            if (_cardIds.Count == 0)
+            {
+                throw new CardCollectionEmptyException();
+            }
         }
 
         private void SetTop()
         {
-            _topCard.Card = _deck == null || _deck.Count == 0 ? null : _deck.PeekTop();
+            _topCard.CardId = _cardIds.Count == 0 ? CardConfig.InvalidId : _cardIds[TopIndex];
         }
 
         private void InvokeOnDeckClicked()
@@ -91,6 +130,11 @@ namespace InterruptingCards.Managers
             }
 
             OnDeckClicked?.Invoke();
+        }
+
+        private void HandleCardIdsChanged(NetworkListEvent<int> changeEvent)
+        {
+            SetTop();
         }
     }
 }

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 using UnityEngine;
 
 using InterruptingCards.Models;
-using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Config
 {
@@ -23,10 +23,11 @@ namespace InterruptingCards.Config
 
         private readonly string _packDirectory = Path.Combine("Assets", "Scripts", "Config", "Packs");
 
-        private readonly Dictionary<int, MetadataCard> _cards = new();
-        private readonly Dictionary<CardPack, ImmutableList<MetadataCard>> _packs = new();
+        private readonly Dictionary<int, Card> _cards = new();
 
         private CardConfig() { }
+
+        public Card this[int cardId] => _cards[cardId];
 
         public static int GetCardId(CardSuit suit, CardRank rank)
         {
@@ -35,50 +36,47 @@ namespace InterruptingCards.Config
 
         public string GetCardString(int id)
         {
+            if (_cards.ContainsKey(id))
+            {
+                return _cards[id].ToString();
+            }
+
             var suit = (CardSuit)((id & SuitBitMask) >> RankBitCount);
             var rank = (CardRank)(id & RankBitMask);
             return $"{rank} | {suit}";
         }
 
-        public MetadataCard GetMetadataCard(int id)
-        {
-            if (!_cards.ContainsKey(id))
-            {
-                Debug.LogWarning($"Card {GetCardString(id)} not found. Is the card pack loaded?");
-            }
-
-            return _cards[id];
-        }
-
-        public ImmutableList<MetadataCard> GetCardPack(CardPack cardPack)
-        {
-            if (!_packs.ContainsKey(cardPack))
-            {
-                Load(cardPack);
-            }
-            
-            return _packs[cardPack];
-        }
-
-        private void Load(CardPack cardPack)
+        public void Load(CardPack cardPack)
         {
             Debug.Log($"CardConfig loading {cardPack}");
+
+            _cards.Clear();
 
             var packName = cardPack.ToString();
             var packPath = Path.Combine(_packDirectory, packName);
             var cardPaths = Directory.GetFiles(packPath, "*." + PackFileExtension);
-            var cards = new MetadataCard[cardPaths.Length];
 
             for (var i = 0; i < cardPaths.Length; i++)
             {
                 var json = File.ReadAllText(cardPaths[i]);
-                var card = JsonUtility.FromJson<MetadataCard>(json);
+                var card = JsonUtility.FromJson<ParserCard>(json);
+                var id = card.Id;
 
-                _cards[card.Id] = card;
-                cards[i] = card;
+                if (_cards.ContainsKey(id))
+                {
+                    Debug.LogWarning($"Cache already contains {id}. Overwriting {_cards[id]} with {card.Name}");
+                }
+
+                _cards[card.Id] = new Card(card);
             }
+        }
 
-            _packs[cardPack] = new ImmutableList<MetadataCard>(cards);
+        public int[] GenerateDeck()
+        {
+            var values = _cards.Values;
+            var expanded = values.SelectMany(c => Enumerable.Repeat(c.Id, c.Count));
+            var asArr = expanded.ToArray();
+            return asArr;
         }
     }
 }

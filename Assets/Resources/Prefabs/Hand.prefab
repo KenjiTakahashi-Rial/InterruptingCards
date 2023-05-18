@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2697637174834264642}
   - component: {fileID: 7060688254981643476}
+  - component: {fileID: 3941736134443299175}
   m_Layer: 5
   m_Name: Hand
   m_TagString: Untagged
@@ -60,6 +61,25 @@ MonoBehaviour:
   - {fileID: 8779846843795177498}
   - {fileID: 8779846844055257176}
   - {fileID: 8779846842826745659}
+--- !u!114 &3941736134443299175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2697637174834264641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1001 &2697637173729890381
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -2,101 +2,131 @@ using System;
 
 using Unity.Netcode;
 using UnityEngine;
+using EventType = Unity.Netcode.NetworkListEvent<int>.EventType;
 
 using InterruptingCards.Behaviours;
-using InterruptingCards.Models;
+using InterruptingCards.Config;
 
 namespace InterruptingCards.Managers
 {
     public class HandManager : NetworkBehaviour
     {
-        private readonly HandFactory _handFactory = HandFactory.Singleton;
+        private readonly CardConfig _cardConfig = CardConfig.Singleton;
+        public NetworkList<int> _cardIds;
 
         [SerializeField] private CardBehaviour[] _cardSlots;
 
-        public event Action<Card> OnCardClicked;
+        private int Count => _cardIds.Count;
 
-        public Hand Hand { get; private set; }
+        public Action<int> OnCardClicked { get; set; }
 
-        private int Count => Hand == null ? 0 : Hand.Count;
+        public int this[int i] => _cardIds[i];
 
-        public void Add(Card card)
+
+        public void Awake()
         {
-            Debug.Log($"Adding card to hand ({card})");
+            _cardIds = new();
+
+            for (var i = 0; i < _cardSlots.Length; i++)
+            {
+                var j = i;
+                _cardSlots[i].OnClicked += () => OnCardClicked?.Invoke(j);
+            }
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+
+            if (IsServer)
+            {
+                _cardIds.OnListChanged += HandleCardIdsChanged;
+                SetCards(0, _cardSlots.Length);
+            }
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            if (IsServer)
+            {
+                _cardIds.OnListChanged -= HandleCardIdsChanged;
+            }
+
+            base.OnNetworkDespawn();
+        }
+
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            foreach (var slot in _cardSlots)
+            {
+                slot.OnClicked = null;
+            }
+        }
+
+        public void Add(int cardId)
+        {
+            Debug.Log($"Adding card to hand ({_cardConfig.GetCardString(cardId)})");
 
             if (Count == _cardSlots.Length)
             {
                 throw new TooManyCardsException("Cannot add more cards than card slots");
             }
 
-            Hand.Add(card);
+            _cardIds.Add(cardId);
+        }
+
+        public int RemoveAt(int i)
+        {
+            var cardId = _cardIds[i];
+            _cardIds.RemoveAt(i);
+            return cardId;
         }
 
         public void Clear()
         {
             Debug.Log("Clearing hand");
 
-            Hand.Clear();
-            SetCards();
+            _cardIds.Clear();
         }
 
-        private void Awake()
+        public bool Contains(int id)
         {
-            Hand = _handFactory.Create();
+            return _cardIds.Contains(id);
         }
 
-        private void OnEnable()
-        {
-            Hand.OnChanged -= SetCards;
-            Hand.OnChanged += SetCards;
-
-            for (var i = 0; i < _cardSlots.Length; i++)
-            {
-                var j = i;
-                void HandleCardChanged() => SetClickListener(j);
-                _cardSlots[i].OnCardChanged -= HandleCardChanged;
-                _cardSlots[i].OnCardChanged += HandleCardChanged;
-            }
-
-            SetAllClickListeners();
-        }
-
-        private void OnDisable()
-        {
-            Hand.OnChanged -= SetCards;
-
-            foreach (var cardSlot in _cardSlots)
-            {
-                cardSlot.UnsubscribeAllOnClicked();
-                cardSlot.UnsubscribeAllOnCardChanged();
-                cardSlot.Card = null;
-            }
-        }
-
-        private void SetCards()
-        {
-            for (var i = 0; i < _cardSlots.Length; i++)
-            {
-                _cardSlots[i].Card = i >= Count ? null : Hand.Get(i);
-            }
-        }
-
-        private void SetClickListener(int i)
+        private void SetCard(int i)
         {
             var cardSlot = _cardSlots[i];
-            cardSlot.UnsubscribeAllOnClicked();
+            cardSlot.CardId = i >= Count ? CardConfig.InvalidId : _cardIds[i];
+        }
 
-            if (cardSlot.Card != null)
+        private void SetCards(int startInclusive, int endExclusive)
+        {
+            for (var i = startInclusive; i < endExclusive; i++)
             {
-                cardSlot.OnClicked += () => OnCardClicked.Invoke(cardSlot.Card);
+                SetCard(i);
             }
         }
 
-        private void SetAllClickListeners()
+        private void HandleCardIdsChanged(NetworkListEvent<int> changeEvent)
         {
-            for (var i = 0; i < _cardSlots.Length; i++)
+            switch (changeEvent.Type)
             {
-                SetClickListener(i);
+                case EventType.Add:
+                    SetCard(Count - 1);
+                    break;
+                case EventType.Insert:
+                case EventType.Remove:
+                case EventType.RemoveAt:
+                case EventType.Value:
+                    SetCards(changeEvent.Index, _cardSlots.Length);
+                    break;
+                case EventType.Clear:
+                case EventType.Full:
+                    SetCards(0, _cardSlots.Length);
+                    break;
             }
         }
     }

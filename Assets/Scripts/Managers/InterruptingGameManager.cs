@@ -20,7 +20,6 @@ namespace InterruptingCards.Managers
         {
             base.OnNetworkSpawn();
 
-            _interruptingCard.OnClicked -= TryInterruptPlayCard;
             _interruptingCard.OnClicked += TryInterruptPlayCard;
         }
 
@@ -37,9 +36,7 @@ namespace InterruptingCards.Managers
 
             if (IsServer)
             {
-                _interruptingCard.Card = CardFactory.Singleton.Create(
-                    CardConfig.GetCardId(CardSuit.InterruptingSuit, CardRank.InterruptingRank)
-                );
+                _interruptingCard.CardId = CardConfig.GetCardId(CardSuit.InterruptingSuit, CardRank.InterruptingRank);
             }
         }
 
@@ -59,7 +56,7 @@ namespace InterruptingCards.Managers
 
             if (IsServer)
             {
-                _interruptingCard.Card = null;
+                _interruptingCard.CardId = CardConfig.InvalidId;
             }
         }
 
@@ -105,21 +102,29 @@ namespace InterruptingCards.Managers
             return true;
         }
 
-        protected override bool CanPlayCard(ulong id)
+        protected override bool CanPlayCard(ulong id, int handManagerIndex)
         {
-            var playerTurn = id == ActivePlayer.Id;
-            var playerInterrupt = id == _interruptingPlayer?.Id;
-            var interruptInProgress = _interruptingPlayer != null;
+            var isPlayerTurn = id == ActivePlayer.Id;
+            var isPlayerInterrupting = id == _interruptingPlayer?.Id;
+            var isInterruptInProgress = _interruptingPlayer != null;
+            var hand = _handManagers[handManagerIndex];
+            var isPlayerHand = (isPlayerTurn && hand == ActivePlayer.Hand) || (isPlayerInterrupting && hand == _interruptingPlayer.Hand);
 
-            if (!playerTurn && !playerInterrupt)
+            if (!isPlayerTurn && !isPlayerInterrupting)
             {
                 Debug.Log($"Player {id} cannot play a card unless it is their turn or they are interrupting");
                 return false;
             }
 
-            if (playerTurn && interruptInProgress)
+            if (isPlayerTurn && isInterruptInProgress)
             {
                 Debug.Log($"Player {id} cannot play a card while they are being interrupted");
+                return false;
+            }
+
+            if (!isPlayerHand)
+            {
+                Debug.Log($"Player {id} can only play cards from their own hand");
                 return false;
             }
 
@@ -163,7 +168,7 @@ namespace InterruptingCards.Managers
         // TODO: Temporary
         protected virtual void TryInterruptPlayCard()
         {
-            TryInterrupt(_interruptingCard.Card.ActiveEffect);
+            TryInterrupt(_cardConfig[_interruptingCard.CardId].ActiveEffect);
         }
 
         [ServerRpc]
