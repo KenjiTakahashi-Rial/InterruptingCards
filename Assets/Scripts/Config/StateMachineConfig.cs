@@ -7,7 +7,6 @@ using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Config
 {
-    // TODO: Make state tense consistent
     public enum StateMachine
     {
         Invalid,
@@ -16,11 +15,11 @@ namespace InterruptingCards.Config
         WaitingForClientsState,
         WaitingForAllReadyState,
         InitializingGameState,
-        EndGameState,
-        StartTurnState,
+        EndingGameState,
+        StartingTurnState,
         WaitingForDrawCardState,
         WaitingForPlayCardState,
-        EndTurnState,
+        EndingTurnState,
 
         // Triggers
         AllReadyTrigger,
@@ -41,9 +40,9 @@ namespace InterruptingCards.Config
             { StateMachine.WaitingForAllReadyState, "Base." +               "WaitingForAllReady" },
             { StateMachine.WaitingForClientsState,  "Base." +               "WaitingForClients"  },
             { StateMachine.InitializingGameState,   "Base." +               "InitializingGame"   },
-            { StateMachine.EndGameState,            "Base.InGame." +        "EndGame"            },
-            { StateMachine.StartTurnState,          "Base.InGame.PlayerTurns.StartTurn"          },
-            { StateMachine.EndTurnState,            "Base.InGame.PlayerTurns.EndTurn"            },
+            { StateMachine.EndingGameState,         "Base.InGame." +        "EndingGame"         },
+            { StateMachine.StartingTurnState,       "Base.InGame.PlayerTurns.StartingTurn"       },
+            { StateMachine.EndingTurnState,         "Base.InGame.PlayerTurns.EndingTurn"         },
             { StateMachine.WaitingForDrawCardState, "Base.InGame.PlayerTurns.WaitingForDrawCard" },
             { StateMachine.WaitingForPlayCardState, "Base.InGame.PlayerTurns.WaitingForPlayCard" },
 
