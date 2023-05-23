@@ -153,7 +153,7 @@ namespace InterruptingCards.Managers
 
             _activePlayerIndex = 0;
 
-            StateTriggerClientRpc(StateMachine.StartGameTrigger);
+            StateTrigger(StateMachine.StartGameTrigger);
         }
 
         public abstract void HandleStartTurn();
@@ -191,11 +191,16 @@ namespace InterruptingCards.Managers
          * Game Flow Methods                                                                      *
         \******************************************************************************************/
 
-        [ClientRpc]
-        protected virtual void StateTriggerClientRpc(StateMachine trigger, ClientRpcParams clientRpcParams = default)
+        protected virtual void StateTrigger(StateMachine trigger)
         {
             var triggerId = _stateMachineConfig.GetId(trigger);
-            Debug.Log($"Triggering {trigger}");
+            StateTriggerClientRpc(triggerId);
+        }
+        
+        [ClientRpc]
+        protected virtual void StateTriggerClientRpc(int triggerId, ClientRpcParams clientRpcParams = default)
+        {
+            Debug.Log($"Triggering {_stateMachineConfig.GetName(triggerId)}");
             _gameStateMachine.SetTrigger(triggerId);
         }
 
@@ -262,7 +267,7 @@ namespace InterruptingCards.Managers
             if (_lobby.Count == MaxPlayers)
             {
                 _notReadyPlayers.UnionWith(_lobby);
-                StateTriggerClientRpc(StateMachine.WaitForReadyTrigger);
+                StateTrigger(StateMachine.WaitForReadyTrigger);
                 SetPlayersClientRpc(_lobby.ToArray());
             }
         }
@@ -276,14 +281,14 @@ namespace InterruptingCards.Managers
             {
                 if (clientId == ActivePlayer.Id)
                 {
-                    StateTriggerClientRpc(StateMachine.ForceEndTurnTrigger);
+                    StateTrigger(StateMachine.ForceEndTurnTrigger);
                 }
 
                 Debug.LogWarning($"Player {clientId} removed while game is playing");
             }
 
             // TODO: Continue game if enough players left
-            StateTriggerClientRpc(StateMachine.ForceEndGameTrigger);
+            StateTrigger(StateMachine.ForceEndGameTrigger);
             _lobby.Remove(clientId);
         }
 
@@ -305,7 +310,7 @@ namespace InterruptingCards.Managers
             
             if (_notReadyPlayers.Count == 0)
             {
-                StateTriggerClientRpc(StateMachine.AllReadyTrigger);
+                StateTrigger(StateMachine.AllReadyTrigger);
             }
         }
 
@@ -375,7 +380,7 @@ namespace InterruptingCards.Managers
             var card = _deckManager.DrawTop();
             ActivePlayer.Hand.Add(card);
 
-            StateTriggerClientRpc(StateMachine.DrawCardTrigger);
+            StateTrigger(StateMachine.DrawCardTrigger);
         }
 
         protected virtual bool CanPlayCard(ulong id, int handManagerIndex)
@@ -428,7 +433,7 @@ namespace InterruptingCards.Managers
             var cardId = _handManagers[handManagerIndex].RemoveAt(cardIndex);
             _discardManager.PlaceTop(cardId);
 
-            StateTriggerClientRpc(StateMachine.PlayCardTrigger);
+            StateTrigger(StateMachine.PlayCardTrigger);
         }
     }
 }
