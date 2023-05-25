@@ -6,18 +6,15 @@ namespace InterruptingCards.Models
 {
     public class Player
     {
-        private ulong _id;
-        private string _name;
-
         internal Player(ulong id, string name)
         {
-            _id = id;
-            _name = name;
+            Id = id;
+            Name = name;
         }
 
-        public ulong Id => _id;
+        public ulong Id { get; }
 
-        public string Name => _name;
+        public string Name { get; }
 
         public HandManager Hand { get; set; }
     }
