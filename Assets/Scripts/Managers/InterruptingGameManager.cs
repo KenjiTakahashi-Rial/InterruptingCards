@@ -198,6 +198,12 @@ namespace InterruptingCards.Managers
                 return false;
             }
 
+            if (_interruptingCard.IsActivated)
+            {
+                Debug.Log($"Player {id} cannot interrupt when the card is already activated");
+                return false;
+            }
+
             return true;
         }
 
