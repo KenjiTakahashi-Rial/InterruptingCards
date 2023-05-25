@@ -383,7 +383,7 @@ namespace InterruptingCards.Managers
             StateTrigger(StateMachine.DrawCardTrigger);
         }
 
-        protected virtual bool CanPlayCard(ulong id, int handManagerIndex)
+        protected virtual bool CanPlayCard(ulong id, int handManagerIndex, int cardIndex)
         {
             if (id != ActivePlayer.Id)
             {
@@ -391,9 +391,23 @@ namespace InterruptingCards.Managers
                 return false;
             }
 
-            if (_handManagers[handManagerIndex] != ActivePlayer.Hand)
+            if (handManagerIndex < 0 || handManagerIndex >= _handManagers.Length)
+            {
+                Debug.Log($"Player {id} cannot play a card from an invalid hand manager index");
+                return false;
+            }
+
+            var hand = _handManagers[handManagerIndex];
+
+            if (hand != ActivePlayer.Hand)
             {
                 Debug.Log($"Player {id} can only play cards from their own hand");
+                return false;
+            }
+
+            if (cardIndex < 0 || cardIndex >= hand.Count)
+            {
+                Debug.Log($"Player {id} cannot play a card from an invalid card index");
                 return false;
             }
 
@@ -412,7 +426,7 @@ namespace InterruptingCards.Managers
 
             Debug.Log($"Trying to play card {_cardConfig.GetCardString(cardId)}");
 
-            if (CanPlayCard(_selfId, handManagerIndex))
+            if (CanPlayCard(_selfId, handManagerIndex, cardIndex))
             {
                 PlayCardServerRpc(handManagerIndex, cardIndex);
             }
@@ -423,7 +437,7 @@ namespace InterruptingCards.Managers
         {
             var senderId = serverRpcParams.Receive.SenderClientId;
 
-            if (!CanPlayCard(senderId, handManagerIndex))
+            if (!CanPlayCard(senderId, handManagerIndex, cardIndex))
             {
                 return;
             }

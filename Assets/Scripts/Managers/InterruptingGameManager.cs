@@ -125,7 +125,7 @@ namespace InterruptingCards.Managers
             return true;
         }
 
-        protected override bool CanPlayCard(ulong id, int handManagerIndex)
+        protected override bool CanPlayCard(ulong id, int handManagerIndex, int cardIndex)
         {
             var isPlayerTurn = id == ActivePlayer.Id;
             var isPlayerInterrupting = id == _interruptingPlayer.Value?.Id;
