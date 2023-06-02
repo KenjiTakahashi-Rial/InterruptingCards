@@ -72,9 +72,14 @@ namespace InterruptingCards.Config
             return Ids[e];
         }
 
+        public StateMachine GetEnum(int id)
+        {
+            return ReverseLookup[id];
+        }
+
         public string GetName(int id)
         {
-            return ReverseLookup[id].ToString();
+            return GetEnum(id).ToString();
         }
     }
 }
