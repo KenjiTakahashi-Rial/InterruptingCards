@@ -28,6 +28,7 @@ namespace InterruptingCards.Managers
             Debug.Log("Waking game manager");
 
             _cardConfig.Load(_cardPack);
+            SetCardsEnabled(false);
             Singleton = this;
         }
 
@@ -92,6 +93,7 @@ namespace InterruptingCards.Managers
             Debug.Log("Initializing Game");
 
             _playerManager.Initialize();
+
             AssignHands();
             
             if (IsServer)
@@ -100,9 +102,14 @@ namespace InterruptingCards.Managers
                 _deckManager.Shuffle();
                 _deckManager.IsFaceUp = false;
                 _discardManager.Clear();
+                foreach (var hand in _handManagers)
+                {
+                    hand.Clear();
+                }
                 DealHandsServerRpc();
             }
 
+            SetCardsEnabled(true);
             _stateMachineManager.SetTrigger(StateMachine.StartGameTrigger);
         }
 
@@ -117,19 +124,8 @@ namespace InterruptingCards.Managers
         {
             Debug.Log("Ending game");
 
-            _playerManager.Clear();
             _tempInfoText.SetText("Start the game");
-
-            if (IsServer)
-            {
-                _deckManager.Clear();
-                _discardManager.Clear();
-
-                foreach (var handManager in _handManagers)
-                {
-                    handManager.Clear();
-                }
-            }
+            SetCardsEnabled(false);
         }
 
         /******************************************************************************************\
@@ -255,6 +251,19 @@ namespace InterruptingCards.Managers
             _discardManager.PlaceTop(cardId);
 
             _stateMachineManager.SetTrigger(StateMachine.PlayCardTrigger);
+        }
+
+        protected void SetCardsEnabled(bool val)
+        {
+            Debug.Log($"Setting cards enabled: {val}");
+
+            _deckManager.gameObject.enabled = val;
+            _discardManager.gameObject.enabled = val;
+
+            foreach (var hand in _handManagers)
+            {
+                hand.gameObject.enabled = false;
+            }
         }
     }
 }

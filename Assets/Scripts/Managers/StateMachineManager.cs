@@ -21,13 +21,17 @@ namespace InterruptingCards.Managers
 
         public void SetTrigger(StateMachine trigger)
         {
-            if (NetworkManager.IsListening)
+            if (IsServer)
             {
                 SetTriggerClientRpc(trigger);
             }
-            else
+            else if (!NetworkManager.IsConnectedClient)
             {
                 SetTriggerImpl(trigger);
+            }
+            else
+            {
+                Debug.LogWarning($"Client attempted to change state while connected to host");
             }
         }
 

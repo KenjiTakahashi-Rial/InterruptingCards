@@ -38,6 +38,16 @@ namespace InterruptingCards.Managers
             base.OnDestroy();
         }
 
+        public void Show()
+        {
+            _topCard.Show();
+        }
+
+        public void Hide()
+        {
+            _topCard.Hide();
+        }
+
         public void Shuffle()
         {
             CheckEmpty();
