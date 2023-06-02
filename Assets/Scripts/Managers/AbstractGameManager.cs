@@ -12,53 +12,19 @@ namespace InterruptingCards.Managers
 {
     public abstract class AbstractGameManager : NetworkBehaviour
     {
-        /******************************************************************************************\
-         * Fields                                                                                 *
-        \******************************************************************************************/
-        
-        protected const int GameStateMachineLayer = 0;
-
-        protected readonly StateMachineConfig _stateMachineConfig = StateMachineConfig.Singleton;
         protected readonly CardConfig _cardConfig = CardConfig.Singleton;
 
-        // Server-only
-        protected readonly List<ulong> _lobby = new();
-        protected readonly HashSet<ulong> _notReadyPlayers = new();
-        
-        protected readonly List<Player> _players = new();
-
         [SerializeField] protected CardPack _cardPack;
-        [SerializeField] protected Animator _gameStateMachine;
+        [SerializeField] protected PlayerManager _playerManager;
+        [SerializeField] protected StateMachineManager _stateMachineManager;
         [SerializeField] protected DeckManager _deckManager;
         [SerializeField] protected DeckManager _discardManager;
         [SerializeField] protected HandManager[] _handManagers;
         [SerializeField] protected TextMeshPro _tempInfoText;
 
-        protected int _activePlayerIndex;
-        protected ulong _selfId; // The player that is on this device
-
-        /******************************************************************************************\
-         * Properties                                                                             *
-        \******************************************************************************************/
-
         public static AbstractGameManager Singleton { get; protected set; }
 
-        public string CurrentStateName => _stateMachineConfig.GetName(CurrentStateId);
-
-        protected virtual int MinPlayers => 2;
-
-        protected virtual int MaxPlayers => 2;
-
         protected virtual int StartingHandCardCount => 4;
-
-        protected virtual int CurrentStateId =>
-            _gameStateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash;
-
-        protected virtual Player ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex];
-
-        /******************************************************************************************\
-         * Unity Methods                                                                          *
-        \******************************************************************************************/
 
         public virtual void Awake()
         {
@@ -70,25 +36,19 @@ namespace InterruptingCards.Managers
 
         public virtual void Update()
         {
-            if (ActivePlayer == null || _tempInfoText == null)
+            if (_playerManager.ActivePlayer == null || _tempInfoText == null)
             {
                 return;
             }
 
-            _tempInfoText.SetText($"{ActivePlayer.Id}\n{CurrentStateName}");
+            _tempInfoText.SetText($"{_playerManager.ActivePlayer.Id}\n{_stateMachineManager.CurrentStateName}");
         }
 
         public override void OnNetworkSpawn()
         {
             Debug.Log("Network spawned");
 
-            GetSelfServerRpc();
-
-            if (IsServer)
-            {
-                NetworkManager.OnClientConnectedCallback += AddPlayerServerRpc;
-                NetworkManager.OnClientDisconnectCallback += RemovePlayerServerRpc;
-            }
+            base.OnNetworkSpawn();
 
             _deckManager.OnClicked += TryDrawCard;
 
@@ -103,13 +63,6 @@ namespace InterruptingCards.Managers
         {
             Debug.Log("Network despawned");
 
-            if (IsServer)
-            {
-                _players.Clear();
-                NetworkManager.OnClientConnectedCallback -= AddPlayerServerRpc;
-                NetworkManager.OnClientDisconnectCallback -= RemovePlayerServerRpc;
-            }
-
             _deckManager.OnClicked -= TryDrawCard;
 
             foreach (var handManager in _handManagers)
@@ -117,10 +70,12 @@ namespace InterruptingCards.Managers
                 handManager.OnCardClicked = null;
             }
 
-            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForClientsState))
+            if (_stateMachineManager.CurrentState != StateMachine.WaitingForClientsState)
             {
-                _gameStateMachine.SetTrigger(_stateMachineConfig.GetId(StateMachine.ForceEndGameTrigger));
+                _stateMachineManager.SetTrigger(StateMachine.ForceEndGameTrigger);
             }
+
+            base.OnNetworkDespawn();
         }
 
         public override void OnDestroy()
@@ -128,7 +83,6 @@ namespace InterruptingCards.Managers
             Debug.Log("Destroying game manager");
 
             Singleton = null;
-            _players.Clear();
             base.OnDestroy();
         }
 
@@ -140,6 +94,7 @@ namespace InterruptingCards.Managers
         {
             Debug.Log("Initializing Game");
 
+            _playerManager.Reset();
             AssignHands();
             
             if (IsServer)
@@ -151,28 +106,21 @@ namespace InterruptingCards.Managers
                 DealHandsServerRpc();
             }
 
-            _activePlayerIndex = 0;
-
-            StateTriggerClientRpc(StateMachine.StartGameTrigger);
+            _stateMachineManager.SetTriggerClientRpc(StateMachine.StartGameTrigger);
         }
 
         public abstract void HandleStartTurn();
 
         public virtual void HandleEndTurn(int shifts = 1)
         {
-            Debug.Log($"Shifting turn {shifts} times");
-
-            for (var i = 0; i < shifts; i++)
-            {
-                _activePlayerIndex = ++_activePlayerIndex == _players.Count ? 0 : _activePlayerIndex;
-            }
+            _playerManager.ShiftTurn(shifts);
         }
 
         public virtual void HandleEndGame()
         {
             Debug.Log("Ending game");
 
-            _players.Clear();
+            _playerManager.Reset();
             _tempInfoText.SetText("Start the game");
 
             if (IsServer)
@@ -191,122 +139,9 @@ namespace InterruptingCards.Managers
          * Game Flow Methods                                                                      *
         \******************************************************************************************/
 
-        [ClientRpc]
-        protected virtual void StateTriggerClientRpc(StateMachine trigger, ClientRpcParams clientRpcParams = default)
-        {
-            var triggerId = _stateMachineConfig.GetId(trigger);
-            Debug.Log($"Triggering {trigger}");
-            _gameStateMachine.SetTrigger(triggerId);
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        protected virtual void GetSelfServerRpc(ServerRpcParams serverRpcParams = default)
-        {
-            var clientId = serverRpcParams.Receive.SenderClientId;
-
-            Debug.Log($"Getting self {clientId}");
-
-            var clientRpcParams = new ClientRpcParams
-            {
-                Send = new ClientRpcSendParams
-                {
-                    TargetClientIds = new ulong[] { clientId }
-                }
-            };
-
-            AssignSelfClientRpc(clientId, clientRpcParams);
-        }
-
-        [ClientRpc]
-        protected virtual void AssignSelfClientRpc(ulong selfId, ClientRpcParams clientRpcParams = default)
-        {
-            Debug.Log($"Assigning self {selfId}");
-            _selfId = selfId;
-        }
-
         protected virtual void AssignHands()
         {
-            if (_players.Count > _handManagers.Length)
-            {
-                throw new TooManyPlayersException();
-            }
-
-            Debug.Log("Assigning hands");
-
-            var i = 0;
-            foreach (var player in _players)
-            {
-                player.Hand = _handManagers[i++];
-            }
-        }
-
-        [ServerRpc]
-        protected virtual void AddPlayerServerRpc(ulong clientId)
-        {
-            Debug.Log($"Adding player {clientId}");
-
-            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForClientsState))
-            {
-                Debug.LogWarning($"Cannnot add player {clientId} while game already started");
-                return;
-            }
-
-            if (_lobby.Count >= MaxPlayers)
-            {
-                Debug.LogWarning($"Cannnot add player {clientId} while lobby is full");
-                return;
-            }
-
-            _lobby.Add(clientId);
-
-            if (_lobby.Count == MaxPlayers)
-            {
-                _notReadyPlayers.UnionWith(_lobby);
-                StateTriggerClientRpc(StateMachine.WaitForReadyTrigger);
-                SetPlayersClientRpc(_lobby.ToArray());
-            }
-        }
-
-        [ServerRpc]
-        protected virtual void RemovePlayerServerRpc(ulong clientId)
-        {
-            Debug.Log($"Removing player {clientId}");
-
-            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForClientsState))
-            {
-                if (clientId == ActivePlayer.Id)
-                {
-                    StateTriggerClientRpc(StateMachine.ForceEndTurnTrigger);
-                }
-
-                Debug.LogWarning($"Player {clientId} removed while game is playing");
-            }
-
-            // TODO: Continue game if enough players left
-            StateTriggerClientRpc(StateMachine.ForceEndGameTrigger);
-            _lobby.Remove(clientId);
-        }
-
-        [ClientRpc]
-        protected virtual void SetPlayersClientRpc(ulong[] playerIds, ClientRpcParams clientRpcParams = default)
-        {
-            foreach (var playerId in playerIds)
-            {
-               _players.Add(new Player(playerId, playerId.ToString()));
-            }
-
-            PlayerReadyServerRpc();
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        protected virtual void PlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
-        {
-            _notReadyPlayers.Remove(serverRpcParams.Receive.SenderClientId);
-            
-            if (_notReadyPlayers.Count == 0)
-            {
-                StateTriggerClientRpc(StateMachine.AllReadyTrigger);
-            }
+            _playerManager.AssignHands(_handManagers);
         }
 
         [ServerRpc]

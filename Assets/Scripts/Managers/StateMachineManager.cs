@@ -2,6 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
+using Codice.Client.BaseCommands;
 
 namespace InterruptingCards.Managers
 {
@@ -19,21 +20,28 @@ namespace InterruptingCards.Managers
 
         public string CurrentStateName => CurrentState.ToString();
 
-        public void SetTrigger(int id)
-        {
-            _gameStateMachine.SetTrigger(id);
-        }
-
         public void SetTrigger(StateMachine trigger)
         {
-            SetTrigger(_stateMachineConfig.GetId(trigger));
+            if (NetworkManager.IsListening)
+            {
+                SetTriggerClientRpc(trigger);
+            }
+            else
+            {
+                SetTriggerImpl(_stateMachineConfig.GetId(trigger));
+            }
         }
 
         [ClientRpc]
-        public void SetTriggerClientRpc(StateMachine trigger)
+        private void SetTriggerClientRpc(StateMachine trigger)
         {
-            Debug.Log($"Triggering {trigger}");
             SetTrigger(trigger);
+        }
+
+        private void SetTriggerImpl(int id)
+        {
+            Debug.Log($"Triggering {_stateMachineConfig.GetName(id)}");
+            _gameStateMachine.SetTrigger(id);
         }
     }
 }
