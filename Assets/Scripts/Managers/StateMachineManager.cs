@@ -2,7 +2,6 @@ using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
-using Codice.Client.BaseCommands;
 
 namespace InterruptingCards.Managers
 {
@@ -28,14 +27,19 @@ namespace InterruptingCards.Managers
             }
             else
             {
-                SetTriggerImpl(_stateMachineConfig.GetId(trigger));
+                SetTriggerImpl(trigger);
             }
         }
 
         [ClientRpc]
         private void SetTriggerClientRpc(StateMachine trigger)
         {
-            SetTrigger(trigger);
+            SetTriggerImpl(trigger);
+        }
+
+        private void SetTriggerImpl(StateMachine trigger)
+        {
+            SetTriggerImpl(_stateMachineConfig.GetId(trigger));
         }
 
         private void SetTriggerImpl(int id)

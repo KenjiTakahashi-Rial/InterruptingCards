@@ -1,12 +1,9 @@
-using System.Collections.Generic;
-
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
 using InterruptingCards.Models;
-using System.Linq;
 
 namespace InterruptingCards.Managers
 {
@@ -94,7 +91,7 @@ namespace InterruptingCards.Managers
         {
             Debug.Log("Initializing Game");
 
-            _playerManager.Reset();
+            _playerManager.Initialize();
             AssignHands();
             
             if (IsServer)
@@ -106,7 +103,7 @@ namespace InterruptingCards.Managers
                 DealHandsServerRpc();
             }
 
-            _stateMachineManager.SetTriggerClientRpc(StateMachine.StartGameTrigger);
+            _stateMachineManager.SetTrigger(StateMachine.StartGameTrigger);
         }
 
         public abstract void HandleStartTurn();
@@ -120,7 +117,7 @@ namespace InterruptingCards.Managers
         {
             Debug.Log("Ending game");
 
-            _playerManager.Reset();
+            _playerManager.Clear();
             _tempInfoText.SetText("Start the game");
 
             if (IsServer)
@@ -147,13 +144,7 @@ namespace InterruptingCards.Managers
         [ServerRpc]
         protected virtual void DealHandsServerRpc()
         {
-            if (_players.Count < MinPlayers)
-            {
-                Debug.LogWarning($"Cannot deal hands before {MinPlayers} joined");
-                return;
-            }
-
-            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.InitializingGameState))
+            if (_stateMachineManager.CurrentState != StateMachine.InitializingGameState)
             {
                 Debug.LogWarning("Cannot deal hands outside of game initialization state");
                 return;
@@ -172,13 +163,13 @@ namespace InterruptingCards.Managers
 
         protected virtual bool CanDrawCard(ulong id)
         {
-            if (id != ActivePlayer.Id)
+            if (id != _playerManager.ActivePlayer.Id)
             {
                 Debug.Log($"Player {id} cannot draw a card unless it is their turn");
                 return false;
             }
 
-            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForDrawCardState))
+            if (_stateMachineManager.CurrentState != StateMachine.WaitingForDrawCardState)
             {
                 Debug.Log($"Player {id} cannot draw a card in the wrong state");
                 return false;
@@ -191,7 +182,7 @@ namespace InterruptingCards.Managers
         {
             Debug.Log("Trying to draw card");
 
-            if (CanDrawCard(_selfId))
+            if (CanDrawCard(_playerManager.SelfId))
             {
                 DrawCardServerRpc();
             }
@@ -208,26 +199,26 @@ namespace InterruptingCards.Managers
             Debug.Log("Drawing card");
 
             var card = _deckManager.DrawTop();
-            ActivePlayer.Hand.Add(card);
+            _playerManager.ActivePlayer.Hand.Add(card);
 
-            StateTriggerClientRpc(StateMachine.DrawCardTrigger);
+            _stateMachineManager.SetTrigger(StateMachine.DrawCardTrigger);
         }
 
         protected virtual bool CanPlayCard(ulong id, int handManagerIndex)
         {
-            if (id != ActivePlayer.Id)
+            if (id != _playerManager.ActivePlayer.Id)
             {
                 Debug.Log($"Player {id} cannot play a card unless it is their turn or they are interrupting");
                 return false;
             }
 
-            if (_handManagers[handManagerIndex] != ActivePlayer.Hand)
+            if (_handManagers[handManagerIndex] != _playerManager.ActivePlayer.Hand)
             {
                 Debug.Log($"Player {id} can only play cards from their own hand");
                 return false;
             }
 
-            if (CurrentStateId != _stateMachineConfig.GetId(StateMachine.WaitingForPlayCardState))
+            if (_stateMachineManager.CurrentState != StateMachine.WaitingForPlayCardState)
             {
                 Debug.Log($"Player {id} cannot play a card in the wrong state");
                 return false;
@@ -242,7 +233,7 @@ namespace InterruptingCards.Managers
 
             Debug.Log($"Trying to play card {_cardConfig.GetCardString(cardId)}");
 
-            if (CanPlayCard(_selfId, handManagerIndex))
+            if (CanPlayCard(_playerManager.SelfId, handManagerIndex))
             {
                 PlayCardServerRpc(handManagerIndex, cardIndex);
             }
@@ -263,7 +254,7 @@ namespace InterruptingCards.Managers
             var cardId = _handManagers[handManagerIndex].RemoveAt(cardIndex);
             _discardManager.PlaceTop(cardId);
 
-            StateTriggerClientRpc(StateMachine.PlayCardTrigger);
+            _stateMachineManager.SetTrigger(StateMachine.PlayCardTrigger);
         }
     }
 }

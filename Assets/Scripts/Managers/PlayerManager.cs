@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 using Unity.Netcode;
 using UnityEngine;
@@ -20,9 +21,11 @@ namespace InterruptingCards.Managers
 
         private int _activePlayerIndex;
 
-        internal Player ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex];
+        public Player ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex];
 
-        internal ulong SelfId { get; private set; }
+        public ulong SelfId { get; private set; }
+
+        public Player this[ulong id] => _players.Single(p => p.Id == id);
 
         public override void OnNetworkSpawn()
         {
@@ -39,22 +42,15 @@ namespace InterruptingCards.Managers
         {
             if (IsServer)
             {
-                _players.Clear();
+                Clear();
                 NetworkManager.OnClientConnectedCallback -= AddPlayerServerRpc;
                 NetworkManager.OnClientDisconnectCallback -= RemovePlayerServerRpc;
             }
         }
 
-        public override void OnDestroy()
-        {
-            _players.Clear();
-            base.OnDestroy();
-        }
-
-        public void Reset()
+        public void Initialize()
         {
             _activePlayerIndex = 0;
-            _players.Clear();
         }
 
         public void AssignHands(HandManager[] hands)
@@ -83,6 +79,11 @@ namespace InterruptingCards.Managers
             }
         }
 
+        public void Clear()
+        {
+            _players.Clear();
+        }
+
         [ServerRpc(RequireOwnership = false)]
         private void GetSelfServerRpc(ServerRpcParams serverRpcParams = default)
         {
@@ -102,7 +103,7 @@ namespace InterruptingCards.Managers
         }
 
         [ClientRpc]
-        private void AssignSelfClientRpc(ulong selfId, ClientRpcParams clientRpcParams = default)
+        private void AssignSelfClientRpc(ulong selfId, ClientRpcParams _)
         {
             Debug.Log($"Assigning self {selfId}");
             SelfId = selfId;
@@ -130,7 +131,7 @@ namespace InterruptingCards.Managers
             if (_lobby.Count == _maxPlayers)
             {
                 _notReadyPlayers.UnionWith(_lobby);
-                _stateMachineManager.SetTriggerClientRpc(StateMachine.WaitForReadyTrigger);
+                _stateMachineManager.SetTrigger(StateMachine.WaitForReadyTrigger);
                 SetPlayersClientRpc(_lobby.ToArray());
             }
         }
@@ -144,19 +145,19 @@ namespace InterruptingCards.Managers
             {
                 if (clientId == ActivePlayer.Id)
                 {
-                    _stateMachineManager.SetTriggerClientRpc(StateMachine.ForceEndTurnTrigger);
+                    _stateMachineManager.SetTrigger(StateMachine.ForceEndTurnTrigger);
                 }
 
                 Debug.LogWarning($"Player {clientId} removed while game is playing");
             }
 
             // TODO: Continue game if enough players left
-            _stateMachineManager.SetTriggerClientRpc(StateMachine.ForceEndGameTrigger);
+            _stateMachineManager.SetTrigger(StateMachine.ForceEndGameTrigger);
             _lobby.Remove(clientId);
         }
 
         [ClientRpc]
-        private void SetPlayersClientRpc(ulong[] playerIds, ClientRpcParams clientRpcParams = default)
+        private void SetPlayersClientRpc(ulong[] playerIds)
         {
             foreach (var playerId in playerIds)
             {
@@ -173,7 +174,7 @@ namespace InterruptingCards.Managers
             
             if (_notReadyPlayers.Count == 0)
             {
-                _stateMachineManager.SetTriggerClientRpc(StateMachine.AllReadyTrigger);
+                _stateMachineManager.SetTrigger(StateMachine.AllReadyTrigger);
             }
         }
     }
