@@ -6,7 +6,6 @@ using UnityEngine;
 
 using InterruptingCards.Config;
 using InterruptingCards.Models;
-using System.Linq;
 
 namespace InterruptingCards.Managers
 {

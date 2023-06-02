@@ -32,6 +32,7 @@ namespace InterruptingCards.Behaviours
         private Quaternion _activatedRotation;
 
         public Action OnClicked { get; set; }
+
         public Action OnActivated { get; set; }
 
         public int CardId
