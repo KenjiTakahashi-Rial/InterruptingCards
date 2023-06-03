@@ -84,10 +84,6 @@ namespace InterruptingCards.Managers
             base.OnDestroy();
         }
 
-        /******************************************************************************************\
-         * State Machine Methods                                                                  *
-        \******************************************************************************************/
-
         public virtual void HandleInitializeGame()
         {
             Debug.Log("Initializing Game");
@@ -128,10 +124,6 @@ namespace InterruptingCards.Managers
             _playerManager.Clear();
             SetCardsHidden(true);
         }
-
-        /******************************************************************************************\
-         * Game Flow Methods                                                                      *
-        \******************************************************************************************/
 
         protected virtual void AssignHands()
         {
