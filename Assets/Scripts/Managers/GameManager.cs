@@ -7,23 +7,23 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public abstract class AbstractGameManager : NetworkBehaviour
+    public class GameManager : NetworkBehaviour
     {
-        protected readonly CardConfig _cardConfig = CardConfig.Singleton;
+        private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
-        [SerializeField] protected CardPack _cardPack;
-        [SerializeField] protected DeckManager _deckManager;
-        [SerializeField] protected DeckManager _discardManager;
-        [SerializeField] protected HandManager[] _handManagers;
-        [SerializeField] protected PlayerManager _playerManager;
-        [SerializeField] protected StateMachineManager _stateMachineManager;
-        [SerializeField] protected TextMeshPro _tempInfoText;
+        [SerializeField] private CardPack _cardPack;
+        [SerializeField] private DeckManager _deckManager;
+        [SerializeField] private DeckManager _discardManager;
+        [SerializeField] private HandManager[] _handManagers;
+        [SerializeField] private PlayerManager _playerManager;
+        [SerializeField] private StateMachineManager _stateMachineManager;
+        [SerializeField] private TextMeshPro _tempInfoText;
 
-        public static AbstractGameManager Singleton { get; protected set; }
+        public static GameManager Singleton { get; private set; }
 
-        protected virtual int StartingHandCardCount => 4;
+        private int StartingHandCardCount => 4;
 
-        public virtual void Awake()
+        public void Awake()
         {
             Debug.Log("Waking game manager");
             _cardConfig.Load(_cardPack);
@@ -31,7 +31,7 @@ namespace InterruptingCards.Managers
             Singleton = this;
         }
 
-        public virtual void Update()
+        public void Update()
         {
             if (_playerManager.ActivePlayer == null || _tempInfoText == null)
             {
@@ -66,9 +66,9 @@ namespace InterruptingCards.Managers
                 handManager.OnCardClicked = null;
             }
 
-            if (_stateMachineManager.CurrentState != StateMachine.WaitingForClientsState)
+            if (_stateMachineManager.CurrentState != StateMachine.WaitingForClients)
             {
-                _stateMachineManager.SetTrigger(StateMachine.ForceEndGameTrigger);
+                _stateMachineManager.SetTrigger(StateMachine.ForceEndGame);
             }
 
             base.OnNetworkDespawn();
@@ -81,13 +81,13 @@ namespace InterruptingCards.Managers
             base.OnDestroy();
         }
 
-        public virtual void HandleInitializeGame()
+        public void HandleInitializeGame()
         {
             Debug.Log("Initializing Game");
             _playerManager.Initialize();
 
             AssignHands();
-            
+
             if (IsServer)
             {
                 _deckManager.Initialize();
@@ -99,20 +99,18 @@ namespace InterruptingCards.Managers
                     hand.Clear();
                 }
                 DealHandsServerRpc();
-                _stateMachineManager.SetTrigger(StateMachine.StartGameTrigger);
+                _stateMachineManager.SetTrigger(StateMachine.StartGame);
             }
 
             SetCardsHidden(false);
         }
 
-        public abstract void HandleStartTurn();
-
-        public virtual void HandleEndTurn(int shifts = 1)
+        public void HandleEndTurn(int shifts = 1)
         {
             _playerManager.ShiftTurn(shifts);
         }
 
-        public virtual void HandleEndGame()
+        public void HandleEndGame()
         {
             Debug.Log("Ending game");
 
@@ -121,15 +119,15 @@ namespace InterruptingCards.Managers
             SetCardsHidden(true);
         }
 
-        protected virtual void AssignHands()
+        private void AssignHands()
         {
             _playerManager.AssignHands(_handManagers);
         }
 
         [ServerRpc]
-        protected virtual void DealHandsServerRpc()
+        private void DealHandsServerRpc()
         {
-            if (_stateMachineManager.CurrentState != StateMachine.InitializingGameState)
+            if (_stateMachineManager.CurrentState != StateMachine.InitializingGame)
             {
                 Debug.LogWarning("Cannot deal hands outside of game initialization state");
                 return;
@@ -145,7 +143,7 @@ namespace InterruptingCards.Managers
             }
         }
 
-        protected virtual bool CanDrawCard(ulong id)
+        private bool CanDrawCard(ulong id)
         {
             if (id != _playerManager.ActivePlayer.Id)
             {
@@ -153,7 +151,7 @@ namespace InterruptingCards.Managers
                 return false;
             }
 
-            if (_stateMachineManager.CurrentState != StateMachine.WaitingForDrawCardState)
+            if (_stateMachineManager.CurrentState != StateMachine.Looting)
             {
                 Debug.Log($"Player {id} cannot draw a card in the wrong state");
                 return false;
@@ -162,7 +160,7 @@ namespace InterruptingCards.Managers
             return true;
         }
 
-        protected virtual void TryDrawCard()
+        private void TryDrawCard()
         {
             Debug.Log("Trying to draw card");
             if (CanDrawCard(_playerManager.SelfId))
@@ -172,7 +170,7 @@ namespace InterruptingCards.Managers
         }
 
         [ServerRpc(RequireOwnership = false)]
-        protected virtual void DrawCardServerRpc(ServerRpcParams serverRpcParams = default)
+        private void DrawCardServerRpc(ServerRpcParams serverRpcParams = default)
         {
             if (!CanDrawCard(serverRpcParams.Receive.SenderClientId))
             {
@@ -182,10 +180,10 @@ namespace InterruptingCards.Managers
             Debug.Log("Drawing card");
             var card = _deckManager.DrawTop();
             _playerManager.ActivePlayer.Hand.Add(card);
-            _stateMachineManager.SetTrigger(StateMachine.DrawCardTrigger);
+            _stateMachineManager.SetTrigger(StateMachine.LootComplete);
         }
 
-        protected virtual bool CanPlayCard(ulong id, int handManagerIndex, int cardIndex)
+        private bool CanPlayCard(ulong id, int handManagerIndex, int cardIndex)
         {
             if (id != _playerManager.ActivePlayer.Id)
             {
@@ -193,13 +191,21 @@ namespace InterruptingCards.Managers
                 return false;
             }
 
-            if (_handManagers[handManagerIndex] != _playerManager.ActivePlayer.Hand)
+            var hand = _handManagers[handManagerIndex];
+
+            if (hand != _playerManager.ActivePlayer.Hand)
             {
                 Debug.Log($"Player {id} can only play cards from their own hand");
                 return false;
             }
 
-            if (_stateMachineManager.CurrentState != StateMachine.WaitingForPlayCardState)
+            if (cardIndex < 0 || hand.Count <= cardIndex)
+            {
+                Debug.Log($"Player {id} cannot play a card from an invalid index of their hand");
+                return false;
+            }
+
+            if (_stateMachineManager.CurrentState != StateMachine.PerformingAction)
             {
                 Debug.Log($"Player {id} cannot play a card in the wrong state");
                 return false;
@@ -208,7 +214,7 @@ namespace InterruptingCards.Managers
             return true;
         }
 
-        protected virtual void TryPlayCard(int handManagerIndex, int cardIndex)
+        private void TryPlayCard(int handManagerIndex, int cardIndex)
         {
             var cardId = _handManagers[handManagerIndex][cardIndex];
             Debug.Log($"Trying to play card {_cardConfig.GetCardString(cardId)}");
@@ -220,7 +226,7 @@ namespace InterruptingCards.Managers
         }
 
         [ServerRpc(RequireOwnership = false)]
-        protected virtual void PlayCardServerRpc(int handManagerIndex, int cardIndex, ServerRpcParams serverRpcParams = default)
+        private void PlayCardServerRpc(int handManagerIndex, int cardIndex, ServerRpcParams serverRpcParams = default)
         {
             var senderId = serverRpcParams.Receive.SenderClientId;
             if (!CanPlayCard(senderId, handManagerIndex, cardIndex))
@@ -231,10 +237,10 @@ namespace InterruptingCards.Managers
             Debug.Log("Playing card");
             var cardId = _handManagers[handManagerIndex].RemoveAt(cardIndex);
             _discardManager.PlaceTop(cardId);
-            _stateMachineManager.SetTrigger(StateMachine.PlayCardTrigger);
+            _stateMachineManager.SetTrigger(StateMachine.PerformAction);
         }
 
-        protected void SetCardsHidden(bool val)
+        private void SetCardsHidden(bool val)
         {
             Debug.Log($"Setting cards hidden: {val}");
             _deckManager.SetHidden(val);
