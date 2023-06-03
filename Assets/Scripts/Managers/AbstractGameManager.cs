@@ -201,7 +201,7 @@ namespace InterruptingCards.Managers
             _stateMachineManager.SetTrigger(StateMachine.DrawCardTrigger);
         }
 
-        protected virtual bool CanPlayCard(ulong id, int handManagerIndex)
+        protected virtual bool CanPlayCard(ulong id, int handManagerIndex, int cardIndex)
         {
             if (id != _playerManager.ActivePlayer.Id)
             {
@@ -230,7 +230,7 @@ namespace InterruptingCards.Managers
 
             Debug.Log($"Trying to play card {_cardConfig.GetCardString(cardId)}");
 
-            if (CanPlayCard(_playerManager.SelfId, handManagerIndex))
+            if (CanPlayCard(_playerManager.SelfId, handManagerIndex, cardIndex))
             {
                 PlayCardServerRpc(handManagerIndex, cardIndex);
             }
@@ -241,7 +241,7 @@ namespace InterruptingCards.Managers
         {
             var senderId = serverRpcParams.Receive.SenderClientId;
 
-            if (!CanPlayCard(senderId, handManagerIndex))
+            if (!CanPlayCard(senderId, handManagerIndex, cardIndex))
             {
                 return;
             }

@@ -10,22 +10,40 @@ namespace InterruptingCards.Managers
 {
     public class InterruptingGameManager : AbstractGameManager
     {
+        protected readonly StateMachineConfig _stateMachineConfig = StateMachineConfig.Singleton;
+
         protected NetworkVariable<PlayerId> _interruptingPlayer = new(null);
+        protected NetworkVariable<CardActiveEffect> _interruptingEffect = new(CardActiveEffect.Invalid);
+        protected StateMachine _stateBeforeInterrupt;
 
         [SerializeField] protected CardBehaviour _interruptingCard;
+
+        public static new InterruptingGameManager Singleton { get; protected set; }
+
+        public override void Awake()
+        {
+            base.Awake();
+            Singleton = this;
+        }
 
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
 
-            _interruptingCard.OnClicked += TryInterruptPlayCard;
+            _interruptingCard.OnClicked += TryInterrupt;
         }
 
         public override void OnNetworkDespawn()
         {
             base.OnNetworkDespawn();
 
-            _interruptingCard.OnClicked -= TryInterruptPlayCard;
+            _interruptingCard.OnClicked -= TryInterrupt;
+        }
+
+        public override void OnDestroy()
+        {
+            Singleton = null;
+            base.OnDestroy();
         }
 
         public override void HandleInitializeGame()
@@ -49,6 +67,27 @@ namespace InterruptingCards.Managers
             }
         }
 
+        public virtual void HandleStartInterrupt()
+        {
+            var effect = _interruptingEffect.Value;
+
+            Debug.Log($"{effect} active effect");
+
+            if (!IsServer)
+            {
+                return;
+            }
+
+            switch (effect)
+            {
+                case CardActiveEffect.PlayCard:
+                    _stateMachineManager.SetTrigger(StateMachine.PlayCardActiveEffectTrigger);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
         public override void HandleEndGame()
         {
             base.HandleEndGame();
@@ -58,7 +97,6 @@ namespace InterruptingCards.Managers
                 _interruptingCard.CardId = CardConfig.InvalidId;
             }
         }
-
 
         protected virtual void HandleEffect(CardActiveEffect effect)
         {
@@ -101,13 +139,17 @@ namespace InterruptingCards.Managers
             return true;
         }
 
-        protected override bool CanPlayCard(ulong id, int handManagerIndex)
+        protected override bool CanPlayCard(ulong id, int handManagerIndex, int cardIndex)
         {
             var isPlayerTurn = id == _playerManager.ActivePlayer.Id;
             var isPlayerInterrupting = id == _interruptingPlayer.Value?.Id;
             var isInterruptInProgress = _interruptingPlayer.Value != null;
             var hand = _handManagers[handManagerIndex];
             var isPlayerHand = hand == _playerManager[id].Hand;
+            var isWaitingForPlayCardState = 
+                _stateMachineManager.CurrentState == StateMachine.WaitingForPlayCardState;
+            var isWaitingForPlayCardInterruptState =
+                _stateMachineManager.CurrentState == StateMachine.WaitingForPlayCardInterruptState;
 
             if (!isPlayerTurn && !isPlayerInterrupting)
             {
@@ -127,7 +169,10 @@ namespace InterruptingCards.Managers
                 return false;
             }
 
-            if (_stateMachineManager.CurrentState != StateMachine.WaitingForPlayCardState)
+            if (
+                isPlayerTurn && !isWaitingForPlayCardState
+                || isPlayerInterrupting && !isWaitingForPlayCardInterruptState
+            )
             {
                 Debug.Log($"Player {id} cannot play a card in the wrong state");
                 return false;
@@ -140,7 +185,13 @@ namespace InterruptingCards.Managers
         protected override void PlayCardServerRpc(int handManagerIndex, int cardIndex, ServerRpcParams serverRpcParams = default)
         {
             base.PlayCardServerRpc(handManagerIndex, cardIndex, serverRpcParams);
-            _interruptingPlayer.Value = null;
+
+            if (_interruptingPlayer.Value != null)
+            {
+                _interruptingPlayer.Value = null;
+                _stateMachineManager.SetTrigger(_stateBeforeInterrupt);
+                _stateBeforeInterrupt = StateMachine.Invalid;
+            }
         }
 
         protected virtual bool CanInterrupt(ulong id)
@@ -160,25 +211,31 @@ namespace InterruptingCards.Managers
                 return false;
             }
 
+            if (_interruptingCard.IsActivated)
+            {
+                Debug.Log($"Player {id} cannot interrupt when the card is already activated");
+                return false;
+            }
+
             return true;
+        }
+
+        // TODO: Temporary
+        protected virtual void TryInterrupt()
+        {
+            TryInterrupt(_cardConfig[_interruptingCard.CardId].ActiveEffect);
         }
 
         protected virtual void TryInterrupt(CardActiveEffect effect)
         {
             if (CanInterrupt(_playerManager.SelfId))
             {
-                InterruptServerRpc(effect);
+                StartInterruptServerRpc(effect);
             }
         }
 
-        // TODO: Temporary
-        protected virtual void TryInterruptPlayCard()
-        {
-            TryInterrupt(_cardConfig[_interruptingCard.CardId].ActiveEffect);
-        }
-
         [ServerRpc(RequireOwnership = false)]
-        protected virtual void InterruptServerRpc(CardActiveEffect effect, ServerRpcParams serverRpcParams = default)
+        protected virtual void StartInterruptServerRpc(CardActiveEffect effect, ServerRpcParams serverRpcParams = default)
         {
             var senderId = serverRpcParams.Receive.SenderClientId;
 
@@ -187,11 +244,13 @@ namespace InterruptingCards.Managers
                 return;
             }
 
-            Debug.Log($"Player {senderId} interrupting player {_playerManager.ActivePlayer.Id}'s turn");
+            Debug.Log($"Player {senderId} interrupting player {_playerManager.ActivePlayer.Id}'s turn with {effect}");
 
+            _stateBeforeInterrupt = _stateMachineManager.CurrentState;
             _interruptingCard.IsActivated = true;
             _interruptingPlayer.Value = new PlayerId(senderId);
-            HandleEffect(effect);
+            _interruptingEffect.Value = effect;
+            _stateMachineManager.SetTrigger(StateMachine.InterruptTrigger);
         }
 
         protected class PlayerId : INetworkSerializable
