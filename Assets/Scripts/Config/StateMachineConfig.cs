@@ -85,17 +85,22 @@ namespace InterruptingCards.Config
             return Ids[e];
         }
 
-        public string GetName(int id)
+        public StateMachine GetEnum(int id)
         {
-            return ReverseLookup[id].ToString();
+            return ReverseLookup[id];
         }
 
-        public int StateToTrigger(int stateId)
+        public string GetName(int id)
+        {
+            return GetEnum(id).ToString();
+        }
+
+        public StateMachine StateToTrigger(int stateId)
         {
             return ReverseLookup[stateId] switch
             {
-                StateMachine.WaitingForPlayCardState => GetId(StateMachine.ReturnToWaitingForPlayCardTrigger),
-                StateMachine.WaitingForDrawCardState => GetId(StateMachine.ReturnToWaitingForDrawCardTrigger),
+                StateMachine.WaitingForPlayCardState => StateMachine.ReturnToWaitingForPlayCardTrigger,
+                StateMachine.WaitingForDrawCardState => StateMachine.ReturnToWaitingForDrawCardTrigger,
                 _ => throw new NotImplementedException(),
             };
         }

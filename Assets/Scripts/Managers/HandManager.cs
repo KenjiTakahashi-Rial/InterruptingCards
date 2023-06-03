@@ -40,10 +40,12 @@ namespace InterruptingCards.Managers
                 slot.OnClicked = null;
             }
         }
-
-        public int Get(int index)
+        public void SetHidden(bool val)
         {
-            return _cardSlots[index].CardId;
+            foreach (var card in _cardSlots)
+            {
+                card.SetHidden(val);
+            }
         }
 
         public void Add(int cardId)
