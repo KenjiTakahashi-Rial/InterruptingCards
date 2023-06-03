@@ -53,6 +53,12 @@ namespace InterruptingCards.Managers
             _activePlayerIndex = 0;
         }
 
+        public Player GetNext(ulong id)
+        {
+            var i = _players.FindIndex(p => p.Id == id);
+            return _players[++i == _players.Count ? 0 : i];
+        }
+
         public void AssignHands(HandManager[] hands)
         {
             if (_players.Count > hands.Length)

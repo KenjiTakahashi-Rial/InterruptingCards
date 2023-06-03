@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 
-using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
@@ -8,7 +7,7 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public class TheStackManager : NetworkBehaviour
+    public class TheStackManager : MonoBehaviour
     {
         private enum StackItemType
         {
