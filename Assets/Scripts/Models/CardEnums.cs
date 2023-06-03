@@ -50,4 +50,9 @@ namespace InterruptingCards.Models
         Invalid,
         PlayCard,
     }
+
+    public enum CardAbility
+    {
+        Invalid,
+    }
 }
