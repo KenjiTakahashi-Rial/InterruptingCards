@@ -11,10 +11,10 @@ namespace InterruptingCards.Managers
 
         private readonly StateMachineConfig _stateMachineConfig = StateMachineConfig.Singleton;
 
-        [SerializeField] private Animator _gameStateMachine;
+        [SerializeField] private Animator _stateMachine;
 
         public StateMachine CurrentState => _stateMachineConfig.GetEnum(
-            _gameStateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash
+            _stateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash
         );
 
         public string CurrentStateName => CurrentState.ToString();
@@ -49,7 +49,7 @@ namespace InterruptingCards.Managers
         private void SetTriggerImpl(int id)
         {
             Debug.Log($"Triggering {_stateMachineConfig.GetName(id)}");
-            _gameStateMachine.SetTrigger(id);
+            _stateMachine.SetTrigger(id);
         }
     }
 }

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 
 using Unity.Netcode;
+using UnityEngine;
 
+using InterruptingCards.Config;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
@@ -16,7 +18,10 @@ namespace InterruptingCards.Managers
             DiceRoll,
         }
 
+        private readonly CardConfig _cardConfig = CardConfig.Singleton;
         private readonly Stack<IStackItem> _theStack = new();
+
+        [SerializeField] private StateMachineManager _stateMachineManager;
 
         public bool IsEmpty => _theStack.Count == 0;
 
@@ -24,22 +29,33 @@ namespace InterruptingCards.Managers
 
         public void PushLoot(int cardId)
         {
+            Debug.Log($"Pushing {_cardConfig.GetCardString(cardId)} to The Stack");
             _theStack.Push(new LootStackItem(cardId));
         }
 
         public void PushAbility(CardAbility ability)
         {
+            Debug.Log($"Pushing {ability} to The Stack");
             _theStack.Push(new AbilityStackItem(ability));
         }
 
         public void PushDiceRoll(int diceRoll)
         {
+            Debug.Log($"Pushing dice roll {diceRoll} to The Stack");
             _theStack.Push(new DiceRollStackItem(diceRoll));
         }
 
         public void Pop()
         {
-            _theStack.Pop();
+            if (_stateMachineManager.CurrentState == StateMachine.Popping)
+            {
+                Debug.Log("Popping The Stack");
+                _theStack.Pop();
+            }
+            else
+            {
+                Debug.Log($"Cannot pop The Stack in state {_stateMachineManager.CurrentStateName}");
+            }
         }
 
         // Models
