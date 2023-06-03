@@ -41,6 +41,14 @@ namespace InterruptingCards.Managers
             }
         }
 
+        public void SetHidden(bool val)
+        {
+            foreach (var card in _cardSlots)
+            {
+                card.SetHidden(val);
+            }
+        }
+
         public void Add(int cardId)
         {
             Debug.Log($"Adding card to hand ({_cardConfig.GetCardString(cardId)})");

@@ -28,7 +28,7 @@ namespace InterruptingCards.Managers
             Debug.Log("Waking game manager");
 
             _cardConfig.Load(_cardPack);
-            SetCardsEnabled(false);
+            SetCardsHidden(true);
             Singleton = this;
         }
 
@@ -107,10 +107,10 @@ namespace InterruptingCards.Managers
                     hand.Clear();
                 }
                 DealHandsServerRpc();
+                _stateMachineManager.SetTrigger(StateMachine.StartGameTrigger);
             }
 
-            SetCardsEnabled(true);
-            _stateMachineManager.SetTrigger(StateMachine.StartGameTrigger);
+            SetCardsHidden(false);
         }
 
         public abstract void HandleStartTurn();
@@ -125,7 +125,8 @@ namespace InterruptingCards.Managers
             Debug.Log("Ending game");
 
             _tempInfoText.SetText("Start the game");
-            SetCardsEnabled(false);
+            _playerManager.Clear();
+            SetCardsHidden(true);
         }
 
         /******************************************************************************************\
@@ -253,16 +254,16 @@ namespace InterruptingCards.Managers
             _stateMachineManager.SetTrigger(StateMachine.PlayCardTrigger);
         }
 
-        protected void SetCardsEnabled(bool val)
+        protected void SetCardsHidden(bool val)
         {
-            Debug.Log($"Setting cards enabled: {val}");
+            Debug.Log($"Setting cards hidden: {val}");
 
-            _deckManager.gameObject.enabled = val;
-            _discardManager.gameObject.enabled = val;
+            _deckManager.SetHidden(val);
+            _discardManager.SetHidden(val);
 
             foreach (var hand in _handManagers)
             {
-                hand.gameObject.enabled = false;
+                hand.SetHidden(val);
             }
         }
     }

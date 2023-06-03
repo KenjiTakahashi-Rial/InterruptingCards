@@ -102,16 +102,9 @@ namespace InterruptingCards.Behaviours
             _isActivated.OnValueChanged -= HandleActivatedChanged;
         }
 
-        public void Show()
+        public void SetHidden(bool val)
         {
-            _isHidden = false;
-            SetCardTextEnabled();
-            SetCardSpriteEnabled();
-        }
-
-        public void Hide()
-        {
-            _isHidden = true;
+            _isHidden = val;
             SetCardTextEnabled();
             SetCardSpriteEnabled();
         }
