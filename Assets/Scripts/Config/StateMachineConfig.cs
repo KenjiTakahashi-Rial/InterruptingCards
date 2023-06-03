@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,14 +21,20 @@ namespace InterruptingCards.Config
         WaitingForDrawCardState,
         WaitingForPlayCardState,
         EndingTurnState,
+        StartingInterruptState,
+        WaitingForPlayCardInterruptState,
+        EndingInterruptState,
 
         // Triggers
         AllReadyTrigger,
         DrawCardTrigger,
         ForceEndTurnTrigger,
         ForceEndGameTrigger,
+        InterruptTrigger,
         PlayCardTrigger,
         PlayCardActiveEffectTrigger,
+        ReturnToWaitingForDrawCardTrigger,
+        ReturnToWaitingForPlayCardTrigger,
         StartGameTrigger,
         WaitForReadyTrigger,
     }
@@ -37,24 +44,30 @@ namespace InterruptingCards.Config
         private static readonly Dictionary<StateMachine, string> Strings = new()
         {
             // States
-            { StateMachine.WaitingForAllReadyState, "Base." +               "WaitingForAllReady" },
-            { StateMachine.WaitingForClientsState,  "Base." +               "WaitingForClients"  },
-            { StateMachine.InitializingGameState,   "Base." +               "InitializingGame"   },
-            { StateMachine.EndingGameState,         "Base.InGame." +        "EndingGame"         },
-            { StateMachine.StartingTurnState,       "Base.InGame.PlayerTurns.StartingTurn"       },
-            { StateMachine.EndingTurnState,         "Base.InGame.PlayerTurns.EndingTurn"         },
-            { StateMachine.WaitingForDrawCardState, "Base.InGame.PlayerTurns.WaitingForDrawCard" },
-            { StateMachine.WaitingForPlayCardState, "Base.InGame.PlayerTurns.WaitingForPlayCard" },
+            { StateMachine.WaitingForAllReadyState,          "Base." +                            "WaitingForAllReady"          },
+            { StateMachine.WaitingForClientsState,           "Base." +                            "WaitingForClients"           },
+            { StateMachine.InitializingGameState,            "Base." +                            "InitializingGame"            },
+            { StateMachine.EndingGameState,                  "Base.InGame." +                     "EndingGame"                  },
+            { StateMachine.StartingTurnState,                "Base.InGame.PlayerTurns." +         "StartingTurn"                },
+            { StateMachine.WaitingForDrawCardState,          "Base.InGame.PlayerTurns." +         "WaitingForDrawCard"          },
+            { StateMachine.WaitingForPlayCardState,          "Base.InGame.PlayerTurns." +         "WaitingForPlayCard"          },
+            { StateMachine.EndingTurnState,                  "Base.InGame.PlayerTurns." +         "EndingTurn"                  },
+            { StateMachine.StartingInterruptState,           "Base.InGame.PlayerTurns.Interrupting.StartingInterrupt"           },
+            { StateMachine.WaitingForPlayCardInterruptState, "Base.InGame.PlayerTurns.Interrupting.WaitingForPlayCardInterrupt" },
+            { StateMachine.EndingInterruptState,             "Base.InGame.PlayerTurns.Interrupting.EndingInterrupt"             },
 
             // Triggers
-            { StateMachine.AllReadyTrigger,             "allReady"             },
-            { StateMachine.DrawCardTrigger,             "drawCard"             },
-            { StateMachine.ForceEndTurnTrigger,         "forceEndTurn"         },
-            { StateMachine.ForceEndGameTrigger,         "forceEndGame"         },
-            { StateMachine.PlayCardTrigger,             "playCard"             },
-            { StateMachine.PlayCardActiveEffectTrigger, "playCardActiveEffect" },
-            { StateMachine.StartGameTrigger,            "startGame"            },
-            { StateMachine.WaitForReadyTrigger,         "waitForReady"         },
+            { StateMachine.AllReadyTrigger,                   "allReady"                          },
+            { StateMachine.DrawCardTrigger,                   "drawCard"                          },
+            { StateMachine.ForceEndTurnTrigger,               "forceEndTurn"                      },
+            { StateMachine.ForceEndGameTrigger,               "forceEndGame"                      },
+            { StateMachine.InterruptTrigger,                  "interrupt"                         },
+            { StateMachine.PlayCardTrigger,                   "playCard"                          },
+            { StateMachine.PlayCardActiveEffectTrigger,       "playCardActiveEffect"              },
+            { StateMachine.ReturnToWaitingForDrawCardTrigger, "returnToWaitingForDrawCard" },
+            { StateMachine.ReturnToWaitingForPlayCardTrigger, "returnToWaitingForPlayCard" },
+            { StateMachine.StartGameTrigger,                  "startGame"                         },
+            { StateMachine.WaitForReadyTrigger,               "waitForReady"                      },
         };
 
         private static readonly ImmutableDictionary<StateMachine, int> Ids = 
@@ -72,9 +85,24 @@ namespace InterruptingCards.Config
             return Ids[e];
         }
 
+        public StateMachine GetEnum(int id)
+        {
+            return ReverseLookup[id];
+        }
+
         public string GetName(int id)
         {
-            return ReverseLookup[id].ToString();
+            return GetEnum(id).ToString();
+        }
+
+        public StateMachine StateToTrigger(int stateId)
+        {
+            return ReverseLookup[stateId] switch
+            {
+                StateMachine.WaitingForPlayCardState => StateMachine.ReturnToWaitingForPlayCardTrigger,
+                StateMachine.WaitingForDrawCardState => StateMachine.ReturnToWaitingForDrawCardTrigger,
+                _ => throw new NotImplementedException(),
+            };
         }
     }
 }

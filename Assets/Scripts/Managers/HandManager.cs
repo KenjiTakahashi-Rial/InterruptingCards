@@ -15,7 +15,7 @@ namespace InterruptingCards.Managers
 
         [SerializeField] private CardBehaviour[] _cardSlots;
 
-        private int Count => _cardSlots.Count(c => c.CardId != CardConfig.InvalidId);
+        public int Count => _cardSlots.Count(c => c.CardId != CardConfig.InvalidId);
 
         public Action<int> OnCardClicked { get; set; }
 
@@ -38,6 +38,13 @@ namespace InterruptingCards.Managers
             foreach (var slot in _cardSlots)
             {
                 slot.OnClicked = null;
+            }
+        }
+        public void SetHidden(bool val)
+        {
+            foreach (var card in _cardSlots)
+            {
+                card.SetHidden(val);
             }
         }
 
@@ -86,11 +93,6 @@ namespace InterruptingCards.Managers
                 
                 slot.CardId = CardConfig.InvalidId;
             }
-        }
-
-        public bool Contains(int cardId)
-        {
-            return _cardSlots.Any(c => c.CardId == cardId);
         }
     }
 }

@@ -30,6 +30,7 @@ namespace InterruptingCards.Behaviours
         private Vector3 _originalScale;
         private Quaternion _originalRotation;
         private Quaternion _activatedRotation;
+        private bool _isHidden;
 
         public Action OnClicked { get; set; }
 
@@ -53,11 +54,46 @@ namespace InterruptingCards.Behaviours
             set => _isActivated.Value = value;
         }
 
+        public void Awake()
+        {
+            _originalScale = transform.localScale;
+            _originalRotation = transform.rotation;
+            var angles = _originalRotation.eulerAngles;
+            _activatedRotation = Quaternion.Euler(angles.x, angles.y, angles.z + ActivatedAngle);
+            transform.rotation = _originalRotation;
+
+            _cardSprite.enabled = false;
+            _cardText.enabled = false;
+        }
+
         public override void OnNetworkSpawn()
         {
             _cardId.OnValueChanged += HandleCardIdChanged;
             _isFaceUp.OnValueChanged += HandleFaceUpChanged;
             _isActivated.OnValueChanged += HandleActivatedChanged;
+        }
+
+        public void Update()
+        {
+            // TODO: NetworkManager spawns the objects at wrong scale. Figure out why and find a better solution
+            if (transform.localScale != _originalScale)
+            {
+                transform.localScale = _originalScale;
+            }
+        }
+
+        public void OnMouseDown()
+        {
+            if (OnClicked == null)
+            {
+                Debug.Log("OnClicked has no subscribers");
+            }
+            else
+            {
+                Debug.Log($"{_cardConfig.GetCardString(_cardId.Value)} clicked");
+            }
+
+            OnClicked?.Invoke();
         }
 
         public override void OnNetworkDespawn()
@@ -67,14 +103,31 @@ namespace InterruptingCards.Behaviours
             _isActivated.OnValueChanged -= HandleActivatedChanged;
         }
 
+        public void SetHidden(bool val)
+        {
+            _isHidden = val;
+            SetCardTextEnabled();
+            SetCardSpriteEnabled();
+        }
+
+        private void SetCardTextEnabled()
+        {
+            _cardText.enabled = !_isHidden && CardId != CardConfig.InvalidId && IsFaceUp;
+        }
+
+        private void SetCardSpriteEnabled()
+        {
+            _cardSprite.enabled = !_isHidden && CardId != CardConfig.InvalidId;
+        }
+
         private void HandleCardIdChanged(int oldValue, int newValue)
         {
             var oldCard = _cardConfig.GetCardString(oldValue);
             var newCard = _cardConfig.GetCardString(newValue);
             Debug.Log($"Card changed ({oldCard} -> {newCard})");
 
-            _cardSprite.enabled = newValue != CardConfig.InvalidId;
-            _cardText.enabled = newValue != CardConfig.InvalidId && IsFaceUp;
+            SetCardTextEnabled();
+            SetCardSpriteEnabled();
             _cardText.SetText(_cardConfig.GetCardString(newValue)); // TODO: Change
         }
 
@@ -84,7 +137,7 @@ namespace InterruptingCards.Behaviours
             var after = newValue ? "face-up" : "face-down";
             Debug.Log($"Card changed ({before} -> {after})");
 
-            _cardText.enabled = (_cardId.Value != CardConfig.InvalidId) && newValue;
+            SetCardTextEnabled();
         }
 
         private void HandleActivatedChanged(bool oldValue, bool newValue)
@@ -101,41 +154,6 @@ namespace InterruptingCards.Behaviours
             }
 
             OnActivated?.Invoke();
-        }
-
-        private void Awake()
-        {
-            _originalScale = transform.localScale;
-            _originalRotation = transform.rotation;
-            var angles = _originalRotation.eulerAngles;
-            _activatedRotation = Quaternion.Euler(angles.x, angles.y, angles.z + ActivatedAngle);
-            transform.rotation = _originalRotation;
-
-            _cardSprite.enabled = false;
-            _cardText.enabled = false;
-        }
-
-        private void Update()
-        {
-            // TODO: NetworkManager spawns the objects at wrong scale. Figure out why and find a better solution
-            if (transform.localScale != _originalScale)
-            {
-                transform.localScale = _originalScale;
-            }
-        }
-
-        private void OnMouseDown()
-        {
-            if (OnClicked == null)
-            {
-                Debug.Log("OnClicked has no subscribers");
-            }
-            else
-            {
-                Debug.Log($"{_cardConfig.GetCardString(_cardId.Value)} clicked");
-            }
-
-            OnClicked?.Invoke();
         }
     }
 }
