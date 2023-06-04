@@ -19,13 +19,27 @@ namespace InterruptingCards.Managers
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _gameStateMachineManager;
 
-        private bool _isPriorityPassInternal;
+        private bool _isPriorityPassFromStack;
+
+        public static TheStackManager Singleton { get; private set; }
 
         public bool IsEmpty => _theStack.Count == 0;
 
         public Player PriorityPlayer { get; private set; }
 
-        // Methods
+        // Unity Methods
+
+        public void Awake()
+        {
+            Singleton = this;
+        }
+
+        public void OnDestroy()
+        {
+            Singleton = null;
+        }
+
+        // The Stack Operations
 
         public void PushLoot(int cardId, Player player)
         {
@@ -45,9 +59,27 @@ namespace InterruptingCards.Managers
             _theStack.Push(new DiceRollTheStackItem(diceRoll));
         }
 
-        public void PriorityPasses()
+        public void Pop()
         {
-            PriorityPassesImpl(false);
+            if (_stateMachineManager.CurrentState == StateMachine.Popping)
+            {
+                Debug.Log("Popping The Stack");
+                OnPop?.Invoke(_theStack.Pop());
+            }
+            else
+            {
+                Debug.Log($"Cannot pop The Stack in state {_stateMachineManager.CurrentStateName}");
+            }
+        }
+
+        // Priority Operations
+
+        public void PriorityPasses(bool isFromStack = false)
+        {
+            Debug.Log($"Priority passes (from stack: {isFromStack})");
+            _isPriorityPassFromStack = isFromStack;
+            // TODO: Automatically passing priority for now. Change later
+            PassPriority();
         }
 
         public void PassPriority()
@@ -63,7 +95,7 @@ namespace InterruptingCards.Managers
 
                 if (IsEmpty)
                 {
-                    if (_isPriorityPassInternal)
+                    if (_isPriorityPassFromStack)
                     {
                         _stateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
                     }
@@ -77,27 +109,6 @@ namespace InterruptingCards.Managers
             else
             {
                 PassPriority();
-            }
-        }
-
-        private void PriorityPassesImpl(bool isInternal)
-        {
-            Debug.Log($"Priority passes (from stack: {isInternal})");
-            _isPriorityPassInternal = isInternal;
-            // TODO: Automatically passing priority for now. Change later
-            PassPriority();
-        }
-
-        private void Pop()
-        {
-            if (_stateMachineManager.CurrentState == StateMachine.Popping)
-            {
-                Debug.Log("Popping The Stack");
-                OnPop?.Invoke(_theStack.Pop());
-            }
-            else
-            {
-                Debug.Log($"Cannot pop The Stack in state {_stateMachineManager.CurrentStateName}");
             }
         }
     }

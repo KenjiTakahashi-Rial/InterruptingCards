@@ -128,6 +128,12 @@ namespace InterruptingCards.Managers
             _stateMachineManager.SetTrigger(StateMachine.LootComplete);
         }
 
+        public void PriorityPasses()
+        {
+            // TODO
+            _theStackManager.PriorityPasses();
+        }
+
         public void DeclareAttack()
         {
             // TODO
