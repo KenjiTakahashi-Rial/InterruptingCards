@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -9,86 +10,73 @@ namespace InterruptingCards.Managers
 {
     public class TheStackManager : MonoBehaviour
     {
-        private enum StackItemType
-        {
-            Invalid,
-            Loot,
-            Ability,
-            DiceRoll,
-        }
+        public event Action<ITheStackItem> OnPop;
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
-        private readonly Stack<IStackItem> _theStack = new();
+        private readonly Stack<ITheStackItem> _theStack = new();
 
+        [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
+
+        private Player _lastItemPlayer;
 
         public bool IsEmpty => _theStack.Count == 0;
 
+        public Player PriorityPlayer { get; private set; }
+
         // Methods
 
-        public void PushLoot(int cardId)
+        public void PushLoot(int cardId, Player player)
         {
-            Debug.Log($"Pushing {_cardConfig.GetCardString(cardId)} to The Stack");
-            _theStack.Push(new LootStackItem(cardId));
+            Debug.Log($"Player {player.Name} pushing {_cardConfig.GetCardString(cardId)} to The Stack");
+            _theStack.Push(new LootTheStackItem(cardId));
+            _lastItemPlayer = player;
         }
 
-        public void PushAbility(CardAbility ability)
+        public void PushAbility(CardAbility ability, Player player)
         {
-            Debug.Log($"Pushing {ability} to The Stack");
-            _theStack.Push(new AbilityStackItem(ability));
+            Debug.Log($"Player {player.Name} pushing {ability} to The Stack");
+            _theStack.Push(new AbilityTheStackItem(ability));
+            _lastItemPlayer = player;
         }
 
-        public void PushDiceRoll(int diceRoll)
+        public void PushDiceRoll(int diceRoll, Player player)
         {
-            Debug.Log($"Pushing dice roll {diceRoll} to The Stack");
-            _theStack.Push(new DiceRollStackItem(diceRoll));
+            Debug.Log($"Player {player.Name} pushing dice roll {diceRoll} to The Stack");
+            _theStack.Push(new DiceRollTheStackItem(diceRoll));
+            _lastItemPlayer = player;
         }
 
-        public void Pop()
+        public void PriorityPasses(Player startingPlayer)
+        {
+            Debug.Log($"Priority passes starting with {startingPlayer.Name}");
+            _lastItemPlayer = startingPlayer;
+        }
+
+        public void PassPriority()
+        {
+            var prevPriorityPlayer = PriorityPlayer;
+            PriorityPlayer = _playerManager.GetNext(PriorityPlayer.Id);
+            var nextPriorityPlayer = PriorityPlayer;
+            Debug.Log($"Passing priority from {prevPriorityPlayer} to {nextPriorityPlayer}");
+
+            if (PriorityPlayer == _lastItemPlayer)
+            {
+                Pop();
+            }
+        }
+
+        private void Pop()
         {
             if (_stateMachineManager.CurrentState == StateMachine.Popping)
             {
                 Debug.Log("Popping The Stack");
-                _theStack.Pop();
+                OnPop?.Invoke(_theStack.Pop());
             }
             else
             {
                 Debug.Log($"Cannot pop The Stack in state {_stateMachineManager.CurrentStateName}");
             }
-        }
-
-        // Models
-
-        private interface IStackItem
-        {
-            StackItemType Type { get; }
-        }
-
-        private sealed class LootStackItem : IStackItem
-        {
-            public LootStackItem(int cardId) { CardId = cardId; }
-
-            public StackItemType Type => StackItemType.Loot;
-
-            public int CardId { get; }
-        }
-
-        private sealed class AbilityStackItem : IStackItem
-        {
-            public AbilityStackItem(CardAbility ability) { Ability = ability; }
-
-            public StackItemType Type => StackItemType.Ability;
-
-            public CardAbility Ability { get; }
-        }
-
-        private sealed class DiceRollStackItem : IStackItem
-        {
-            public DiceRollStackItem(int diceRoll) { DiceRoll = diceRoll; }
-
-            public StackItemType Type => StackItemType.DiceRoll;
-
-            public int DiceRoll { get; }
         }
     }
 }

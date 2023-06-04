@@ -15,6 +15,7 @@ namespace InterruptingCards.Behaviours
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
+        // TODO: Do these need to be NetworkVariable? Is it possible to send ClientRpc messages to change them instead?
         private readonly NetworkVariable<int> _cardId = new(CardConfig.GetCardId(s_defaultSuit, s_defaultRank));
         private readonly NetworkVariable<bool> _isFaceUp = new(s_defaultIsFaceUp);
         private readonly NetworkVariable<bool> _isActivated = new(s_defaultIsActivated);
