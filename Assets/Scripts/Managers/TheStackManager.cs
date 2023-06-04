@@ -17,8 +17,9 @@ namespace InterruptingCards.Managers
 
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
+        [SerializeField] private StateMachineManager _gameStateMachineManager;
 
-        private Player _lastItemPlayer;
+        private bool _isPriorityPassInternal;
 
         public bool IsEmpty => _theStack.Count == 0;
 
@@ -30,27 +31,23 @@ namespace InterruptingCards.Managers
         {
             Debug.Log($"Player {player.Name} pushing {_cardConfig.GetCardString(cardId)} to The Stack");
             _theStack.Push(new LootTheStackItem(cardId));
-            _lastItemPlayer = player;
         }
 
         public void PushAbility(CardAbility ability, Player player)
         {
             Debug.Log($"Player {player.Name} pushing {ability} to The Stack");
             _theStack.Push(new AbilityTheStackItem(ability));
-            _lastItemPlayer = player;
         }
 
         public void PushDiceRoll(int diceRoll, Player player)
         {
             Debug.Log($"Player {player.Name} pushing dice roll {diceRoll} to The Stack");
             _theStack.Push(new DiceRollTheStackItem(diceRoll));
-            _lastItemPlayer = player;
         }
 
-        public void PriorityPasses(Player startingPlayer)
+        public void PriorityPasses()
         {
-            Debug.Log($"Priority passes starting with {startingPlayer.Name}");
-            _lastItemPlayer = startingPlayer;
+            PriorityPassesImpl(false);
         }
 
         public void PassPriority()
@@ -60,10 +57,35 @@ namespace InterruptingCards.Managers
             var nextPriorityPlayer = PriorityPlayer;
             Debug.Log($"Passing priority from {prevPriorityPlayer} to {nextPriorityPlayer}");
 
-            if (PriorityPlayer == _lastItemPlayer)
+            if (PriorityPlayer == _playerManager.ActivePlayer)
             {
                 Pop();
+
+                if (IsEmpty)
+                {
+                    if (_isPriorityPassInternal)
+                    {
+                        _stateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
+                    }
+                    else
+                    {
+                        _gameStateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
+                    }
+                }
             }
+            // TODO: Automatically passing priority for now. Change later
+            else
+            {
+                PassPriority();
+            }
+        }
+
+        private void PriorityPassesImpl(bool isInternal)
+        {
+            Debug.Log($"Priority passes (from stack: {isInternal})");
+            _isPriorityPassInternal = isInternal;
+            // TODO: Automatically passing priority for now. Change later
+            PassPriority();
         }
 
         private void Pop()

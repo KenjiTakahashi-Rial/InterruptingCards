@@ -75,7 +75,7 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public void ShiftTurn(int shifts)
+        public void ShiftTurn(int shifts = 1)
         {
             Debug.Log($"Shifting turn {shifts} times");
 

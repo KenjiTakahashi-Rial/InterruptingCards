@@ -17,11 +17,14 @@ namespace InterruptingCards.Managers
         [SerializeField] private HandManager[] _handManagers;
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
+        [SerializeField] private TheStackManager _theStackManager;
         [SerializeField] private TextMeshPro _tempInfoText;
 
         public static GameManager Singleton { get; private set; }
 
         private int StartingHandCardCount => 4;
+
+        // Unity Methods
 
         public void Awake()
         {
@@ -81,12 +84,14 @@ namespace InterruptingCards.Managers
             base.OnDestroy();
         }
 
-        public void HandleInitializeGame()
+        // State Handlers
+
+        public void Initialize()
         {
             Debug.Log("Initializing Game");
             _playerManager.Initialize();
 
-            AssignHands();
+            _playerManager.AssignHands(_handManagers);
 
             if (IsServer)
             {
@@ -105,24 +110,94 @@ namespace InterruptingCards.Managers
             SetCardsHidden(false);
         }
 
-        public void HandleEndTurn(int shifts = 1)
+        public void RechargeStep()
         {
-            _playerManager.ShiftTurn(shifts);
+            // TODO
+            _stateMachineManager.SetTrigger(StateMachine.RechargeComplete);
         }
 
-        public void HandleEndGame()
+        public void TriggerStartOfTurnAbilities()
+        {
+            // TODO
+            _theStackManager.PriorityPasses();
+        }
+
+        public void LootStep()
+        {
+            // TODO
+            _stateMachineManager.SetTrigger(StateMachine.LootComplete);
+        }
+
+        public void DeclareAttack()
+        {
+            // TODO
+            _theStackManager.PriorityPasses();
+        }
+
+        public void Attack()
+        {
+            // TODO
+            _stateMachineManager.SetTrigger(StateMachine.AttackComplete);
+        }
+
+        public void DeclarePurchase()
+        {
+            // TODO
+            _theStackManager.PriorityPasses();
+        }
+
+        public void Purchase()
+        {
+            // TODO
+            _stateMachineManager.SetTrigger(StateMachine.PurchaseComplete);
+        }
+
+        public void PerformAction()
+        {
+            // TODO
+            _theStackManager.PriorityPasses();
+        }
+
+        public void DeclareEndTurn()
+        {
+            // TODO
+            _theStackManager.PriorityPasses();
+        }
+
+        public void TriggerEndOfTurnAbilities()
+        {
+            // TODO
+            _theStackManager.PriorityPasses();
+        }
+
+        public void Discard()
+        {
+            // TODO
+            _stateMachineManager.SetTrigger(StateMachine.DiscardComplete);
+        }
+
+        public void ShiftRoom()
+        {
+            // TODO
+            _stateMachineManager.SetTrigger(StateMachine.ShiftRoomComplete);
+        }
+
+        public void EndTurn()
+        {
+            // TODO
+            _playerManager.ShiftTurn();
+            _stateMachineManager.SetTrigger(StateMachine.EndTurn);
+        }
+
+        public void EndGame()
         {
             Debug.Log("Ending game");
-
             _tempInfoText.SetText("Start the game");
             _playerManager.Clear();
             SetCardsHidden(true);
         }
 
-        private void AssignHands()
-        {
-            _playerManager.AssignHands(_handManagers);
-        }
+        // ServerRpc Methods & Tries
 
         [ServerRpc]
         private void DealHandsServerRpc()
