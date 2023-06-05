@@ -81,6 +81,7 @@ namespace InterruptingCards.Config
             // Game States
             { StateMachine.WaitingForClients, "Base.WaitingForClients" },
             { StateMachine.WaitingForAllReady, "Base.WaitingForAllReady" },
+            { StateMachine.InitializingGame, "Base.InitializingGame" },
 
             // In-Game
             { StateMachine.Entry, "Base.InGame.Entry" },
@@ -128,6 +129,7 @@ namespace InterruptingCards.Config
             { StateMachine.ShiftRoomComplete, "shiftRoomComplete"},
             { StateMachine.StartGame, "startGame"},
             { StateMachine.StartPhaseComplete, "startPhaseComplete"},
+            { StateMachine.WaitForReady, "waitForReady" },
 
             // The Stack States
             { StateMachine.TheStackPriorityPassing, "Base.PriorityPassing" },

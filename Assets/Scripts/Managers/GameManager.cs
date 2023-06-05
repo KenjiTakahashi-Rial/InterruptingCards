@@ -34,6 +34,12 @@ namespace InterruptingCards.Managers
             Singleton = this;
         }
 
+        public void Start()
+        {
+            // TODO: Remove after upgrading to Netcode 1.4.1
+            NetworkManager.NetworkConfig.Prefabs.NetworkPrefabsLists.Clear();
+        }
+
         public void Update()
         {
             if (_playerManager.ActivePlayer == null || _tempInfoText == null)

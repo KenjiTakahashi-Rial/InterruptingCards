@@ -1643,7 +1643,9 @@ MonoBehaviour:
   - {fileID: 2058083998825954511}
   _playerManager: {fileID: 1412915941}
   _stateMachineManager: {fileID: 1138538691}
+  _theStackManager: {fileID: 1458435631}
   _tempInfoText: {fileID: 1054745979}
+  _networkPrefabsList: {fileID: 11400000, guid: 2a06f76f523839e42b261d5de8d1ae35, type: 2}
 --- !u!4 &1138538689
 Transform:
   m_ObjectHideFlags: 0
@@ -1871,7 +1873,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9437fa2ed0c9a244794b26d58200fefd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _playerManager: {fileID: 1412915941}
   _stateMachineManager: {fileID: 1458435635}
+  _gameStateMachineManager: {fileID: 1138538691}
 --- !u!4 &1458435632
 Transform:
   m_ObjectHideFlags: 0
