@@ -1,3 +1,5 @@
+using UnityEngine;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +36,19 @@ namespace InterruptingCards.Utilities
             Func<KeyValuePair<TKey, TValue>, NewTValue> valueSelector
         )
         {
-            return new ImmutableDictionary<NewTKey, NewTValue>(_dictionary.ToDictionary(keySelector, valueSelector));
+            try
+            {
+                return new ImmutableDictionary<NewTKey, NewTValue>(_dictionary.ToDictionary(keySelector, valueSelector));
+            }
+            catch
+            {
+                foreach ((var k, var v) in _dictionary)
+                {
+                    Debug.LogError($"{{ {k}: {v} }}");
+                }
+
+                throw;
+            }
         }
     }
 }

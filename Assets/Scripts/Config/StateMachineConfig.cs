@@ -120,7 +120,7 @@ namespace InterruptingCards.Config
             { StateMachine.EndPhaseComplete, "endPhaseComplete"},
             { StateMachine.ForceEndGame, "forceEndGame"},
             { StateMachine.ForceEndTurn, "forceEndTurn"},
-            { StateMachine.GamePriorityPassComplete, "priorityPassComplete"},
+            { StateMachine.GamePriorityPassComplete, "gamePriorityPassComplete"},
             { StateMachine.LootComplete, "lootComplete"},
             { StateMachine.PerformAction, "performAction"},
             { StateMachine.PurchaseComplete, "purchaseComplete"},
@@ -134,7 +134,7 @@ namespace InterruptingCards.Config
             { StateMachine.Popping, "Base.Popping" },
 
             // The Stack Triggers
-            { StateMachine.TheStackPriorityPassComplete, "priorityPassComplete" },
+            { StateMachine.TheStackPriorityPassComplete, "theStackPriorityPassComplete" },
             { StateMachine.TheStackIsEmpty, "Base.IsEmpty" },
         };
 
