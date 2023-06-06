@@ -175,16 +175,28 @@ namespace InterruptingCards.Managers
             _stateMachineManager.SetTrigger(StateMachine.PurchaseComplete);
         }
 
-        public void BeginPerformAction()
+        public void BeginPlayLoot()
         {
             // TODO
-            _stateMachineManager.SetTrigger(StateMachine.PerformAction);
+            _stateMachineManager.SetTrigger(StateMachine.PlayLoot);
         }
 
-        public void PerformAction()
+        public void PlayLoot()
         {
             // TODO
-            _theStackManager.Begin();
+            _stateMachineManager.SetTrigger(StateMachine.PlayedLoot);
+        }
+
+        public void BeginActivateAbility()
+        {
+            // TODO
+            _stateMachineManager.SetTrigger(StateMachine.ActivateAbility);
+        }
+
+        public void ActivateAbility()
+        {
+            // TODO
+            _stateMachineManager.SetTrigger(StateMachine.ActivatedAbility);
         }
 
         public void BeginDeclareEndTurn()
@@ -315,7 +327,7 @@ namespace InterruptingCards.Managers
                 return false;
             }
 
-            if (_stateMachineManager.CurrentState != StateMachine.PerformingAction)
+            if (_stateMachineManager.CurrentState != StateMachine.PlayingLoot)
             {
                 Debug.Log($"Player {id} cannot play a card in the wrong state");
                 return false;
@@ -347,7 +359,7 @@ namespace InterruptingCards.Managers
             Debug.Log("Playing card");
             var cardId = _handManagers[handManagerIndex].RemoveAt(cardIndex);
             _discardManager.PlaceTop(cardId);
-            _stateMachineManager.SetTrigger(StateMachine.PerformAction);
+            _stateMachineManager.SetTrigger(StateMachine.PlayedLoot);
         }
 
         private void SetCardsHidden(bool val)

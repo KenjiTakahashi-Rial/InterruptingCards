@@ -33,7 +33,8 @@ namespace InterruptingCards.Config
         Attacking,
         DeclaringPurchase,
         Purchasing,
-        PerformingAction,
+        PlayingLoot,
+        ActivatingAbility,
         DeclaringEndTurn,
 
         // EndPhase
@@ -44,6 +45,8 @@ namespace InterruptingCards.Config
 
         // Game Triggers
         ActionPhaseComplete,
+        ActivateAbility,
+        ActivatedAbility,
         AllReady,
         AttackComplete,
         DeclareAttack,
@@ -57,7 +60,8 @@ namespace InterruptingCards.Config
         ForceEndTurn,
         GamePriorityPassComplete,
         LootComplete,
-        PerformAction,
+        PlayedLoot,
+        PlayLoot,
         PurchaseComplete,
         RechargeComplete,
         ShiftRoomComplete,
@@ -104,7 +108,8 @@ namespace InterruptingCards.Config
             { StateMachine.Attacking, "Base.InGame.PlayerTurns.ActionPhase.Attacking"},
             { StateMachine.DeclaringPurchase, "Base.InGame.PlayerTurns.ActionPhase.DeclaringPurchase"},
             { StateMachine.Purchasing, "Base.InGame.PlayerTurns.ActionPhase.Purchasing"},
-            { StateMachine.PerformingAction, "Base.InGame.PlayerTurns.ActionPhase.PerformingAction"},
+            { StateMachine.PlayingLoot, "Base.InGame.PlayerTurns.ActionPhase.PlayingLoot"},
+            { StateMachine.ActivatingAbility, "Base.InGame.PlayerTurns.ActionPhase.ActivatingAbility"},
             { StateMachine.DeclaringEndTurn, "Base.InGame.PlayerTurns.ActionPhase.DeclaringEndTurn"},
 
             // End Phase
@@ -115,6 +120,8 @@ namespace InterruptingCards.Config
 
             // Game Triggers
             { StateMachine.ActionPhaseComplete, "actionPhaseComplete"},
+            { StateMachine.ActivateAbility, "activateAbility"},
+            { StateMachine.ActivatedAbility, "activatedAbility"},
             { StateMachine.AllReady, "allReady"},
             { StateMachine.AttackComplete, "attackComplete"},
             { StateMachine.DeclareAttack, "declareAttack"},
@@ -128,7 +135,8 @@ namespace InterruptingCards.Config
             { StateMachine.ForceEndTurn, "forceEndTurn"},
             { StateMachine.GamePriorityPassComplete, "gamePriorityPassComplete"},
             { StateMachine.LootComplete, "lootComplete"},
-            { StateMachine.PerformAction, "performAction"},
+            { StateMachine.PlayedLoot, "playedLoot"},
+            { StateMachine.PlayLoot, "playLoot"},
             { StateMachine.PurchaseComplete, "purchaseComplete"},
             { StateMachine.RechargeComplete, "rechargeComplete"},
             { StateMachine.ShiftRoomComplete, "shiftRoomComplete"},
