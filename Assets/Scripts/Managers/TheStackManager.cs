@@ -10,7 +10,7 @@ namespace InterruptingCards.Managers
 {
     public class TheStackManager : MonoBehaviour
     {
-        public event Action<ITheStackItem> OnPop;
+        public event Action<ITheStackItem> OnResolve;
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
         private readonly Stack<ITheStackItem> _theStack = new();
@@ -19,11 +19,9 @@ namespace InterruptingCards.Managers
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _gameStateMachineManager;
 
-        private bool _isPriorityPassFromStack;
+        private Player _lastPushBy;
 
         public static TheStackManager Singleton { get; private set; }
-
-        public bool IsEmpty => _theStack.Count == 0;
 
         public Player PriorityPlayer { get; private set; }
 
@@ -32,11 +30,13 @@ namespace InterruptingCards.Managers
         public void Awake()
         {
             Singleton = this;
+            _playerManager.OnActivePlayerChanged += SetActivePlayerPriority;
         }
 
         public void OnDestroy()
         {
             Singleton = null;
+            _playerManager.OnActivePlayerChanged -= SetActivePlayerPriority;
         }
 
         // The Stack Operations
@@ -44,66 +44,96 @@ namespace InterruptingCards.Managers
         public void PushLoot(int cardId, Player player)
         {
             Debug.Log($"Player {player.Name} pushing {_cardConfig.GetCardString(cardId)} to The Stack");
+            _lastPushBy = player;
             _theStack.Push(new LootTheStackItem(cardId));
+            _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
         }
 
         public void PushAbility(CardAbility ability, Player player)
         {
             Debug.Log($"Player {player.Name} pushing {ability} to The Stack");
+            _lastPushBy = player;
             _theStack.Push(new AbilityTheStackItem(ability));
+            _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
         }
 
         public void PushDiceRoll(int diceRoll, Player player)
         {
             Debug.Log($"Player {player.Name} pushing dice roll {diceRoll} to The Stack");
+            _lastPushBy = player;
             _theStack.Push(new DiceRollTheStackItem(diceRoll));
+            _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
         }
 
         public void Pop()
         {
-            if (_stateMachineManager.CurrentState == StateMachine.Popping)
+            if (_stateMachineManager.CurrentState == StateMachine.TheStackPopping)
             {
                 Debug.Log("Popping The Stack");
-                OnPop?.Invoke(_theStack.Pop());
+                var item = _theStack.Pop();
+                PriorityPlayer = item.PushedBy;
+                OnResolve?.Invoke(item);
+                _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
+                _stateMachineManager.SetTrigger(StateMachine.TheStackPopped);
             }
             else
             {
-                Debug.Log($"Cannot pop The Stack in state {_stateMachineManager.CurrentStateName}");
+                Debug.LogWarning($"Cannot pop The Stack in state {_stateMachineManager.CurrentStateName}");
+            }
+        }
+
+        // State Machine Operations
+
+        public void Begin()
+        {
+            _stateMachineManager.SetTrigger(StateMachine.TheStackBegin);
+        }
+
+        public void End()
+        {
+            if (_stateMachineManager.CurrentState == StateMachine.TheStackEnding)
+            {
+                _lastPushBy = null;
+                _gameStateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
+                _stateMachineManager.SetTrigger(StateMachine.TheStackEnded);
+            }
+            else
+            {
+                Debug.LogWarning($"Cannot end The Stack in state {_stateMachineManager.CurrentStateName}");
             }
         }
 
         // Priority Operations
 
-        public void PriorityPasses(bool isFromStack = false)
+        public void SetActivePlayerPriority(Player _)
         {
-            Debug.Log($"Priority passes (from stack: {isFromStack})");
-            _isPriorityPassFromStack = isFromStack;
-            // TODO: Automatically passing priority for now. Change later
-            PassPriority();
+            PriorityPlayer = _playerManager.ActivePlayer;
         }
 
-        public void PassPriority()
+        public void PriorityPasses()
+        {
+            if (_stateMachineManager.CurrentState == StateMachine.TheStackPriorityPassing)
+            {
+                Debug.Log($"Priority passes");
+                // TODO: Automatically passing priority for now. Change later
+                PassPriority();
+            }
+            else
+            {
+                Debug.LogWarning($"Cannot pass priority in state {_stateMachineManager.CurrentStateName}");
+            }
+        }
+
+        private void PassPriority()
         {
             var prevPriorityPlayer = PriorityPlayer;
             PriorityPlayer = _playerManager.GetNext(PriorityPlayer.Id);
             var nextPriorityPlayer = PriorityPlayer;
-            Debug.Log($"Passing priority from {prevPriorityPlayer} to {nextPriorityPlayer}");
+            Debug.Log($"Passing priority from {prevPriorityPlayer.Name} to {nextPriorityPlayer.Name}");
 
-            if (PriorityPlayer == _playerManager.ActivePlayer)
+            if (PriorityPlayer == _lastPushBy || _lastPushBy == null && PriorityPlayer == _playerManager.ActivePlayer)
             {
-                Pop();
-
-                if (IsEmpty)
-                {
-                    if (_isPriorityPassFromStack)
-                    {
-                        _stateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
-                    }
-                    else
-                    {
-                        _gameStateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
-                    }
-                }
+                 _stateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
             }
             // TODO: Automatically passing priority for now. Change later
             else

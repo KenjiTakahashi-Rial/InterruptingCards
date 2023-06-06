@@ -125,7 +125,7 @@ namespace InterruptingCards.Managers
         public void TriggerStartOfTurnAbilities()
         {
             // TODO
-            _theStackManager.PriorityPasses();
+            _theStackManager.Begin();
         }
 
         public void LootStep()
@@ -137,13 +137,13 @@ namespace InterruptingCards.Managers
         public void PriorityPasses()
         {
             // TODO
-            _theStackManager.PriorityPasses();
+            _theStackManager.Begin();
         }
 
         public void DeclareAttack()
         {
             // TODO
-            _theStackManager.PriorityPasses();
+            _theStackManager.Begin();
         }
 
         public void Attack()
@@ -155,7 +155,7 @@ namespace InterruptingCards.Managers
         public void DeclarePurchase()
         {
             // TODO
-            _theStackManager.PriorityPasses();
+            _theStackManager.Begin();
         }
 
         public void Purchase()
@@ -167,19 +167,19 @@ namespace InterruptingCards.Managers
         public void PerformAction()
         {
             // TODO
-            _theStackManager.PriorityPasses();
+            _theStackManager.Begin();
         }
 
         public void DeclareEndTurn()
         {
             // TODO
-            _theStackManager.PriorityPasses();
+            _theStackManager.Begin();
         }
 
         public void TriggerEndOfTurnAbilities()
         {
             // TODO
-            _theStackManager.PriorityPasses();
+            _theStackManager.Begin();
         }
 
         public void Discard()

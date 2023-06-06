@@ -28,7 +28,7 @@ namespace InterruptingCards.Config
         GamePriorityPassing,
 
         // Action Phase
-        Idling,
+        ActionPhaseIdling,
         DeclaringAttack,
         Attacking,
         DeclaringPurchase,
@@ -66,12 +66,17 @@ namespace InterruptingCards.Config
         WaitForReady,
 
         // The Stack States
+        TheStackIdling,
         TheStackPriorityPassing,
-        Popping,
+        TheStackPopping,
+        TheStackEnding,
 
         // The Stack Triggers
-        TheStackPriorityPassComplete,
+        TheStackEnded,
         TheStackIsEmpty,
+        TheStackPopped,
+        TheStackBegin,
+        TheStackPriorityPassComplete,
     }
 
     public class StateMachineConfig
@@ -94,7 +99,7 @@ namespace InterruptingCards.Config
             { StateMachine.GamePriorityPassing, "Base.InGame.PlayerTurns.StartPhase.PriorityPassing"},
 
             // Action Phase
-            { StateMachine.Idling, "Base.InGame.PlayerTurns.ActionPhase.Idling"},
+            { StateMachine.ActionPhaseIdling, "Base.InGame.PlayerTurns.ActionPhase.Idling"},
             { StateMachine.DeclaringAttack, "Base.InGame.PlayerTurns.ActionPhase.DeclaringAttack"},
             { StateMachine.Attacking, "Base.InGame.PlayerTurns.ActionPhase.Attacking"},
             { StateMachine.DeclaringPurchase, "Base.InGame.PlayerTurns.ActionPhase.DeclaringPurchase"},
@@ -132,12 +137,17 @@ namespace InterruptingCards.Config
             { StateMachine.WaitForReady, "waitForReady" },
 
             // The Stack States
+            { StateMachine.TheStackIdling, "Base.Idling" },
             { StateMachine.TheStackPriorityPassing, "Base.PriorityPassing" },
-            { StateMachine.Popping, "Base.Popping" },
+            { StateMachine.TheStackPopping, "Base.Popping" },
+            { StateMachine.TheStackEnding, "Base.Ending" },
 
             // The Stack Triggers
+            { StateMachine.TheStackBegin, "begin" },
+            { StateMachine.TheStackEnded, "ended" },
+            { StateMachine.TheStackIsEmpty, "isEmpty" },
+            { StateMachine.TheStackPopped, "popped" },
             { StateMachine.TheStackPriorityPassComplete, "theStackPriorityPassComplete" },
-            { StateMachine.TheStackIsEmpty, "Base.IsEmpty" },
         };
 
         private static readonly ImmutableDictionary<StateMachine, int> Ids = 

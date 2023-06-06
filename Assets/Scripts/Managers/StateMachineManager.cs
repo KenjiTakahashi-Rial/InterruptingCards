@@ -31,7 +31,7 @@ namespace InterruptingCards.Managers
             }
             else
             {
-                Debug.LogWarning($"Client attempted to change state while connected to host");
+                Debug.LogWarning($"Client attempted to set trigger {trigger} while connected to host");
             }
         }
 
@@ -43,13 +43,38 @@ namespace InterruptingCards.Managers
 
         private void SetTriggerImpl(StateMachine trigger)
         {
-            SetTriggerImpl(_stateMachineConfig.GetId(trigger));
-        }
-
-        private void SetTriggerImpl(int id)
-        {
+            var id = _stateMachineConfig.GetId(trigger);
             Debug.Log($"Triggering {_stateMachineConfig.GetName(id)}");
             _stateMachine.SetTrigger(id);
+        }
+
+        public void SetBool(StateMachine param, bool val)
+        {
+            if (IsServer)
+            {
+                SetBoolClientRpc(param, val);
+            }
+            else if (!NetworkManager.IsConnectedClient)
+            {
+                SetBoolImpl(param, val);
+            }
+            else
+            {
+                Debug.LogWarning($"Client attempted to set bool {param} while connected to host");
+            }
+        }
+
+        [ClientRpc]
+        private void SetBoolClientRpc(StateMachine param, bool val)
+        {
+            SetBoolImpl(param, val);
+        }
+
+        private void SetBoolImpl(StateMachine param, bool val)
+        {
+            var id = _stateMachineConfig.GetId(param);
+            Debug.Log($"Setting bool {_stateMachineConfig.GetName(id)}");
+            _stateMachine.SetBool(id, val);
         }
     }
 }

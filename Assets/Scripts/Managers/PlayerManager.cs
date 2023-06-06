@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,6 +7,7 @@ using UnityEngine;
 
 using InterruptingCards.Config;
 using InterruptingCards.Models;
+using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Managers
 {
@@ -14,14 +16,25 @@ namespace InterruptingCards.Managers
         private readonly List<ulong> _lobby = new();
         private readonly HashSet<ulong> _notReadyPlayers = new();
         private readonly List<Player> _players = new();
+        private readonly Observable<int> _activePlayerIndex = new();
+        private readonly Dictionary<int, Action<int>> _onActivePlayerChangedHandlers = new();
 
         [SerializeField] private StateMachineManager _gameStateMachineManager;
         [SerializeField] private int _minPlayers;
         [SerializeField] private int _maxPlayers;
 
-        private int _activePlayerIndex;
+        public Player ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex.Value];
 
-        public Player ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex];
+        public event Action<Player> OnActivePlayerChanged
+        {
+            add
+            {
+                void IndexToPlayer(int i) { value(_players[i]); }
+                _onActivePlayerChangedHandlers[value.GetHashCode()] = IndexToPlayer;
+                _activePlayerIndex.OnChanged += IndexToPlayer;
+            }
+            remove => _activePlayerIndex.OnChanged -= _onActivePlayerChangedHandlers[value.GetHashCode()];
+        }
 
         public ulong SelfId { get; private set; }
 
@@ -50,7 +63,7 @@ namespace InterruptingCards.Managers
 
         public void Initialize()
         {
-            _activePlayerIndex = 0;
+            _activePlayerIndex.Value = 0;
         }
 
         public Player GetNext(ulong id)
@@ -81,7 +94,7 @@ namespace InterruptingCards.Managers
 
             for (var i = 0; i < shifts; i++)
             {
-                _activePlayerIndex = ++_activePlayerIndex == _players.Count ? 0 : _activePlayerIndex;
+                _activePlayerIndex.Value = (_activePlayerIndex.Value + 1) % _players.Count;
             }
         }
 

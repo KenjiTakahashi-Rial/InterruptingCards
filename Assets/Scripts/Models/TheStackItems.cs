@@ -1,5 +1,3 @@
-using System;
-
 namespace InterruptingCards.Models
 {
     public enum TheStackItemType
@@ -13,6 +11,8 @@ namespace InterruptingCards.Models
     public interface ITheStackItem
     {
         TheStackItemType Type { get; }
+
+        Player PushedBy { get; }
     }
 
     public class LootTheStackItem : ITheStackItem
@@ -20,6 +20,8 @@ namespace InterruptingCards.Models
         public LootTheStackItem(int cardId) { CardId = cardId; }
 
         public TheStackItemType Type => TheStackItemType.Loot;
+
+        public Player PushedBy { get; }
 
         public int CardId { get; }
     }
@@ -30,6 +32,8 @@ namespace InterruptingCards.Models
 
         public TheStackItemType Type => TheStackItemType.Ability;
 
+        public Player PushedBy { get; }
+
         public CardAbility Ability { get; }
     }
 
@@ -38,6 +42,8 @@ namespace InterruptingCards.Models
         public DiceRollTheStackItem(int diceRoll) { DiceRoll = diceRoll; }
 
         public TheStackItemType Type => TheStackItemType.DiceRoll;
+
+        public Player PushedBy { get; }
 
         public int DiceRoll { get; }
     }
