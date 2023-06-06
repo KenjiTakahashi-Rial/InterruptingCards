@@ -140,6 +140,11 @@ namespace InterruptingCards.Managers
             _theStackManager.Begin();
         }
 
+        public void BeginDeclareAttack()
+        {
+            _stateMachineManager.SetTrigger(StateMachine.DeclareAttack);
+        }
+
         public void DeclareAttack()
         {
             // TODO
@@ -150,6 +155,12 @@ namespace InterruptingCards.Managers
         {
             // TODO
             _stateMachineManager.SetTrigger(StateMachine.AttackComplete);
+        }
+
+        public void BeginDeclarePurchase()
+        {
+            // TODO
+            _stateMachineManager.SetTrigger(StateMachine.DeclarePurchase);
         }
 
         public void DeclarePurchase()
@@ -164,10 +175,22 @@ namespace InterruptingCards.Managers
             _stateMachineManager.SetTrigger(StateMachine.PurchaseComplete);
         }
 
+        public void BeginPerformAction()
+        {
+            // TODO
+            _stateMachineManager.SetTrigger(StateMachine.PerformAction);
+        }
+
         public void PerformAction()
         {
             // TODO
             _theStackManager.Begin();
+        }
+
+        public void BeginDeclareEndTurn()
+        {
+            // TODO
+            _stateMachineManager.SetTrigger(StateMachine.DeclareEndTurn);
         }
 
         public void DeclareEndTurn()
