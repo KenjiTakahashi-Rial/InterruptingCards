@@ -10,10 +10,10 @@ namespace InterruptingCards.Managers
 {
     public class TheStackManager : MonoBehaviour
     {
-        public event Action<ITheStackItem> OnResolve;
+        public event Action<ITheStackElement> OnResolve;
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
-        private readonly Stack<ITheStackItem> _theStack = new();
+        private readonly Stack<ITheStackElement> _theStack = new();
 
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
@@ -45,7 +45,7 @@ namespace InterruptingCards.Managers
         {
             Debug.Log($"Player {player.Name} pushing {_cardConfig.GetCardString(cardId)} to The Stack");
             _lastPushBy = player;
-            _theStack.Push(new LootTheStackItem(cardId));
+            _theStack.Push(new LootElement(cardId));
             _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
         }
 
@@ -53,7 +53,7 @@ namespace InterruptingCards.Managers
         {
             Debug.Log($"Player {player.Name} pushing {ability} to The Stack");
             _lastPushBy = player;
-            _theStack.Push(new AbilityTheStackItem(ability));
+            _theStack.Push(new AbilityElement(ability));
             _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
         }
 
@@ -61,7 +61,7 @@ namespace InterruptingCards.Managers
         {
             Debug.Log($"Player {player.Name} pushing dice roll {diceRoll} to The Stack");
             _lastPushBy = player;
-            _theStack.Push(new DiceRollTheStackItem(diceRoll));
+            _theStack.Push(new DiceRollElement(diceRoll));
             _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
         }
 

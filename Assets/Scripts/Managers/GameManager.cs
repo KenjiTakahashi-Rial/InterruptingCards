@@ -36,7 +36,7 @@ namespace InterruptingCards.Managers
 
         public void Start()
         {
-            // TODO: Remove after upgrading to Netcode 1.4.1
+            // TODO: Workaround for "network prefabs list not empty" warning. Remove after upgrading to Netcode 1.4.1
             NetworkManager.NetworkConfig.Prefabs.NetworkPrefabsLists.Clear();
         }
 
