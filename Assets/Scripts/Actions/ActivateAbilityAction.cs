@@ -5,7 +5,7 @@ using InterruptingCards.Managers;
 
 namespace InterruptingCards.Actions
 {
-    public class AttackAction : AbstractAction
+    public class ActivateAbilityAction : AbstractAction
     {
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _gameStateMachineManager;
@@ -14,18 +14,20 @@ namespace InterruptingCards.Actions
         {
             get
             {
+                // TODO: Integrate stack and priority ability activation
+
                 if (_playerManager.SelfId != _playerManager.ActivePlayer.Id)
                 {
                     Debug.LogWarning(
-                        $"Cannot attack if not active player (self: {_playerManager.SelfId}, active player: " +
+                        $"Cannot activate ability if not active player (self: {_playerManager.SelfId}, active player: " +
                         $"{_playerManager.ActivePlayer.Name}"
                     );
                     return false;
                 }
 
-                if (_gameStateMachineManager.CurrentState != StateMachine.Attacking)
+                if (_gameStateMachineManager.CurrentState != StateMachine.ActionPhaseIdling)
                 {
-                    Debug.LogWarning($"Cannot attack from {_gameStateMachineManager.CurrentState}");
+                    Debug.LogWarning($"Cannot activate ability from {_gameStateMachineManager.CurrentState}");
                     return false;
                 }
 
@@ -36,7 +38,8 @@ namespace InterruptingCards.Actions
         protected override void Execute()
         {
             // TODO
-            _gameStateMachineManager.SetTrigger(StateMachine.AttackComplete);
+            _gameStateMachineManager.SetTrigger(StateMachine.ActivateAbility);
+            GameManager.Singleton.ActivateAbility();
         }
     }
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 
 using InterruptingCards.Config;
 using InterruptingCards.Models;
+using InterruptingCards.Actions;
 
 namespace InterruptingCards.Managers
 {
@@ -11,13 +12,26 @@ namespace InterruptingCards.Managers
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
+        [Header("Config")]
         [SerializeField] private CardPack _cardPack;
+
+        [Header("Managers")]
         [SerializeField] private DeckManager _deckManager;
         [SerializeField] private DeckManager _discardManager;
         [SerializeField] private HandManager[] _handManagers;
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private TheStackManager _theStackManager;
+
+        [Header("Actions")]
+        [SerializeField] private DeclareAttackAction _declareAttack;
+        [SerializeField] private AttackAction _attack;
+        [SerializeField] private DeclarePurchaseAction _declarePurchase;
+        [SerializeField] private PurchaseAction _purchase;
+        [SerializeField] private PlayLootAction _playLoot;
+        [SerializeField] private ActivateAbilityAction _activateAbility;
+
+        [Header("Temp")]
         [SerializeField] private TextMeshPro _tempInfoText;
 
         public static GameManager Singleton { get; private set; }
@@ -42,6 +56,8 @@ namespace InterruptingCards.Managers
 
         public void Update()
         {
+            // TODO: This is temporary
+
             if (_playerManager.ActivePlayer == null || _tempInfoText == null)
             {
                 return;
@@ -140,9 +156,9 @@ namespace InterruptingCards.Managers
             _theStackManager.Begin();
         }
 
-        public void BeginDeclareAttack()
+        public void TryDeclareAttack()
         {
-            _stateMachineManager.SetTrigger(StateMachine.DeclareAttack);
+            _declareAttack.TryExecute();
         }
 
         public void DeclareAttack()
@@ -154,13 +170,12 @@ namespace InterruptingCards.Managers
         public void Attack()
         {
             // TODO
-            _stateMachineManager.SetTrigger(StateMachine.AttackComplete);
+            _attack.TryExecute();
         }
 
-        public void BeginDeclarePurchase()
+        public void TryDeclarePurchase()
         {
-            // TODO
-            _stateMachineManager.SetTrigger(StateMachine.DeclarePurchase);
+            _declarePurchase.TryExecute();
         }
 
         public void DeclarePurchase()
@@ -175,28 +190,26 @@ namespace InterruptingCards.Managers
             _stateMachineManager.SetTrigger(StateMachine.PurchaseComplete);
         }
 
-        public void BeginPlayLoot()
+        public void TryPlayLoot()
         {
-            // TODO
-            _stateMachineManager.SetTrigger(StateMachine.PlayLoot);
+            _playLoot.TryExecute();
         }
 
         public void PlayLoot()
         {
             // TODO
-            _stateMachineManager.SetTrigger(StateMachine.PlayedLoot);
+            _theStackManager.Begin();
         }
 
-        public void BeginActivateAbility()
+        public void TryActivateAbility()
         {
-            // TODO
-            _stateMachineManager.SetTrigger(StateMachine.ActivateAbility);
+            _activateAbility.TryExecute();
         }
 
         public void ActivateAbility()
         {
             // TODO
-            _stateMachineManager.SetTrigger(StateMachine.ActivatedAbility);
+            _theStackManager.Begin();
         }
 
         public void BeginDeclareEndTurn()
@@ -359,7 +372,7 @@ namespace InterruptingCards.Managers
             Debug.Log("Playing card");
             var cardId = _handManagers[handManagerIndex].RemoveAt(cardIndex);
             _discardManager.PlaceTop(cardId);
-            _stateMachineManager.SetTrigger(StateMachine.PlayedLoot);
+            _theStackManager.Begin();
         }
 
         private void SetCardsHidden(bool val)

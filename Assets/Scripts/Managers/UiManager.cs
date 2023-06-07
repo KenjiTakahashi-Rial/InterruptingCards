@@ -1,3 +1,5 @@
+using InterruptingCards.Actions;
+
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,10 +22,10 @@ namespace InterruptingCards.Managers
             _hostButton.onClick.AddListener(() => NetworkManager.Singleton.StartHost());
             _clientButton.onClick.AddListener(() => NetworkManager.Singleton.StartClient());
 
-            _purchaseButton.onClick.AddListener(() => GameManager.Singleton.BeginDeclarePurchase());
-            _attackButton.onClick.AddListener(() => GameManager.Singleton.BeginDeclareAttack());
-            _lootPlayButton.onClick.AddListener(() => GameManager.Singleton.BeginPlayLoot());
-            _abilityButton.onClick.AddListener(() => GameManager.Singleton.BeginActivateAbility());
+            _purchaseButton.onClick.AddListener(() => GameManager.Singleton.TryDeclarePurchase());
+            _attackButton.onClick.AddListener(() => GameManager.Singleton.TryDeclareAttack());
+            _lootPlayButton.onClick.AddListener(() => GameManager.Singleton.TryPlayLoot());
+            _abilityButton.onClick.AddListener(() => GameManager.Singleton.TryActivateAbility());
             _endTurnButton.onClick.AddListener(() => GameManager.Singleton.BeginDeclareEndTurn());
         }
     }

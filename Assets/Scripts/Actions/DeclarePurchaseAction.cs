@@ -5,7 +5,7 @@ using InterruptingCards.Managers;
 
 namespace InterruptingCards.Actions
 {
-    public class AttackAction : AbstractAction
+    public class DeclarePurchaseAction : AbstractAction
     {
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _gameStateMachineManager;
@@ -17,15 +17,17 @@ namespace InterruptingCards.Actions
                 if (_playerManager.SelfId != _playerManager.ActivePlayer.Id)
                 {
                     Debug.LogWarning(
-                        $"Cannot attack if not active player (self: {_playerManager.SelfId}, active player: " +
+                        $"Cannot declare purchase if not active player (self: {_playerManager.SelfId}, active player: " +
                         $"{_playerManager.ActivePlayer.Name}"
                     );
                     return false;
                 }
 
-                if (_gameStateMachineManager.CurrentState != StateMachine.Attacking)
+                // TODO: Check for remaining purchases this turn
+
+                if (_gameStateMachineManager.CurrentState != StateMachine.ActionPhaseIdling)
                 {
-                    Debug.LogWarning($"Cannot attack from {_gameStateMachineManager.CurrentState}");
+                    Debug.LogWarning($"Cannot declare purchase from {_gameStateMachineManager.CurrentState}");
                     return false;
                 }
 
@@ -36,7 +38,7 @@ namespace InterruptingCards.Actions
         protected override void Execute()
         {
             // TODO
-            _gameStateMachineManager.SetTrigger(StateMachine.AttackComplete);
+            _gameStateMachineManager.SetTrigger(StateMachine.DeclarePurchase);
         }
     }
 }

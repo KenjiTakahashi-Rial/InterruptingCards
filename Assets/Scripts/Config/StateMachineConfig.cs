@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -46,7 +45,6 @@ namespace InterruptingCards.Config
         // Game Triggers
         ActionPhaseComplete,
         ActivateAbility,
-        ActivatedAbility,
         AllReady,
         AttackComplete,
         DeclareAttack,
@@ -60,7 +58,6 @@ namespace InterruptingCards.Config
         ForceEndTurn,
         GamePriorityPassComplete,
         LootComplete,
-        PlayedLoot,
         PlayLoot,
         PurchaseComplete,
         RechargeComplete,
@@ -121,7 +118,6 @@ namespace InterruptingCards.Config
             // Game Triggers
             { StateMachine.ActionPhaseComplete, "actionPhaseComplete"},
             { StateMachine.ActivateAbility, "activateAbility"},
-            { StateMachine.ActivatedAbility, "activatedAbility"},
             { StateMachine.AllReady, "allReady"},
             { StateMachine.AttackComplete, "attackComplete"},
             { StateMachine.DeclareAttack, "declareAttack"},
@@ -135,7 +131,6 @@ namespace InterruptingCards.Config
             { StateMachine.ForceEndTurn, "forceEndTurn"},
             { StateMachine.GamePriorityPassComplete, "gamePriorityPassComplete"},
             { StateMachine.LootComplete, "lootComplete"},
-            { StateMachine.PlayedLoot, "playedLoot"},
             { StateMachine.PlayLoot, "playLoot"},
             { StateMachine.PurchaseComplete, "purchaseComplete"},
             { StateMachine.RechargeComplete, "rechargeComplete"},
