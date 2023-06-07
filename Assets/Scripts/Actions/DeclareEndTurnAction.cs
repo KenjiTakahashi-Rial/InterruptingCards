@@ -4,22 +4,22 @@ using InterruptingCards.Config;
 
 namespace InterruptingCards.Actions
 {
-    public class PurchaseAction : AbstractAction
+    public class DeclareEndTurnAction : AbstractAction
     {
         protected override bool CanExecute(ulong playerId)
         {
             if (playerId != _playerManager.ActivePlayer.Id)
             {
                 Debug.LogWarning(
-                    $"Cannot purchase if not active player (self: {_playerManager.SelfId}, active player: " +
+                    $"Cannot end turn if not active player (self: {_playerManager.SelfId}, active player: " +
                     $"{_playerManager.ActivePlayer.Name})"
                 );
                 return false;
             }
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.Purchasing)
+            if (_gameStateMachineManager.CurrentState != StateMachine.ActionPhaseIdling)
             {
-                Debug.LogWarning($"Cannot purchase from {_gameStateMachineManager.CurrentState}");
+                Debug.LogWarning($"Cannot end turn from {_gameStateMachineManager.CurrentState}");
                 return false;
             }
 
@@ -29,7 +29,7 @@ namespace InterruptingCards.Actions
         protected override void Execute()
         {
             // TODO
-            _gameStateMachineManager.SetTrigger(StateMachine.PurchaseComplete);
+            _gameStateMachineManager.SetTrigger(StateMachine.DeclareEndTurn);
         }
     }
 }

@@ -30,6 +30,7 @@ namespace InterruptingCards.Managers
         [SerializeField] private PurchaseAction _purchase;
         [SerializeField] private PlayLootAction _playLoot;
         [SerializeField] private ActivateAbilityAction _activateAbility;
+        [SerializeField] private DeclareEndTurnAction _declareEndTurn;
 
         [Header("Temp")]
         [SerializeField] private TextMeshPro _tempInfoText;
@@ -212,10 +213,10 @@ namespace InterruptingCards.Managers
             _theStackManager.Begin();
         }
 
-        public void BeginDeclareEndTurn()
+        public void TryDeclareEndTurn()
         {
             // TODO
-            _stateMachineManager.SetTrigger(StateMachine.DeclareEndTurn);
+            _declareEndTurn.TryExecute();
         }
 
         public void DeclareEndTurn()

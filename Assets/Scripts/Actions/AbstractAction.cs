@@ -1,25 +1,33 @@
 using Unity.Netcode;
+using UnityEngine;
+
+using InterruptingCards.Managers;
 
 namespace InterruptingCards.Actions
 {
     public abstract class AbstractAction : NetworkBehaviour
     {
-        protected abstract bool CanExecute { get; }
+        [SerializeField] protected PlayerManager _playerManager;
+        [SerializeField] protected StateMachineManager _gameStateMachineManager;
 
         public void TryExecute()
         {
-            if (CanExecute)
+            if (CanExecute(_playerManager.SelfId))
             {
-                Execute();
+                ExecuteServerRpc();
             }
         }
+
+        protected abstract bool CanExecute(ulong playerId);
 
         protected abstract void Execute();
 
         [ServerRpc(RequireOwnership = false)]
-        public void ExecuteServerRpc()
+        protected void ExecuteServerRpc(ServerRpcParams serverRpcParams = default)
         {
-            if (CanExecute)
+            var senderId = serverRpcParams.Receive.SenderClientId;
+
+            if (CanExecute(senderId))
             {
                 Execute();
             }

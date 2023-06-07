@@ -26,7 +26,7 @@ namespace InterruptingCards.Managers
             _attackButton.onClick.AddListener(() => GameManager.Singleton.TryDeclareAttack());
             _lootPlayButton.onClick.AddListener(() => GameManager.Singleton.TryPlayLoot());
             _abilityButton.onClick.AddListener(() => GameManager.Singleton.TryActivateAbility());
-            _endTurnButton.onClick.AddListener(() => GameManager.Singleton.BeginDeclareEndTurn());
+            _endTurnButton.onClick.AddListener(() => GameManager.Singleton.TryDeclareEndTurn());
         }
     }
 }
