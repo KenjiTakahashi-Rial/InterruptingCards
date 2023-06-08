@@ -19,9 +19,10 @@ namespace InterruptingCards.Actions
 
             // TODO: Check for remaining purchases this turn
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.ActionPhaseIdling)
+            var gameState = _gameStateMachineManager.CurrentState;
+            if (gameState != StateMachine.ActionPhaseIdling)
             {
-                Debug.LogWarning($"Cannot declare purchase from {_gameStateMachineManager.CurrentState}");
+                Debug.LogWarning($"Cannot declare purchase from {gameState}");
                 return false;
             }
 

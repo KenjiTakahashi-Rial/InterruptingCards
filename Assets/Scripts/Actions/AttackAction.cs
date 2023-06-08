@@ -17,9 +17,10 @@ namespace InterruptingCards.Actions
                 return false;
             }
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.Attacking)
+            var gameState = _gameStateMachineManager.CurrentState;
+            if (gameState != StateMachine.Attacking)
             {
-                Debug.LogWarning($"Cannot attack from {_gameStateMachineManager.CurrentState}");
+                Debug.LogWarning($"Cannot attack from {gameState}");
                 return false;
             }
 

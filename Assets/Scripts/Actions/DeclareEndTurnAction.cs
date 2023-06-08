@@ -17,9 +17,10 @@ namespace InterruptingCards.Actions
                 return false;
             }
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.ActionPhaseIdling)
+            var gameState = _gameStateMachineManager.CurrentState;
+            if (gameState!= StateMachine.ActionPhaseIdling)
             {
-                Debug.LogWarning($"Cannot end turn from {_gameStateMachineManager.CurrentState}");
+                Debug.LogWarning($"Cannot end turn from {gameState}");
                 return false;
             }
 

@@ -17,9 +17,10 @@ namespace InterruptingCards.Actions
                 return false;
             }
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.Purchasing)
+            var gameState = _gameStateMachineManager.CurrentState;
+            if (gameState != StateMachine.Purchasing)
             {
-                Debug.LogWarning($"Cannot purchase from {_gameStateMachineManager.CurrentState}");
+                Debug.LogWarning($"Cannot purchase from {gameState}");
                 return false;
             }
 

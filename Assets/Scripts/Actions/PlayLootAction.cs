@@ -20,9 +20,10 @@ namespace InterruptingCards.Actions
                 return false;
             }
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.ActionPhaseIdling)
+            var gameState = _gameStateMachineManager.CurrentState;
+            if (gameState != StateMachine.ActionPhaseIdling)
             {
-                Debug.LogWarning($"Cannot play loot from {_gameStateMachineManager.CurrentState}");
+                Debug.LogWarning($"Cannot play loot from {gameState}");
                 return false;
             }
 

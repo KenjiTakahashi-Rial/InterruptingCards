@@ -20,9 +20,10 @@ namespace InterruptingCards.Actions
                 return false;
             }
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.ActionPhaseIdling)
+            var gameState = _gameStateMachineManager.CurrentState;
+            if (gameState != StateMachine.ActionPhaseIdling)
             {
-                Debug.LogWarning($"Cannot activate ability from {_gameStateMachineManager.CurrentState}");
+                Debug.LogWarning($"Cannot activate ability from {gameState}");
                 return false;
             }
 

@@ -19,9 +19,10 @@ namespace InterruptingCards.Actions
 
             // TODO: Check for number of attacks remaining this turn
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.ActionPhaseIdling)
+            var gameState = _gameStateMachineManager.CurrentState;
+            if (gameState != StateMachine.ActionPhaseIdling)
             {
-                Debug.LogWarning($"Cannot declare attack from {_gameStateMachineManager.CurrentState}");
+                Debug.LogWarning($"Cannot declare attack from {gameState}");
                 return false;
             }
 
