@@ -21,6 +21,7 @@ namespace InterruptingCards.Managers
         [SerializeField] private HandManager[] _handManagers;
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
+        [SerializeField] private StateMachineManager _theStackStateMachineManager;
         [SerializeField] private TheStackManager _theStackManager;
 
         [Header("Actions")]
@@ -31,6 +32,7 @@ namespace InterruptingCards.Managers
         [SerializeField] private PlayLootAction _playLoot;
         [SerializeField] private ActivateAbilityAction _activateAbility;
         [SerializeField] private DeclareEndTurnAction _declareEndTurn;
+        [SerializeField] private PassPriorityAction _passPriority;
 
         [Header("Temp")]
         [SerializeField] private TextMeshPro _tempInfoText;
@@ -64,7 +66,11 @@ namespace InterruptingCards.Managers
                 return;
             }
 
-            _tempInfoText.SetText($"{_playerManager.ActivePlayer.Id}\n{_stateMachineManager.CurrentStateName}");
+            _tempInfoText.SetText(
+                $"{_playerManager.ActivePlayer.Id}\n" +
+                $"{_stateMachineManager.CurrentStateName}\n" +
+                $"{_theStackStateMachineManager.CurrentStateName}"
+            );
         }
 
         public override void OnNetworkSpawn()
@@ -145,16 +151,15 @@ namespace InterruptingCards.Managers
             _theStackManager.Begin();
         }
 
+        public void TryPassPriority()
+        {
+            _passPriority.TryExecute();
+        }
+
         public void LootStep()
         {
             // TODO
             _stateMachineManager.SetTrigger(StateMachine.LootComplete);
-        }
-
-        public void PriorityPasses()
-        {
-            // TODO
-            _theStackManager.Begin();
         }
 
         public void TryDeclareAttack()

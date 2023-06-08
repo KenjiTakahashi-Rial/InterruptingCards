@@ -16,27 +16,24 @@ namespace InterruptingCards.Managers
         private readonly Stack<ITheStackElement> _theStack = new();
 
         [SerializeField] private PlayerManager _playerManager;
+        [SerializeField] private PriorityManager _priorityManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _gameStateMachineManager;
 
-        private Player _lastPushBy;
-
         public static TheStackManager Singleton { get; private set; }
 
-        public Player PriorityPlayer { get; private set; }
+        public Player LastPushBy { get; private set; }
 
         // Unity Methods
 
         public void Awake()
         {
             Singleton = this;
-            _playerManager.OnActivePlayerChanged += SetActivePlayerPriority;
         }
 
         public void OnDestroy()
         {
             Singleton = null;
-            _playerManager.OnActivePlayerChanged -= SetActivePlayerPriority;
         }
 
         // The Stack Operations
@@ -44,7 +41,7 @@ namespace InterruptingCards.Managers
         public void PushLoot(int cardId, Player player)
         {
             Debug.Log($"Player {player.Name} pushing {_cardConfig.GetCardString(cardId)} to The Stack");
-            _lastPushBy = player;
+            LastPushBy = player;
             _theStack.Push(new LootElement(cardId));
             _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
         }
@@ -52,7 +49,7 @@ namespace InterruptingCards.Managers
         public void PushAbility(CardAbility ability, Player player)
         {
             Debug.Log($"Player {player.Name} pushing {ability} to The Stack");
-            _lastPushBy = player;
+            LastPushBy = player;
             _theStack.Push(new AbilityElement(ability));
             _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
         }
@@ -60,7 +57,7 @@ namespace InterruptingCards.Managers
         public void PushDiceRoll(int diceRoll, Player player)
         {
             Debug.Log($"Player {player.Name} pushing dice roll {diceRoll} to The Stack");
-            _lastPushBy = player;
+            LastPushBy = player;
             _theStack.Push(new DiceRollElement(diceRoll));
             _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
         }
@@ -71,7 +68,6 @@ namespace InterruptingCards.Managers
             {
                 Debug.Log("Popping The Stack");
                 var item = _theStack.Pop();
-                PriorityPlayer = item.PushedBy;
                 OnResolve?.Invoke(item);
                 _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
                 _stateMachineManager.SetTrigger(StateMachine.TheStackPopped);
@@ -84,6 +80,7 @@ namespace InterruptingCards.Managers
 
         // State Machine Operations
 
+        // TODO: Start putting actual elements on the stack and then remove this method
         public void Begin()
         {
             _stateMachineManager.SetTrigger(StateMachine.TheStackBegin);
@@ -93,52 +90,13 @@ namespace InterruptingCards.Managers
         {
             if (_stateMachineManager.CurrentState == StateMachine.TheStackEnding)
             {
-                _lastPushBy = null;
+                LastPushBy = null;
                 _gameStateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
                 _stateMachineManager.SetTrigger(StateMachine.TheStackEnded);
             }
             else
             {
                 Debug.LogWarning($"Cannot end The Stack in state {_stateMachineManager.CurrentStateName}");
-            }
-        }
-
-        // Priority Operations
-
-        public void SetActivePlayerPriority(Player _)
-        {
-            PriorityPlayer = _playerManager.ActivePlayer;
-        }
-
-        public void PriorityPasses()
-        {
-            if (_stateMachineManager.CurrentState == StateMachine.TheStackPriorityPassing)
-            {
-                Debug.Log($"Priority passes");
-                // TODO: Automatically passing priority for now. Change later
-                PassPriority();
-            }
-            else
-            {
-                Debug.LogWarning($"Cannot pass priority in state {_stateMachineManager.CurrentStateName}");
-            }
-        }
-
-        private void PassPriority()
-        {
-            var prevPriorityPlayer = PriorityPlayer;
-            PriorityPlayer = _playerManager.GetNext(PriorityPlayer.Id);
-            var nextPriorityPlayer = PriorityPlayer;
-            Debug.Log($"Passing priority from {prevPriorityPlayer.Name} to {nextPriorityPlayer.Name}");
-
-            if (PriorityPlayer == _lastPushBy || _lastPushBy == null && PriorityPlayer == _playerManager.ActivePlayer)
-            {
-                 _stateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
-            }
-            // TODO: Automatically passing priority for now. Change later
-            else
-            {
-                PassPriority();
             }
         }
     }

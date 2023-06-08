@@ -1,5 +1,3 @@
-using InterruptingCards.Actions;
-
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +15,8 @@ namespace InterruptingCards.Managers
         [SerializeField] private Button _abilityButton;
         [SerializeField] private Button _endTurnButton;
 
+        [SerializeField] private Button _passPriorityButton;
+
         private void Awake()
         {
             _hostButton.onClick.AddListener(() => NetworkManager.Singleton.StartHost());
@@ -27,6 +27,8 @@ namespace InterruptingCards.Managers
             _lootPlayButton.onClick.AddListener(() => GameManager.Singleton.TryPlayLoot());
             _abilityButton.onClick.AddListener(() => GameManager.Singleton.TryActivateAbility());
             _endTurnButton.onClick.AddListener(() => GameManager.Singleton.TryDeclareEndTurn());
+
+            _passPriorityButton.onClick.AddListener(() => GameManager.Singleton.TryPassPriority());
         }
     }
 }
