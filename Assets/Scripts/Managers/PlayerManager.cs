@@ -7,7 +7,6 @@ using UnityEngine;
 
 using InterruptingCards.Config;
 using InterruptingCards.Models;
-using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Managers
 {
@@ -16,8 +15,8 @@ namespace InterruptingCards.Managers
         private readonly List<ulong> _lobby = new();
         private readonly HashSet<ulong> _notReadyPlayers = new();
         private readonly List<Player> _players = new();
-        private readonly Observable<int> _activePlayerIndex = new();
-        private readonly Dictionary<int, Action<int>> _onActivePlayerChangedHandlers = new();
+        private readonly NetworkVariable<int> _activePlayerIndex = new();
+        private readonly Dictionary<int, NetworkVariable<int>.OnValueChangedDelegate> _onActivePlayerChangedHandlers = new();
 
         [SerializeField] private StateMachineManager _gameStateMachineManager;
         [SerializeField] private int _minPlayers;
@@ -29,11 +28,15 @@ namespace InterruptingCards.Managers
         {
             add
             {
-                void IndexToPlayer(int i) { value(_players[i]); }
+                void IndexToPlayer(int _, int i) { value(_players[i]); }
                 _onActivePlayerChangedHandlers[value.GetHashCode()] = IndexToPlayer;
-                _activePlayerIndex.OnChanged += IndexToPlayer;
+                _activePlayerIndex.OnValueChanged += IndexToPlayer;
             }
-            remove => _activePlayerIndex.OnChanged -= _onActivePlayerChangedHandlers[value.GetHashCode()];
+
+// Needs to be a delegate. Action<int, int> gives an error
+#pragma warning disable S3172 // Delegates should not be subtracted
+            remove => _activePlayerIndex.OnValueChanged -= _onActivePlayerChangedHandlers[value.GetHashCode()];
+#pragma warning restore S3172 // Delegates should not be subtracted
         }
 
         public ulong SelfId { get; private set; }

@@ -144,14 +144,20 @@ namespace InterruptingCards.Managers
 
         public void RechargeStep()
         {
-            // TODO
-            _stateMachineManager.SetTrigger(StateMachine.RechargeComplete);
+            // TODO: Recharge all active items
+            if (IsServer)
+            {
+                _stateMachineManager.SetTrigger(StateMachine.RechargeComplete);
+            }
         }
 
         public void TriggerStartOfTurnAbilities()
         {
-            // TODO
-            _theStackManager.Begin();
+            // TODO: Trigger the abilities
+            if (IsServer)
+            {
+                _theStackManager.Begin();
+            }
         }
 
         public void TryPassPriority()
@@ -161,8 +167,19 @@ namespace InterruptingCards.Managers
 
         public void LootStep()
         {
-            // TODO
-            _stateMachineManager.SetTrigger(StateMachine.LootComplete);
+            // TODO: Give the active player a loot
+            if (IsServer)
+            {
+                _stateMachineManager.SetTrigger(StateMachine.LootComplete);
+            }
+        }
+
+        public void PriorityPasses()
+        {
+            if (IsServer)
+            {
+                _theStackManager.Begin();
+            }
         }
 
         public void TryDeclareAttack()
@@ -172,14 +189,20 @@ namespace InterruptingCards.Managers
 
         public void DeclareAttack()
         {
-            // TODO
-            _theStackManager.Begin();
+            // TODO: Put the attack declaration on the stack
+            if (IsServer)
+            {
+                _theStackManager.Begin();
+            }
         }
 
         public void Attack()
         {
-            // TODO
-            _attack.TryExecute();
+            // TODO: Prompt the active player to select a monster
+            if (_playerManager.SelfId == _playerManager.ActivePlayer.Id)
+            {
+                _attack.TryExecute();
+            }
         }
 
         public void TryDeclarePurchase()
@@ -189,73 +212,101 @@ namespace InterruptingCards.Managers
 
         public void DeclarePurchase()
         {
-            // TODO
-            _theStackManager.Begin();
+            // TODO: Put the purchase declaration on the stack
+            if (IsServer)
+            {
+                _theStackManager.Begin();
+            }
         }
 
         public void Purchase()
         {
-            // TODO
-            _stateMachineManager.SetTrigger(StateMachine.PurchaseComplete);
+            // TODO: Prompt the active player to select an item
+            if (_playerManager.SelfId == _playerManager.ActivePlayer.Id)
+            {
+                _purchase.TryExecute();
+            }
         }
 
         public void TryPlayLoot()
         {
+            // TODO: This should include which loot is attempting to be played
             _playLoot.TryExecute();
         }
 
         public void PlayLoot()
         {
-            // TODO
-            _theStackManager.Begin();
+            // TODO: Add loot to the stack
+            if (IsServer)
+            {
+                _theStackManager.Begin();
+            }
         }
 
         public void TryActivateAbility()
         {
+            // TODO: This should include which ability is trying to be activated
             _activateAbility.TryExecute();
         }
 
         public void ActivateAbility()
         {
-            // TODO
-            _theStackManager.Begin();
+            // TODO: Add activated ability to the stack
+            if (IsServer)
+            {
+                _theStackManager.Begin();
+            }
         }
 
         public void TryDeclareEndTurn()
         {
-            // TODO
             _declareEndTurn.TryExecute();
         }
 
         public void DeclareEndTurn()
         {
-            // TODO
-            _theStackManager.Begin();
+            // TODO: Put the end turn declaration on the stack
+            if (IsServer)
+            {
+                _theStackManager.Begin();
+            }
         }
 
         public void TriggerEndOfTurnAbilities()
         {
-            // TODO
-            _theStackManager.Begin();
+            // TODO: Trigger the abilities
+            if (IsServer)
+            {
+                _theStackManager.Begin();
+            }
         }
 
         public void Discard()
         {
-            // TODO
-            _stateMachineManager.SetTrigger(StateMachine.DiscardComplete);
+            // TODO: Prompt the active player to discard (if necessary)
+            if (IsServer)
+            {
+                _stateMachineManager.SetTrigger(StateMachine.DiscardComplete);
+            }
         }
 
         public void ShiftRoom()
         {
-            // TODO
-            _stateMachineManager.SetTrigger(StateMachine.ShiftRoomComplete);
+            // TODO: Prompt the active player to 
+            if (IsServer)
+            {
+                _stateMachineManager.SetTrigger(StateMachine.ShiftRoomComplete);
+            }
         }
 
         public void EndTurn()
         {
             // TODO
-            _playerManager.ShiftTurn();
-            _stateMachineManager.SetTrigger(StateMachine.EndTurn);
+            if (IsServer)
+            {
+                _playerManager.ShiftTurn();
+                _stateMachineManager.SetTrigger(StateMachine.EndTurn);
+            }
         }
 
         public void EndGame()

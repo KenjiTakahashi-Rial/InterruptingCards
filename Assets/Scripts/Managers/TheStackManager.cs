@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
@@ -8,7 +9,7 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public class TheStackManager : MonoBehaviour
+    public class TheStackManager : NetworkBehaviour
     {
         public event Action<ITheStackElement> OnResolve;
 
@@ -17,7 +18,6 @@ namespace InterruptingCards.Managers
         private readonly Stack<ITheStackElement> _theStack = new();
 
         [SerializeField] private PlayerManager _playerManager;
-        [SerializeField] private PriorityManager _priorityManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _gameStateMachineManager;
 
@@ -34,9 +34,10 @@ namespace InterruptingCards.Managers
             Singleton = this;
         }
 
-        public void OnDestroy()
+        public override void OnDestroy()
         {
             Singleton = null;
+            base.OnDestroy();
         }
 
         // The Stack Operations
@@ -91,6 +92,11 @@ namespace InterruptingCards.Managers
 
         public void End()
         {
+            if (!IsServer)
+            {
+                return;
+            }
+
             if (_stateMachineManager.CurrentState == StateMachine.TheStackEnding)
             {
                 LastPushBy = null;
@@ -99,7 +105,7 @@ namespace InterruptingCards.Managers
             }
             else
             {
-                Log.Warn($"Cannot end The Stack in state {_stateMachineManager.CurrentStateName}");
+                Log.Warn($"Cannot end The Stack from {_stateMachineManager.CurrentStateName}");
             }
         }
     }

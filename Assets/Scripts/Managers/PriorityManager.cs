@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
@@ -5,14 +6,16 @@ using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
-    public class PriorityManager : MonoBehaviour
+    public class PriorityManager : NetworkBehaviour
     {
+        private readonly NetworkVariable<ulong> _priorityPlayerId = new();
+
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _gameStateMachineManager;
         [SerializeField] private StateMachineManager _theStackStateMachineManager;
         [SerializeField] private TheStackManager _theStackManager;
 
-        public Player PriorityPlayer { get; private set; }
+        public Player PriorityPlayer => _playerManager[_priorityPlayerId.Value];
 
         private LogManager Log => LogManager.Singleton;
 
@@ -22,16 +25,23 @@ namespace InterruptingCards.Managers
             _theStackManager.OnResolve += SetPlayerPriority;
         }
 
-        public void OnDestroy()
+        public override void OnDestroy()
         {
             _playerManager.OnActivePlayerChanged -= SetPlayerPriority;
             _theStackManager.OnResolve -= SetPlayerPriority;
+            base.OnDestroy();
         }
 
         public void PassPriority()
         {
+            if (!IsServer)
+            {
+                Log.Warn($"Cannot pass priority if not host");
+                return;
+            }
+
             var prevPriorityPlayer = PriorityPlayer;
-            PriorityPlayer = _playerManager.GetNext(PriorityPlayer.Id);
+            _priorityPlayerId.Value = _playerManager.GetNextId(_priorityPlayerId.Value);
             var nextPriorityPlayer = PriorityPlayer;
             Log.Info($"Passing priority from {prevPriorityPlayer.Name} to {nextPriorityPlayer.Name}");
 
@@ -42,7 +52,7 @@ namespace InterruptingCards.Managers
 
                 if (theStackState == StateMachine.TheStackPriorityPassing)
                 {
-                    _theStackStateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassing);
+                    _theStackStateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
                 }
                 else
                 {
@@ -53,12 +63,12 @@ namespace InterruptingCards.Managers
 
         private void SetPlayerPriority(Player player)
         {
-            PriorityPlayer = player;
+            _priorityPlayerId.Value = player.Id;
         }
 
         private void SetPlayerPriority(ITheStackElement element)
         {
-            PriorityPlayer = element.PushedBy;
+            _priorityPlayerId.Value = element.PushedBy.Id;
         }
     }
 }
