@@ -39,22 +39,26 @@ namespace InterruptingCards.Managers
 
         public static GameManager Singleton { get; private set; }
 
+        private LogManager Log => LogManager.Singleton;
+
         private int StartingHandCardCount => 4;
 
         // Unity Methods
 
         public void Awake()
         {
-            Debug.Log("Waking game manager");
-            _cardConfig.Load(_cardPack);
-            SetCardsHidden(true);
             Singleton = this;
         }
 
         public void Start()
         {
+            Log.Info("GameManager starting");
+
             // TODO: Workaround for "network prefabs list not empty" warning. Remove after upgrading to Netcode 1.4.1
             NetworkManager.NetworkConfig.Prefabs.NetworkPrefabsLists.Clear();
+            
+            _cardConfig.Load(_cardPack);
+            SetCardsHidden(true);
         }
 
         public void Update()
@@ -76,7 +80,7 @@ namespace InterruptingCards.Managers
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
-            Debug.Log("Network spawned");
+            Log.Info("Network spawned");
 
             _deckManager.OnClicked += TryDrawCard;
 
@@ -89,7 +93,7 @@ namespace InterruptingCards.Managers
 
         public override void OnNetworkDespawn()
         {
-            Debug.Log("Network despawned");
+            Log.Info("Network despawned");
 
             _deckManager.OnClicked -= TryDrawCard;
 
@@ -108,7 +112,6 @@ namespace InterruptingCards.Managers
 
         public override void OnDestroy()
         {
-            Debug.Log("Destroying game manager");
             Singleton = null;
             base.OnDestroy();
         }
@@ -117,7 +120,7 @@ namespace InterruptingCards.Managers
 
         public void Initialize()
         {
-            Debug.Log("Initializing Game");
+            Log.Info("Initializing Game");
             _playerManager.Initialize();
 
             _playerManager.AssignHands(_handManagers);
@@ -257,7 +260,7 @@ namespace InterruptingCards.Managers
 
         public void EndGame()
         {
-            Debug.Log("Ending game");
+            Log.Info("Ending game");
             _tempInfoText.SetText("Start the game");
             _playerManager.Clear();
             SetCardsHidden(true);
@@ -270,11 +273,11 @@ namespace InterruptingCards.Managers
         {
             if (_stateMachineManager.CurrentState != StateMachine.InitializingGame)
             {
-                Debug.LogWarning("Cannot deal hands outside of game initialization state");
+                Log.Warn("Cannot deal hands outside of game initialization state");
                 return;
             }
 
-            Debug.Log("Dealing hands");
+            Log.Info("Dealing hands");
             for (var i = 0; i < StartingHandCardCount; i++)
             {
                 foreach (var hand in _handManagers)
@@ -288,13 +291,13 @@ namespace InterruptingCards.Managers
         {
             if (id != _playerManager.ActivePlayer.Id)
             {
-                Debug.Log($"Player {id} cannot draw a card unless it is their turn");
+                Log.Info($"Cannot draw a card unless it is their turn");
                 return false;
             }
 
             if (_stateMachineManager.CurrentState != StateMachine.Looting)
             {
-                Debug.Log($"Player {id} cannot draw a card in the wrong state");
+                Log.Info($"Player {id} cannot draw a card in the wrong state");
                 return false;
             }
 
@@ -303,7 +306,7 @@ namespace InterruptingCards.Managers
 
         private void TryDrawCard()
         {
-            Debug.Log("Trying to draw card");
+            Log.Info("Trying to draw card");
             if (CanDrawCard(_playerManager.SelfId))
             {
                 DrawCardServerRpc();
@@ -318,7 +321,7 @@ namespace InterruptingCards.Managers
                 return;
             }
 
-            Debug.Log("Drawing card");
+            Log.Info("Drawing card");
             var card = _deckManager.DrawTop();
             _playerManager.ActivePlayer.Hand.Add(card);
             _stateMachineManager.SetTrigger(StateMachine.LootComplete);
@@ -328,7 +331,7 @@ namespace InterruptingCards.Managers
         {
             if (id != _playerManager.ActivePlayer.Id)
             {
-                Debug.Log($"Player {id} cannot play a card unless it is their turn or they are interrupting");
+                Log.Info($"Player {id} cannot play a card unless it is their turn or they are interrupting");
                 return false;
             }
 
@@ -336,19 +339,19 @@ namespace InterruptingCards.Managers
 
             if (hand != _playerManager.ActivePlayer.Hand)
             {
-                Debug.Log($"Player {id} can only play cards from their own hand");
+                Log.Info($"Player {id} can only play cards from their own hand");
                 return false;
             }
 
             if (cardIndex < 0 || hand.Count <= cardIndex)
             {
-                Debug.Log($"Player {id} cannot play a card from an invalid index of their hand");
+                Log.Info($"Player {id} cannot play a card from an invalid index of their hand");
                 return false;
             }
 
             if (_stateMachineManager.CurrentState != StateMachine.PlayingLoot)
             {
-                Debug.Log($"Player {id} cannot play a card in the wrong state");
+                Log.Info($"Player {id} cannot play a card in the wrong state");
                 return false;
             }
 
@@ -358,7 +361,7 @@ namespace InterruptingCards.Managers
         private void TryPlayCard(int handManagerIndex, int cardIndex)
         {
             var cardId = _handManagers[handManagerIndex][cardIndex];
-            Debug.Log($"Trying to play card {_cardConfig.GetCardString(cardId)}");
+            Log.Info($"Trying to play card {_cardConfig.GetCardString(cardId)}");
 
             if (CanPlayCard(_playerManager.SelfId, handManagerIndex, cardIndex))
             {
@@ -375,7 +378,7 @@ namespace InterruptingCards.Managers
                 return;
             }
 
-            Debug.Log("Playing card");
+            Log.Info("Playing card");
             var cardId = _handManagers[handManagerIndex].RemoveAt(cardIndex);
             _discardManager.PlaceTop(cardId);
             _theStackManager.Begin();
@@ -383,7 +386,7 @@ namespace InterruptingCards.Managers
 
         private void SetCardsHidden(bool val)
         {
-            Debug.Log($"Setting cards hidden: {val}");
+            Log.Info($"Setting cards hidden: {val}");
             _deckManager.SetHidden(val);
             _discardManager.SetHidden(val);
 

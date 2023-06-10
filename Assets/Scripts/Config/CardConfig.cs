@@ -4,6 +4,7 @@ using System.Linq;
 
 using UnityEngine;
 
+using InterruptingCards.Managers;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Config
@@ -27,6 +28,8 @@ namespace InterruptingCards.Config
 
         private CardConfig() { }
 
+        private LogManager Log => LogManager.Singleton;
+
         public Card this[int cardId] => _cards[cardId];
 
         public static int GetCardId(CardSuit suit, CardRank rank)
@@ -48,7 +51,7 @@ namespace InterruptingCards.Config
 
         public void Load(CardPack cardPack)
         {
-            Debug.Log($"CardConfig loading {cardPack}");
+            Log.Info($"CardConfig loading {cardPack}");
 
             _cards.Clear();
 
@@ -64,7 +67,7 @@ namespace InterruptingCards.Config
 
                 if (_cards.ContainsKey(id))
                 {
-                    Debug.LogWarning($"Cache already contains {id}. Overwriting {_cards[id]} with {card.Name}");
+                    Log.Warn($"Cache already contains {id}. Overwriting {_cards[id]} with {card.Name}");
                 }
 
                 _cards[card.Id] = new Card(card);

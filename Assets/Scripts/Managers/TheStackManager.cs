@@ -13,6 +13,7 @@ namespace InterruptingCards.Managers
         public event Action<ITheStackElement> OnResolve;
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
+        // TODO: Change to NetworkList
         private readonly Stack<ITheStackElement> _theStack = new();
 
         [SerializeField] private PlayerManager _playerManager;
@@ -23,6 +24,8 @@ namespace InterruptingCards.Managers
         public static TheStackManager Singleton { get; private set; }
 
         public Player LastPushBy { get; private set; }
+
+        private LogManager Log => LogManager.Singleton;
 
         // Unity Methods
 
@@ -40,7 +43,7 @@ namespace InterruptingCards.Managers
 
         public void PushLoot(int cardId, Player player)
         {
-            Debug.Log($"Player {player.Name} pushing {_cardConfig.GetCardString(cardId)} to The Stack");
+            Log.Info($"Player {player.Name} pushing {_cardConfig.GetCardString(cardId)} to The Stack");
             LastPushBy = player;
             _theStack.Push(new LootElement(cardId));
             _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
@@ -48,7 +51,7 @@ namespace InterruptingCards.Managers
 
         public void PushAbility(CardAbility ability, Player player)
         {
-            Debug.Log($"Player {player.Name} pushing {ability} to The Stack");
+            Log.Info($"Player {player.Name} pushing {ability} to The Stack");
             LastPushBy = player;
             _theStack.Push(new AbilityElement(ability));
             _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
@@ -56,7 +59,7 @@ namespace InterruptingCards.Managers
 
         public void PushDiceRoll(int diceRoll, Player player)
         {
-            Debug.Log($"Player {player.Name} pushing dice roll {diceRoll} to The Stack");
+            Log.Info($"Player {player.Name} pushing dice roll {diceRoll} to The Stack");
             LastPushBy = player;
             _theStack.Push(new DiceRollElement(diceRoll));
             _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
@@ -66,7 +69,7 @@ namespace InterruptingCards.Managers
         {
             if (_stateMachineManager.CurrentState == StateMachine.TheStackPopping)
             {
-                Debug.Log("Popping The Stack");
+                Log.Info("Popping The Stack");
                 var item = _theStack.Pop();
                 OnResolve?.Invoke(item);
                 _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
@@ -74,7 +77,7 @@ namespace InterruptingCards.Managers
             }
             else
             {
-                Debug.LogWarning($"Cannot pop The Stack in state {_stateMachineManager.CurrentStateName}");
+                Log.Warn($"Cannot pop The Stack in state {_stateMachineManager.CurrentStateName}");
             }
         }
 
@@ -96,7 +99,7 @@ namespace InterruptingCards.Managers
             }
             else
             {
-                Debug.LogWarning($"Cannot end The Stack in state {_stateMachineManager.CurrentStateName}");
+                Log.Warn($"Cannot end The Stack in state {_stateMachineManager.CurrentStateName}");
             }
         }
     }

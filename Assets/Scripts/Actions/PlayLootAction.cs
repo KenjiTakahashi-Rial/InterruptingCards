@@ -1,5 +1,3 @@
-using UnityEngine;
-
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
 
@@ -13,17 +11,14 @@ namespace InterruptingCards.Actions
 
             if (playerId != _playerManager.ActivePlayer.Id)
             {
-                Debug.LogWarning(
-                    $"Cannot play loot if not active player (self: {_playerManager.SelfId}, active player: " +
-                    $"{_playerManager.ActivePlayer.Name} )"
-                );
+                Log.Warn($"Cannot play loot if not active player (active player: {_playerManager.ActivePlayer.Name})");
                 return false;
             }
 
             var gameState = _gameStateMachineManager.CurrentState;
             if (gameState != StateMachine.ActionPhaseIdling)
             {
-                Debug.LogWarning($"Cannot play loot from {gameState}");
+                Log.Warn($"Cannot play loot from {gameState}");
                 return false;
             }
 

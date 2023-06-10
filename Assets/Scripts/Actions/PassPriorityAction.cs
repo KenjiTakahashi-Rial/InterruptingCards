@@ -14,8 +14,8 @@ namespace InterruptingCards.Actions
         {
             if (playerId != _priorityManager.PriorityPlayer.Id)
             {
-                Debug.LogWarning(
-                    $"Cannot pass priority if not priority player (self: {_playerManager.SelfId}, priority player: " +
+                Log.Warn(
+                    $"Cannot pass priority if not priority player (priority player: " +
                     $"{_priorityManager.PriorityPlayer.Name})"
                 );
                 return false;
@@ -24,7 +24,7 @@ namespace InterruptingCards.Actions
             var theStackState = _theStackStateMachineManager.CurrentState;
             if (theStackState != StateMachine.TheStackPriorityPassing)
             {
-                Debug.LogWarning($"Cannot pass priority from {theStackState}");
+                Log.Warn($"Cannot pass priority from {theStackState}");
                 return false;
             }
 

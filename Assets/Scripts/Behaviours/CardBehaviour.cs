@@ -5,6 +5,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
+using InterruptingCards.Managers;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
@@ -15,7 +16,6 @@ namespace InterruptingCards.Behaviours
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
-        // TODO: Do these need to be NetworkVariable? Is it possible to send ClientRpc messages to change them instead?
         private readonly NetworkVariable<int> _cardId = new(CardConfig.GetCardId(s_defaultSuit, s_defaultRank));
         private readonly NetworkVariable<bool> _isFaceUp = new(s_defaultIsFaceUp);
         private readonly NetworkVariable<bool> _isActivated = new(s_defaultIsActivated);
@@ -55,6 +55,8 @@ namespace InterruptingCards.Behaviours
             set => _isActivated.Value = value;
         }
 
+        private LogManager Log => LogManager.Singleton;
+
         public void Awake()
         {
             _originalScale = transform.localScale;
@@ -87,11 +89,11 @@ namespace InterruptingCards.Behaviours
         {
             if (OnClicked == null)
             {
-                Debug.Log("OnClicked has no subscribers");
+                Log.Info("OnClicked has no subscribers");
             }
             else
             {
-                Debug.Log($"{_cardConfig.GetCardString(_cardId.Value)} clicked");
+                Log.Info($"{_cardConfig.GetCardString(_cardId.Value)} clicked");
             }
 
             OnClicked?.Invoke();
@@ -125,7 +127,7 @@ namespace InterruptingCards.Behaviours
         {
             var oldCard = _cardConfig.GetCardString(oldValue);
             var newCard = _cardConfig.GetCardString(newValue);
-            Debug.Log($"Card changed ({oldCard} -> {newCard})");
+            Log.Info($"Card changed ({oldCard} -> {newCard})");
 
             SetCardTextEnabled();
             SetCardSpriteEnabled();
@@ -136,7 +138,7 @@ namespace InterruptingCards.Behaviours
         {
             var before = oldValue ? "face-up" : "face-down";
             var after = newValue ? "face-up" : "face-down";
-            Debug.Log($"Card changed ({before} -> {after})");
+            Log.Info($"Card changed ({before} -> {after})");
 
             SetCardTextEnabled();
         }
@@ -145,13 +147,13 @@ namespace InterruptingCards.Behaviours
         {
             var before = oldValue ? "activated" : "not activated";
             var after = newValue ? "activated" : "not activated";
-            Debug.Log($"Active card changed ({before} -> {after})");
+            Log.Info($"Active card changed ({before} -> {after})");
 
             transform.rotation = IsActivated ? _activatedRotation : _originalRotation;
 
             if (OnActivated == null)
             {
-                Debug.Log("OnActivated has no subscribers");
+                Log.Info("OnActivated has no subscribers");
             }
 
             OnActivated?.Invoke();

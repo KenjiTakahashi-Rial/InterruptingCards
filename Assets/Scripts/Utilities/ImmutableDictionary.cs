@@ -1,8 +1,8 @@
-using UnityEngine;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using InterruptingCards.Managers;
 
 namespace InterruptingCards.Utilities
 {
@@ -31,6 +31,8 @@ namespace InterruptingCards.Utilities
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.GetEnumerator();
 
+        private LogManager Log => LogManager.Singleton;
+
         public ImmutableDictionary<NewTKey, NewTValue> ToDictionary<NewTKey, NewTValue>(
             Func<KeyValuePair<TKey, TValue>, NewTKey> keySelector,
             Func<KeyValuePair<TKey, TValue>, NewTValue> valueSelector
@@ -44,7 +46,7 @@ namespace InterruptingCards.Utilities
             {
                 foreach ((var k, var v) in _dictionary)
                 {
-                    Debug.LogError($"{{ {k}: {v} }}");
+                    Log.Error($"{{ {k}: {v} }}");
                 }
 
                 throw;

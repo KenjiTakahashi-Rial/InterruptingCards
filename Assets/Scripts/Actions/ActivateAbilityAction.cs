@@ -1,5 +1,3 @@
-using UnityEngine;
-
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
 
@@ -13,9 +11,8 @@ namespace InterruptingCards.Actions
 
             if (playerId != _playerManager.ActivePlayer.Id)
             {
-                Debug.LogWarning(
-                    $"Cannot activate ability if not active player (self: {_playerManager.SelfId}, active player: " +
-                    $"{_playerManager.ActivePlayer.Name})"
+                Log.Warn(
+                    $"Cannot activate ability if not active player (active player: {_playerManager.ActivePlayer.Name})"
                 );
                 return false;
             }
@@ -23,7 +20,7 @@ namespace InterruptingCards.Actions
             var gameState = _gameStateMachineManager.CurrentState;
             if (gameState != StateMachine.ActionPhaseIdling)
             {
-                Debug.LogWarning($"Cannot activate ability from {gameState}");
+                Log.Warn($"Cannot activate ability from {gameState}");
                 return false;
             }
 

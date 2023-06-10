@@ -25,6 +25,8 @@ namespace InterruptingCards.Managers
             set => _topCard.IsFaceUp = value;
         }
 
+        private LogManager Log => LogManager.Singleton;
+
         private int TopIndex => _cardIds.Count - 1;
 
         public void Awake()
@@ -93,11 +95,11 @@ namespace InterruptingCards.Managers
         {
             if (OnClicked == null)
             {
-                Debug.Log("Deck OnClicked has no subscribers");
+                Log.Info("Deck OnClicked has no subscribers");
             }
             else
             {
-                Debug.Log("Deck clicked");
+                Log.Info("Deck clicked");
             }
 
             OnClicked?.Invoke();

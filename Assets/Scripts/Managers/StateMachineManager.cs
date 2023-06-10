@@ -19,6 +19,8 @@ namespace InterruptingCards.Managers
 
         public string CurrentStateName => CurrentState.ToString();
 
+        private LogManager Log => LogManager.Singleton;
+
         public void SetTrigger(StateMachine trigger)
         {
             if (IsServer)
@@ -31,7 +33,7 @@ namespace InterruptingCards.Managers
             }
             else
             {
-                Debug.LogWarning($"Client attempted to set trigger {trigger} while connected to host");
+                Log.Warn($"Cannot set trigger {trigger} while connected to host");
             }
         }
 
@@ -44,7 +46,7 @@ namespace InterruptingCards.Managers
         private void SetTriggerImpl(StateMachine trigger)
         {
             var id = _stateMachineConfig.GetId(trigger);
-            Debug.Log($"Triggering {_stateMachineConfig.GetName(id)}");
+            Log.Info($"Triggering {_stateMachineConfig.GetName(id)}");
             _stateMachine.SetTrigger(id);
         }
 
@@ -60,7 +62,7 @@ namespace InterruptingCards.Managers
             }
             else
             {
-                Debug.LogWarning($"Client attempted to set bool {param} while connected to host");
+                Log.Warn($"Cannot set bool {param} while connected to host");
             }
         }
 
@@ -73,7 +75,7 @@ namespace InterruptingCards.Managers
         private void SetBoolImpl(StateMachine param, bool val)
         {
             var id = _stateMachineConfig.GetId(param);
-            Debug.Log($"Setting bool {_stateMachineConfig.GetName(id)}");
+            Log.Warn($"Setting bool {_stateMachineConfig.GetName(id)}");
             _stateMachine.SetBool(id, val);
         }
     }

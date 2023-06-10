@@ -1,5 +1,3 @@
-using UnityEngine;
-
 using InterruptingCards.Config;
 
 namespace InterruptingCards.Actions
@@ -10,17 +8,14 @@ namespace InterruptingCards.Actions
         {
             if (playerId != _playerManager.ActivePlayer.Id)
             {
-                Debug.LogWarning(
-                    $"Cannot end turn if not active player (self: {_playerManager.SelfId}, active player: " +
-                    $"{_playerManager.ActivePlayer.Name})"
-                );
+                Log.Warn($"Cannot end turn if not active player (active player: {_playerManager.ActivePlayer.Name})");
                 return false;
             }
 
             var gameState = _gameStateMachineManager.CurrentState;
             if (gameState!= StateMachine.ActionPhaseIdling)
             {
-                Debug.LogWarning($"Cannot end turn from {gameState}");
+                Log.Warn($"Cannot end turn from {gameState}");
                 return false;
             }
 

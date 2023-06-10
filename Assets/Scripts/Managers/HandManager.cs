@@ -19,6 +19,8 @@ namespace InterruptingCards.Managers
 
         public Action<int> OnCardClicked { get; set; }
 
+        private LogManager Log => LogManager.Singleton;
+
         public int this[int i] => _cardSlots[i].CardId;
 
 
@@ -50,7 +52,7 @@ namespace InterruptingCards.Managers
 
         public void Add(int cardId)
         {
-            Debug.Log($"Adding card to hand ({_cardConfig.GetCardString(cardId)})");
+            Log.Info($"Adding card to hand ({_cardConfig.GetCardString(cardId)})");
 
             if (Count == _cardSlots.Length)
             {
@@ -64,7 +66,7 @@ namespace InterruptingCards.Managers
         {
             var cardId = _cardSlots[index].CardId;
 
-            Debug.Log($"Removing {_cardConfig.GetCardString(cardId)} from hand index {index}");
+            Log.Info($"Removing {_cardConfig.GetCardString(cardId)} from hand index {index}");
 
             for (int i = index; i < _cardSlots.Length; i++)
             {
@@ -82,7 +84,7 @@ namespace InterruptingCards.Managers
 
         public void Clear()
         {
-            Debug.Log("Clearing hand");
+            Log.Info("Clearing hand");
 
             foreach (var slot in _cardSlots)
             {

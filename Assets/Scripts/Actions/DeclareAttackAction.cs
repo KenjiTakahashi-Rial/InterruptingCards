@@ -1,5 +1,3 @@
-using UnityEngine;
-
 using InterruptingCards.Config;
 
 namespace InterruptingCards.Actions
@@ -10,9 +8,8 @@ namespace InterruptingCards.Actions
         {
             if (playerId != _playerManager.ActivePlayer.Id)
             {
-                Debug.LogWarning(
-                    $"Cannot declare attack if not active player (self: {_playerManager.SelfId}, active player: " +
-                    $"{_playerManager.ActivePlayer.Id})"
+                Log.Warn(
+                    $"Cannot declare attack if not active player (active player: {_playerManager.ActivePlayer.Id})"
                 );
                 return false;
             }
@@ -22,7 +19,7 @@ namespace InterruptingCards.Actions
             var gameState = _gameStateMachineManager.CurrentState;
             if (gameState != StateMachine.ActionPhaseIdling)
             {
-                Debug.LogWarning($"Cannot declare attack from {gameState}");
+                Log.Warn($"Cannot declare attack from {gameState}");
                 return false;
             }
 

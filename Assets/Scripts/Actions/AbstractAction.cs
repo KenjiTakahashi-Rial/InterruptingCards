@@ -10,6 +10,8 @@ namespace InterruptingCards.Actions
         [SerializeField] protected PlayerManager _playerManager;
         [SerializeField] protected StateMachineManager _gameStateMachineManager;
 
+        protected LogManager Log => LogManager.Singleton;
+
         public void TryExecute()
         {
             if (CanExecute(_playerManager.SelfId))

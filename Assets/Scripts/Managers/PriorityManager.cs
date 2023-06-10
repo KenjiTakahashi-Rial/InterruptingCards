@@ -14,6 +14,8 @@ namespace InterruptingCards.Managers
 
         public Player PriorityPlayer { get; private set; }
 
+        private LogManager Log => LogManager.Singleton;
+
         public void Awake()
         {
             _playerManager.OnActivePlayerChanged += SetPlayerPriority;
@@ -31,7 +33,7 @@ namespace InterruptingCards.Managers
             var prevPriorityPlayer = PriorityPlayer;
             PriorityPlayer = _playerManager.GetNext(PriorityPlayer.Id);
             var nextPriorityPlayer = PriorityPlayer;
-            Debug.Log($"Passing priority from {prevPriorityPlayer.Name} to {nextPriorityPlayer.Name}");
+            Log.Info($"Passing priority from {prevPriorityPlayer.Name} to {nextPriorityPlayer.Name}");
 
             var lastPushBy = _theStackManager.LastPushBy;
             if (PriorityPlayer == lastPushBy || lastPushBy == null && PriorityPlayer == _playerManager.ActivePlayer)
@@ -44,7 +46,7 @@ namespace InterruptingCards.Managers
                 }
                 else
                 {
-                    Debug.LogWarning($"Cannot pass priority from {theStackState}");
+                    Log.Warn($"Cannot pass priority from {theStackState}");
                 }
             }
         }

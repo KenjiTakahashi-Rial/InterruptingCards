@@ -38,6 +38,8 @@ namespace InterruptingCards.Managers
 
         public ulong SelfId { get; private set; }
 
+        private LogManager Log => LogManager.Singleton;
+
         public Player this[ulong id] => _players.Single(p => p.Id == id);
 
         public override void OnNetworkSpawn()
@@ -66,10 +68,10 @@ namespace InterruptingCards.Managers
             _activePlayerIndex.Value = 0;
         }
 
-        public Player GetNext(ulong id)
+        public ulong GetNextId(ulong id)
         {
             var i = _players.FindIndex(p => p.Id == id);
-            return _players[++i == _players.Count ? 0 : i];
+            return _players[++i == _players.Count ? 0 : i].Id;
         }
 
         public void AssignHands(HandManager[] hands)
@@ -79,7 +81,7 @@ namespace InterruptingCards.Managers
                 throw new TooManyPlayersException();
             }
 
-            Debug.Log("Assigning hands");
+            Log.Info("Assigning hands");
 
             var i = 0;
             foreach (var player in _players)
@@ -90,7 +92,7 @@ namespace InterruptingCards.Managers
 
         public void ShiftTurn(int shifts = 1)
         {
-            Debug.Log($"Shifting turn {shifts} times");
+            Log.Info($"Shifting turn {shifts} times");
 
             for (var i = 0; i < shifts; i++)
             {
@@ -108,7 +110,7 @@ namespace InterruptingCards.Managers
         {
             var clientId = serverRpcParams.Receive.SenderClientId;
 
-            Debug.Log($"Getting self {clientId}");
+            Log.Info($"Getting self {clientId}");
 
             var clientRpcParams = new ClientRpcParams
             {
@@ -124,24 +126,24 @@ namespace InterruptingCards.Managers
         [ClientRpc]
         private void AssignSelfClientRpc(ulong selfId, ClientRpcParams _)
         {
-            Debug.Log($"Assigning self {selfId}");
+            Log.Info($"Assigning self {selfId}");
             SelfId = selfId;
         }
 
         [ServerRpc]
         private void AddPlayerServerRpc(ulong clientId)
         {
-            Debug.Log($"Adding player {clientId}");
+            Log.Info($"Adding player {clientId}");
 
             if (_gameStateMachineManager.CurrentState != StateMachine.WaitingForClients)
             {
-                Debug.LogWarning($"Cannnot add player {clientId} while game already started");
+                Log.Warn($"Cannnot add player {clientId} when game already started");
                 return;
             }
 
             if (_lobby.Count >= _maxPlayers)
             {
-                Debug.LogWarning($"Cannnot add player {clientId} while lobby is full");
+                Log.Warn($"Cannnot add player {clientId} when lobby is full");
                 return;
             }
 
@@ -158,7 +160,7 @@ namespace InterruptingCards.Managers
         [ServerRpc]
         private void RemovePlayerServerRpc(ulong clientId)
         {
-            Debug.Log($"Removing player {clientId}");
+            Log.Info($"Removing player {clientId}");
 
             if (_gameStateMachineManager.CurrentState != StateMachine.WaitingForClients)
             {
@@ -167,7 +169,7 @@ namespace InterruptingCards.Managers
                     _gameStateMachineManager.SetTrigger(StateMachine.ForceEndTurn);
                 }
 
-                Debug.LogWarning($"Player {clientId} removed while game is playing");
+                Log.Warn($"Player {clientId} removed while game is playing");
             }
 
             // TODO: Continue game if enough players left
