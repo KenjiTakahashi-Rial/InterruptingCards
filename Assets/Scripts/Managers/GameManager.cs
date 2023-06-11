@@ -82,25 +82,25 @@ namespace InterruptingCards.Managers
             base.OnNetworkSpawn();
             Log.Info("Network spawned");
 
-            _deckManager.OnClicked += TryDrawCard;
+            //_deckManager.OnClicked += TryDrawCard;
 
-            for (var i = 0; i < _handManagers.Length; i++)
-            {
-                var j = i;
-                _handManagers[i].OnCardClicked += (int k) => TryPlayCard(j, k);
-            }
+            //for (var i = 0; i < _handManagers.Length; i++)
+            //{
+            //    var j = i;
+            //    _handManagers[i].OnCardClicked += (int k) => TryPlayCard(j, k);
+            //}
         }
 
         public override void OnNetworkDespawn()
         {
             Log.Info("Network despawned");
 
-            _deckManager.OnClicked -= TryDrawCard;
+            //_deckManager.OnClicked -= TryDrawCard;
 
-            foreach (var handManager in _handManagers)
-            {
-                handManager.OnCardClicked = null;
-            }
+            //foreach (var handManager in _handManagers)
+            //{
+            //    handManager.OnCardClicked = null;
+            //}
 
             if (_stateMachineManager.CurrentState != StateMachine.WaitingForClients)
             {
@@ -317,104 +317,104 @@ namespace InterruptingCards.Managers
             SetCardsHidden(true);
         }
 
-        // ServerRpc Methods & Tries
+        //// ServerRpc Methods & Tries
 
-        private bool CanDrawCard(ulong id)
-        {
-            if (id != _playerManager.ActivePlayer.Id)
-            {
-                Log.Info($"Cannot draw a card unless it is their turn");
-                return false;
-            }
+        //private bool CanDrawCard(ulong id)
+        //{
+        //    if (id != _playerManager.ActivePlayer.Id)
+        //    {
+        //        Log.Info($"Cannot draw a card unless it is their turn");
+        //        return false;
+        //    }
 
-            if (_stateMachineManager.CurrentState != StateMachine.Looting)
-            {
-                Log.Info($"Player {id} cannot draw a card in the wrong state");
-                return false;
-            }
+        //    if (_stateMachineManager.CurrentState != StateMachine.Looting)
+        //    {
+        //        Log.Info($"Player {id} cannot draw a card in the wrong state");
+        //        return false;
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
 
-        private void TryDrawCard()
-        {
-            Log.Info("Trying to draw card");
-            if (CanDrawCard(_playerManager.SelfId))
-            {
-                DrawCardServerRpc();
-            }
-        }
+        //private void TryDrawCard()
+        //{
+        //    Log.Info("Trying to draw card");
+        //    if (CanDrawCard(_playerManager.SelfId))
+        //    {
+        //        DrawCardServerRpc();
+        //    }
+        //}
 
-        [ServerRpc(RequireOwnership = false)]
-        private void DrawCardServerRpc(ServerRpcParams serverRpcParams = default)
-        {
-            if (!CanDrawCard(serverRpcParams.Receive.SenderClientId))
-            {
-                return;
-            }
+        //[ServerRpc(RequireOwnership = false)]
+        //private void DrawCardServerRpc(ServerRpcParams serverRpcParams = default)
+        //{
+        //    if (!CanDrawCard(serverRpcParams.Receive.SenderClientId))
+        //    {
+        //        return;
+        //    }
 
-            Log.Info("Drawing card");
-            var card = _deckManager.DrawTop();
-            _playerManager.ActivePlayer.Hand.Add(card);
-            _stateMachineManager.SetTrigger(StateMachine.LootComplete);
-        }
+        //    Log.Info("Drawing card");
+        //    var card = _deckManager.DrawTop();
+        //    _playerManager.ActivePlayer.Hand.Add(card);
+        //    _stateMachineManager.SetTrigger(StateMachine.LootComplete);
+        //}
 
-        private bool CanPlayCard(ulong id, int handManagerIndex, int cardIndex)
-        {
-            if (id != _playerManager.ActivePlayer.Id)
-            {
-                Log.Info($"Player {id} cannot play a card unless it is their turn or they are interrupting");
-                return false;
-            }
+        //private bool CanPlayCard(ulong id, int handManagerIndex, int cardIndex)
+        //{
+        //    if (id != _playerManager.ActivePlayer.Id)
+        //    {
+        //        Log.Info($"Player {id} cannot play a card unless it is their turn or they are interrupting");
+        //        return false;
+        //    }
 
-            var hand = _handManagers[handManagerIndex];
+        //    var hand = _handManagers[handManagerIndex];
 
-            if (hand != _playerManager.ActivePlayer.Hand)
-            {
-                Log.Info($"Player {id} can only play cards from their own hand");
-                return false;
-            }
+        //    if (hand != _playerManager.ActivePlayer.Hand)
+        //    {
+        //        Log.Info($"Player {id} can only play cards from their own hand");
+        //        return false;
+        //    }
 
-            if (cardIndex < 0 || hand.Count <= cardIndex)
-            {
-                Log.Info($"Player {id} cannot play a card from an invalid index of their hand");
-                return false;
-            }
+        //    if (cardIndex < 0 || hand.Count <= cardIndex)
+        //    {
+        //        Log.Info($"Player {id} cannot play a card from an invalid index of their hand");
+        //        return false;
+        //    }
 
-            if (_stateMachineManager.CurrentState != StateMachine.PlayingLoot)
-            {
-                Log.Info($"Player {id} cannot play a card in the wrong state");
-                return false;
-            }
+        //    if (_stateMachineManager.CurrentState != StateMachine.PlayingLoot)
+        //    {
+        //        Log.Info($"Player {id} cannot play a card in the wrong state");
+        //        return false;
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
 
-        private void TryPlayCard(int handManagerIndex, int cardIndex)
-        {
-            var cardId = _handManagers[handManagerIndex][cardIndex];
-            Log.Info($"Trying to play card {_cardConfig.GetName(cardId)}");
+        //private void TryPlayCard(int handManagerIndex, int cardIndex)
+        //{
+        //    var cardId = _handManagers[handManagerIndex][cardIndex];
+        //    Log.Info($"Trying to play card {_cardConfig.GetName(cardId)}");
 
-            if (CanPlayCard(_playerManager.SelfId, handManagerIndex, cardIndex))
-            {
-                PlayCardServerRpc(handManagerIndex, cardIndex);
-            }
-        }
+        //    if (CanPlayCard(_playerManager.SelfId, handManagerIndex, cardIndex))
+        //    {
+        //        PlayCardServerRpc(handManagerIndex, cardIndex);
+        //    }
+        //}
 
-        [ServerRpc(RequireOwnership = false)]
-        private void PlayCardServerRpc(int handManagerIndex, int cardIndex, ServerRpcParams serverRpcParams = default)
-        {
-            var senderId = serverRpcParams.Receive.SenderClientId;
-            if (!CanPlayCard(senderId, handManagerIndex, cardIndex))
-            {
-                return;
-            }
+        //[ServerRpc(RequireOwnership = false)]
+        //private void PlayCardServerRpc(int handManagerIndex, int cardIndex, ServerRpcParams serverRpcParams = default)
+        //{
+        //    var senderId = serverRpcParams.Receive.SenderClientId;
+        //    if (!CanPlayCard(senderId, handManagerIndex, cardIndex))
+        //    {
+        //        return;
+        //    }
 
-            Log.Info("Playing card");
-            var cardId = _handManagers[handManagerIndex].RemoveAt(cardIndex);
-            _discardManager.PlaceTop(cardId);
-            _theStackManager.Begin();
-        }
+        //    Log.Info("Playing card");
+        //    var cardId = _handManagers[handManagerIndex].RemoveAt(cardIndex);
+        //    _discardManager.PlaceTop(cardId);
+        //    _theStackManager.Begin();
+        //}
 
         // Helper Methods
 
