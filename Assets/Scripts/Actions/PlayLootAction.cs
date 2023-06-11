@@ -3,9 +3,9 @@ using InterruptingCards.Managers;
 
 namespace InterruptingCards.Actions
 {
-    public class PlayLootAction : AbstractAction
+    public class PlayLootAction : AbstractCardAction
     {
-        protected override bool CanExecute(ulong playerId)
+        protected override bool CanExecute(ulong playerId, int cardId)
         {
             // TODO: Integrate stack and priority loot plays
 
@@ -24,7 +24,7 @@ namespace InterruptingCards.Actions
 
             return true;
         }
-        protected override void Execute()
+        protected override void Execute(int cardId)
         {
             // TODO
             _gameStateMachineManager.SetTrigger(StateMachine.PlayLoot);

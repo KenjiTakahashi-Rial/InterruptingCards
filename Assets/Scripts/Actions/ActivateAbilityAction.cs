@@ -3,9 +3,9 @@ using InterruptingCards.Managers;
 
 namespace InterruptingCards.Actions
 {
-    public class ActivateAbilityAction : AbstractAction
+    public class ActivateAbilityAction : AbstractCardAction
     {
-        protected override bool CanExecute(ulong playerId)
+        protected override bool CanExecute(ulong playerId, int cardId)
         {
             // TODO: Integrate stack and priority ability activation
 
@@ -27,7 +27,7 @@ namespace InterruptingCards.Actions
             return true;
         }
 
-        protected override void Execute()
+        protected override void Execute(int cardId)
         {
             // TODO
             _gameStateMachineManager.SetTrigger(StateMachine.ActivateAbility);

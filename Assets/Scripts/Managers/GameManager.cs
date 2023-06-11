@@ -202,7 +202,7 @@ namespace InterruptingCards.Managers
             // TODO: Prompt the active player to select a monster
             if (_playerManager.SelfId == _playerManager.ActivePlayer.Id)
             {
-                _attack.TryExecute();
+                _attack.TryExecute(CardConfig.InvalidId);
             }
         }
 
@@ -224,14 +224,14 @@ namespace InterruptingCards.Managers
             // TODO: Prompt the active player to select an item
             if (_playerManager.SelfId == _playerManager.ActivePlayer.Id)
             {
-                _purchase.TryExecute();
+                _purchase.TryExecute(CardConfig.InvalidId);
             }
         }
 
         public void TryPlayLoot()
         {
             // TODO: This should include which loot is attempting to be played
-            _playLoot.TryExecute();
+            _playLoot.TryExecute(CardConfig.InvalidId);
         }
 
         public void PlayLoot()
@@ -246,7 +246,7 @@ namespace InterruptingCards.Managers
         public void TryActivateAbility()
         {
             // TODO: This should include which ability is trying to be activated
-            _activateAbility.TryExecute();
+            _activateAbility.TryExecute(CardConfig.InvalidId);
         }
 
         public void ActivateAbility()

@@ -2,9 +2,9 @@ using InterruptingCards.Config;
 
 namespace InterruptingCards.Actions
 {
-    public class PurchaseAction : AbstractAction
+    public class PurchaseAction : AbstractCardAction
     {
-        protected override bool CanExecute(ulong playerId)
+        protected override bool CanExecute(ulong playerId, int cardId)
         {
             if (playerId != _playerManager.ActivePlayer.Id)
             {
@@ -22,7 +22,7 @@ namespace InterruptingCards.Actions
             return true;
         }
 
-        protected override void Execute()
+        protected override void Execute(int cardId)
         {
             // TODO
             _gameStateMachineManager.SetTrigger(StateMachine.PurchaseComplete);
