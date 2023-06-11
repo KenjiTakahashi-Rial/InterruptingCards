@@ -75,7 +75,7 @@ namespace InterruptingCards.Managers
         private void SetBoolImpl(StateMachine param, bool val)
         {
             var id = _stateMachineConfig.GetId(param);
-            Log.Warn($"Setting bool {_stateMachineConfig.GetName(id)}");
+            Log.Info($"Setting bool {_stateMachineConfig.GetName(id)} {val}");
             _stateMachine.SetBool(id, val);
         }
     }

@@ -66,9 +66,9 @@ namespace InterruptingCards.Managers
             _priorityPlayerId.Value = player.Id;
         }
 
-        private void SetPlayerPriority(ITheStackElement element)
+        private void SetPlayerPriority(TheStackElement element)
         {
-            _priorityPlayerId.Value = element.PushedBy.Id;
+            _priorityPlayerId.Value = element.PushedById;
         }
     }
 }

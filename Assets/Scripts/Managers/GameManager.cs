@@ -153,10 +153,10 @@ namespace InterruptingCards.Managers
 
         public void TriggerStartOfTurnAbilities()
         {
-            // TODO: Trigger the abilities
+            // TODO: Look up the abilities from the player
             if (IsServer)
             {
-                _theStackManager.Begin();
+                _theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
             }
         }
 
@@ -189,7 +189,6 @@ namespace InterruptingCards.Managers
 
         public void DeclareAttack()
         {
-            // TODO: Put the attack declaration on the stack
             if (IsServer)
             {
                 _theStackManager.Begin();
@@ -212,7 +211,6 @@ namespace InterruptingCards.Managers
 
         public void DeclarePurchase()
         {
-            // TODO: Put the purchase declaration on the stack
             if (IsServer)
             {
                 _theStackManager.Begin();
@@ -236,10 +234,10 @@ namespace InterruptingCards.Managers
 
         public void PlayLoot()
         {
-            // TODO: Add loot to the stack
+            // TODO: Get the loot to be played
             if (IsServer)
             {
-                _theStackManager.Begin();
+                _theStackManager.PushLoot(_playerManager.ActivePlayer, CardConfig.InvalidId);
             }
         }
 
@@ -251,10 +249,10 @@ namespace InterruptingCards.Managers
 
         public void ActivateAbility()
         {
-            // TODO: Add activated ability to the stack
+            // TODO: Get the ability to be activated
             if (IsServer)
             {
-                _theStackManager.Begin();
+                _theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
             }
         }
 
@@ -274,10 +272,10 @@ namespace InterruptingCards.Managers
 
         public void TriggerEndOfTurnAbilities()
         {
-            // TODO: Trigger the abilities
+            // TODO: Look up player's abilities
             if (IsServer)
             {
-                _theStackManager.Begin();
+                _theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
             }
         }
 

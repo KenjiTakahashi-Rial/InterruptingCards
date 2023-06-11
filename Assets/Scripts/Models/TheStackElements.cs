@@ -1,6 +1,10 @@
+using System;
+
+using Unity.Netcode;
+
 namespace InterruptingCards.Models
 {
-    public enum TheStackElement
+    public enum TheStackElementType
     {
         Invalid,
         Loot,
@@ -8,43 +12,38 @@ namespace InterruptingCards.Models
         DiceRoll,
     }
 
-    public interface ITheStackElement
+    public struct TheStackElement : INetworkSerializable, IEquatable<TheStackElement>
     {
-        TheStackElement Type { get; }
+        private TheStackElementType _type;
+        private ulong _pushedById;
+        private int _value;
 
-        Player PushedBy { get; }
-    }
+        public TheStackElement(TheStackElementType type, ulong pushedById, int value)
+        {
+            _type = type;
+            _pushedById = pushedById;
+            _value = value;
+        }
 
-    public class LootElement : ITheStackElement
-    {
-        public LootElement(int cardId) { CardId = cardId; }
+        public readonly TheStackElementType Type => _type;
 
-        public TheStackElement Type => TheStackElement.Loot;
+        public readonly ulong PushedById => _pushedById;
 
-        public Player PushedBy { get; }
+        public readonly int Value => _value;
 
-        public int CardId { get; }
-    }
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref _type);
+            serializer.SerializeValue(ref _pushedById);
+            serializer.SerializeValue(ref _value);
 
-    public class AbilityElement : ITheStackElement
-    {
-        public AbilityElement(CardAbility ability) { Ability = ability; }
+        }
 
-        public TheStackElement Type => TheStackElement.Ability;
-
-        public Player PushedBy { get; }
-
-        public CardAbility Ability { get; }
-    }
-
-    public class DiceRollElement : ITheStackElement
-    {
-        public DiceRollElement(int diceRoll) { DiceRoll = diceRoll; }
-
-        public TheStackElement Type => TheStackElement.DiceRoll;
-
-        public Player PushedBy { get; }
-
-        public int DiceRoll { get; }
+        public bool Equals(TheStackElement other)
+        {
+            return Type == other.Type
+                && PushedById == other.PushedById
+                && Value == other.Value;
+        }
     }
 }
