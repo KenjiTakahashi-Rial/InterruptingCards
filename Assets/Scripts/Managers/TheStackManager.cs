@@ -47,7 +47,7 @@ namespace InterruptingCards.Managers
 
         public void PushLoot(Player player, int cardId)
         {
-            Log.Info($"Player {player.Name} pushing {_cardConfig.GetCardString(cardId)} to The Stack");
+            Log.Info($"Player {player.Name} pushing {_cardConfig.GetName(cardId)} to The Stack");
             LastPushBy = player;
             _theStack.Add(new TheStackElement(TheStackElementType.Loot, player.Id, cardId));
             _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);

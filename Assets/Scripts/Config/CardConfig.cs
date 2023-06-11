@@ -11,16 +11,12 @@ namespace InterruptingCards.Config
 {
     public class CardConfig
     {
+        public const int InvalidId = 0;
+
+        private const string InvalidName = "Invalid";
         private const string PackFileExtension = "json";
 
         public static readonly CardConfig Singleton = new();
-        public static readonly int InvalidId = GetCardId(CardSuit.Invalid, CardRank.Invalid);
-
-        private static readonly int IdBitCount = 32;
-        private static readonly int SuitBitCount = IdBitCount / 2;
-        private static readonly int RankBitCount = IdBitCount / 2;
-        private static readonly int SuitBitMask = ~0 << (IdBitCount - SuitBitCount);
-        private static readonly int RankBitMask = (1 << RankBitCount) - 1;
 
         private readonly string _packDirectory = Path.Combine("Assets", "Scripts", "Config", "Packs");
 
@@ -32,21 +28,14 @@ namespace InterruptingCards.Config
 
         public Card this[int cardId] => _cards[cardId];
 
-        public static int GetCardId(CardSuit suit, CardRank rank)
+        public string GetName(int id)
         {
-            return (((int)suit << RankBitCount) & SuitBitMask) | ((int)rank & RankBitMask);
-        }
-
-        public string GetCardString(int id)
-        {
-            if (_cards.ContainsKey(id))
+            if (id == InvalidId)
             {
-                return _cards[id].ToString();
+                return InvalidName;
             }
 
-            var suit = (CardSuit)((id & SuitBitMask) >> RankBitCount);
-            var rank = (CardRank)(id & RankBitMask);
-            return $"{rank} | {suit}";
+            return _cards[id].ToString();
         }
 
         public void Load(CardPack cardPack)
@@ -59,24 +48,23 @@ namespace InterruptingCards.Config
             var packPath = Path.Combine(_packDirectory, packName);
             var cardPaths = Directory.GetFiles(packPath, "*." + PackFileExtension);
 
+            var id = 1;
+
             for (var i = 0; i < cardPaths.Length; i++)
             {
                 var json = File.ReadAllText(cardPaths[i]);
                 var card = JsonUtility.FromJson<ParserCard>(json);
-                var id = card.Id;
 
-                if (_cards.ContainsKey(id))
+                for (var j = 0; j < card.Count; j++)
                 {
-                    Log.Warn($"Cache already contains {id}. Overwriting {_cards[id]} with {card.Name}");
+                    _cards[id] = new Card(id++, card);
                 }
-
-                _cards[card.Id] = new Card(card);
             }
         }
 
-        public List<int> GenerateDeck()
+        public List<int> GenerateIdDeck()
         {
-            return _cards.Values.SelectMany(c => Enumerable.Repeat(c.Id, c.Count)).ToList();
+            return _cards.Keys.ToList();
         }
     }
 }

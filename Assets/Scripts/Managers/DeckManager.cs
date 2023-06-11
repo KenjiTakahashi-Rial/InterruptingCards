@@ -68,7 +68,7 @@ namespace InterruptingCards.Managers
 
         public void Initialize()
         {
-            _cardIds = _cardConfig.GenerateDeck();
+            _cardIds = _cardConfig.GenerateIdDeck();
             SetTop();
         }
 

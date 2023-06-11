@@ -9,9 +9,7 @@ namespace InterruptingCards.Models
     [Serializable]
     public class ParserCard
     {
-        /******************************************************************************************\
-         * JSON Keys                                                                              *
-        \******************************************************************************************/
+        // JSON Keys
 
         [SerializeField] private string _suitName;
 
@@ -23,9 +21,7 @@ namespace InterruptingCards.Models
 
         [SerializeField] private string _activeEffectName;
 
-        /******************************************************************************************\
-         * Lazy Backing Fields                                                                    *
-        \******************************************************************************************/
+        // Lazy Backing Fields
 
         private Lazy<int> _id;
 
@@ -35,18 +31,7 @@ namespace InterruptingCards.Models
 
         private Lazy<CardActiveEffect> _activeEffect;
 
-        /******************************************************************************************\
-         * Public Getters                                                                         *
-        \******************************************************************************************/
-
-        public int Id
-        {
-            get
-            {
-                _id ??= new(() => CardConfig.GetCardId(Suit, Rank));
-                return _id.Value;
-            }
-        }
+        // Public Getters
 
         public CardSuit Suit
         {
@@ -79,9 +64,7 @@ namespace InterruptingCards.Models
             }
         }
 
-        /******************************************************************************************\
-         * Helper Methods                                                                         *
-        \******************************************************************************************/
+        // Helper Methods
 
         private Func<E> EnumValueFactory<E>(string name) where E : struct
         {

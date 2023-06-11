@@ -16,12 +16,10 @@ namespace InterruptingCards.Behaviours
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
-        private readonly NetworkVariable<int> _cardId = new(CardConfig.GetCardId(s_defaultSuit, s_defaultRank));
+        private readonly NetworkVariable<int> _cardId = new(CardConfig.InvalidId);
         private readonly NetworkVariable<bool> _isFaceUp = new(s_defaultIsFaceUp);
         private readonly NetworkVariable<bool> _isActivated = new(s_defaultIsActivated);
 
-        [SerializeField] private static CardSuit s_defaultSuit = CardSuit.Invalid;
-        [SerializeField] private static CardRank s_defaultRank = CardRank.Invalid;
         [SerializeField] private static bool s_defaultIsFaceUp = true;
         [SerializeField] private static bool s_defaultIsActivated = false;
 
@@ -93,7 +91,7 @@ namespace InterruptingCards.Behaviours
             }
             else
             {
-                Log.Info($"{_cardConfig.GetCardString(_cardId.Value)} clicked");
+                Log.Info($"{_cardConfig.GetName(_cardId.Value)} clicked");
             }
 
             OnClicked?.Invoke();
@@ -125,13 +123,13 @@ namespace InterruptingCards.Behaviours
 
         private void HandleCardIdChanged(int oldValue, int newValue)
         {
-            var oldCard = _cardConfig.GetCardString(oldValue);
-            var newCard = _cardConfig.GetCardString(newValue);
+            var oldCard = _cardConfig.GetName(oldValue);
+            var newCard = _cardConfig.GetName(newValue);
             Log.Info($"Card changed ({oldCard} -> {newCard})");
 
             SetCardTextEnabled();
             SetCardSpriteEnabled();
-            _cardText.SetText(_cardConfig.GetCardString(newValue)); // TODO: Change
+            _cardText.SetText(_cardConfig.GetName(newValue)); // TODO: Change
         }
 
         private void HandleFaceUpChanged(bool oldValue, bool newValue)

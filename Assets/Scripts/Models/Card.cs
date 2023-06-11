@@ -1,12 +1,10 @@
-using InterruptingCards.Config;
-
 namespace InterruptingCards.Models
 {
     public class Card
     {
-        public Card(ParserCard metadataCard)
+        public Card(int id, ParserCard metadataCard)
         {
-            Id = metadataCard.Id;
+            Id = id;
             Suit = metadataCard.Suit;
             Rank = metadataCard.Rank;
             Name = metadataCard.Name;
@@ -16,7 +14,7 @@ namespace InterruptingCards.Models
 
         // All attributes must be readonly
 
-        // TODO: Make an instance ID too
+        // Instance ID. Each card will have a unique ID, even if they have the same suit & rank
         public int Id { get; }
 
         public CardSuit Suit { get; }

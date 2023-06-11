@@ -52,7 +52,7 @@ namespace InterruptingCards.Managers
 
         public void Add(int cardId)
         {
-            Log.Info($"Adding card to hand ({_cardConfig.GetCardString(cardId)})");
+            Log.Info($"Adding card to hand ({_cardConfig.GetName(cardId)})");
 
             if (Count == _cardSlots.Length)
             {
@@ -66,7 +66,7 @@ namespace InterruptingCards.Managers
         {
             var cardId = _cardSlots[index].CardId;
 
-            Log.Info($"Removing {_cardConfig.GetCardString(cardId)} from hand index {index}");
+            Log.Info($"Removing {_cardConfig.GetName(cardId)} from hand index {index}");
 
             for (int i = index; i < _cardSlots.Length; i++)
             {

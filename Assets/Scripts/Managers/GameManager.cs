@@ -393,7 +393,7 @@ namespace InterruptingCards.Managers
         private void TryPlayCard(int handManagerIndex, int cardIndex)
         {
             var cardId = _handManagers[handManagerIndex][cardIndex];
-            Log.Info($"Trying to play card {_cardConfig.GetCardString(cardId)}");
+            Log.Info($"Trying to play card {_cardConfig.GetName(cardId)}");
 
             if (CanPlayCard(_playerManager.SelfId, handManagerIndex, cardIndex))
             {
