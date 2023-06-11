@@ -135,7 +135,7 @@ namespace InterruptingCards.Managers
                 {
                     hand.Clear();
                 }
-                DealHandsServerRpc();
+                DealHands();
                 _stateMachineManager.SetTrigger(StateMachine.StartGame);
             }
 
@@ -170,6 +170,8 @@ namespace InterruptingCards.Managers
             // TODO: Give the active player a loot
             if (IsServer)
             {
+                var card = _deckManager.DrawTop();
+                _playerManager.ActivePlayer.Hand.Add(card);
                 _stateMachineManager.SetTrigger(StateMachine.LootComplete);
             }
         }
@@ -317,25 +319,6 @@ namespace InterruptingCards.Managers
 
         // ServerRpc Methods & Tries
 
-        [ServerRpc]
-        private void DealHandsServerRpc()
-        {
-            if (_stateMachineManager.CurrentState != StateMachine.InitializingGame)
-            {
-                Log.Warn("Cannot deal hands outside of game initialization state");
-                return;
-            }
-
-            Log.Info("Dealing hands");
-            for (var i = 0; i < StartingHandCardCount; i++)
-            {
-                foreach (var hand in _handManagers)
-                {
-                    hand.Add(_deckManager.DrawTop());
-                }
-            }
-        }
-
         private bool CanDrawCard(ulong id)
         {
             if (id != _playerManager.ActivePlayer.Id)
@@ -433,6 +416,8 @@ namespace InterruptingCards.Managers
             _theStackManager.Begin();
         }
 
+        // Helper Methods
+
         private void SetCardsHidden(bool val)
         {
             Log.Info($"Setting cards hidden: {val}");
@@ -442,6 +427,24 @@ namespace InterruptingCards.Managers
             foreach (var hand in _handManagers)
             {
                 hand.SetHidden(val);
+            }
+        }
+
+        private void DealHands()
+        {
+            if (_stateMachineManager.CurrentState != StateMachine.InitializingGame)
+            {
+                Log.Warn("Cannot deal hands outside of game initialization state");
+                return;
+            }
+
+            Log.Info("Dealing hands");
+            for (var i = 0; i < StartingHandCardCount; i++)
+            {
+                foreach (var hand in _handManagers)
+                {
+                    hand.Add(_deckManager.DrawTop());
+                }
             }
         }
     }
