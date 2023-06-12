@@ -11,13 +11,15 @@ namespace InterruptingCards.Managers
 
         private readonly StateMachineConfig _stateMachineConfig = StateMachineConfig.Singleton;
 
-        [SerializeField] private Animator _gameStateMachine;
+        [SerializeField] private Animator _stateMachine;
 
         public StateMachine CurrentState => _stateMachineConfig.GetEnum(
-            _gameStateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash
+            _stateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash
         );
 
         public string CurrentStateName => CurrentState.ToString();
+
+        private LogManager Log => LogManager.Singleton;
 
         public void SetTrigger(StateMachine trigger)
         {
@@ -31,7 +33,7 @@ namespace InterruptingCards.Managers
             }
             else
             {
-                Debug.LogWarning($"Client attempted to change state while connected to host");
+                Log.Warn($"Cannot set trigger {trigger} while connected to host");
             }
         }
 
@@ -43,13 +45,38 @@ namespace InterruptingCards.Managers
 
         private void SetTriggerImpl(StateMachine trigger)
         {
-            SetTriggerImpl(_stateMachineConfig.GetId(trigger));
+            var id = _stateMachineConfig.GetId(trigger);
+            Log.Info($"Triggering {_stateMachineConfig.GetName(id)}");
+            _stateMachine.SetTrigger(id);
         }
 
-        private void SetTriggerImpl(int id)
+        public void SetBool(StateMachine param, bool val)
         {
-            Debug.Log($"Triggering {_stateMachineConfig.GetName(id)}");
-            _gameStateMachine.SetTrigger(id);
+            if (IsServer)
+            {
+                SetBoolClientRpc(param, val);
+            }
+            else if (!NetworkManager.IsConnectedClient)
+            {
+                SetBoolImpl(param, val);
+            }
+            else
+            {
+                Log.Warn($"Cannot set bool {param} while connected to host");
+            }
+        }
+
+        [ClientRpc]
+        private void SetBoolClientRpc(StateMachine param, bool val)
+        {
+            SetBoolImpl(param, val);
+        }
+
+        private void SetBoolImpl(StateMachine param, bool val)
+        {
+            var id = _stateMachineConfig.GetId(param);
+            Log.Info($"Setting bool {_stateMachineConfig.GetName(id)} {val}");
+            _stateMachine.SetBool(id, val);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace InterruptingCards.Behaviours
     {
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            AbstractGameManager.Singleton.HandleInitializeGame();
+            GameManager.Singleton.Initialize();
         }
     }
 }

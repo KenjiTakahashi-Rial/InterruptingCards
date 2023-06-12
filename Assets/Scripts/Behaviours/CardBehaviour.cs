@@ -5,6 +5,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
+using InterruptingCards.Managers;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
@@ -15,12 +16,10 @@ namespace InterruptingCards.Behaviours
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
-        private readonly NetworkVariable<int> _cardId = new(CardConfig.GetCardId(s_defaultSuit, s_defaultRank));
+        private readonly NetworkVariable<int> _cardId = new(CardConfig.InvalidId);
         private readonly NetworkVariable<bool> _isFaceUp = new(s_defaultIsFaceUp);
         private readonly NetworkVariable<bool> _isActivated = new(s_defaultIsActivated);
 
-        [SerializeField] private static CardSuit s_defaultSuit = CardSuit.Invalid;
-        [SerializeField] private static CardRank s_defaultRank = CardRank.Invalid;
         [SerializeField] private static bool s_defaultIsFaceUp = true;
         [SerializeField] private static bool s_defaultIsActivated = false;
 
@@ -33,6 +32,7 @@ namespace InterruptingCards.Behaviours
         private bool _isHidden;
 
         public Action OnClicked { get; set; }
+
         public Action OnActivated { get; set; }
 
         public int CardId
@@ -52,6 +52,8 @@ namespace InterruptingCards.Behaviours
             get => _isActivated.Value;
             set => _isActivated.Value = value;
         }
+
+        private LogManager Log => LogManager.Singleton;
 
         public void Awake()
         {
@@ -85,11 +87,11 @@ namespace InterruptingCards.Behaviours
         {
             if (OnClicked == null)
             {
-                Debug.Log("OnClicked has no subscribers");
+                Log.Info("OnClicked has no subscribers");
             }
             else
             {
-                Debug.Log($"{_cardConfig.GetCardString(_cardId.Value)} clicked");
+                Log.Info($"{_cardConfig.GetName(_cardId.Value)} clicked");
             }
 
             OnClicked?.Invoke();
@@ -121,20 +123,20 @@ namespace InterruptingCards.Behaviours
 
         private void HandleCardIdChanged(int oldValue, int newValue)
         {
-            var oldCard = _cardConfig.GetCardString(oldValue);
-            var newCard = _cardConfig.GetCardString(newValue);
-            Debug.Log($"Card changed ({oldCard} -> {newCard})");
+            var oldCard = _cardConfig.GetName(oldValue);
+            var newCard = _cardConfig.GetName(newValue);
+            Log.Info($"Card changed ({oldCard} -> {newCard})");
 
             SetCardTextEnabled();
             SetCardSpriteEnabled();
-            _cardText.SetText(_cardConfig.GetCardString(newValue)); // TODO: Change
+            _cardText.SetText(_cardConfig.GetName(newValue)); // TODO: Change
         }
 
         private void HandleFaceUpChanged(bool oldValue, bool newValue)
         {
             var before = oldValue ? "face-up" : "face-down";
             var after = newValue ? "face-up" : "face-down";
-            Debug.Log($"Card changed ({before} -> {after})");
+            Log.Info($"Card changed ({before} -> {after})");
 
             SetCardTextEnabled();
         }
@@ -143,13 +145,13 @@ namespace InterruptingCards.Behaviours
         {
             var before = oldValue ? "activated" : "not activated";
             var after = newValue ? "activated" : "not activated";
-            Debug.Log($"Active card changed ({before} -> {after})");
+            Log.Info($"Active card changed ({before} -> {after})");
 
             transform.rotation = IsActivated ? _activatedRotation : _originalRotation;
 
             if (OnActivated == null)
             {
-                Debug.Log("OnActivated has no subscribers");
+                Log.Info("OnActivated has no subscribers");
             }
 
             OnActivated?.Invoke();

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using InterruptingCards.Managers;
+
 namespace InterruptingCards.Utilities
 {
     public class ImmutableDictionary<TKey, TValue>
@@ -29,12 +31,26 @@ namespace InterruptingCards.Utilities
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.GetEnumerator();
 
+        private LogManager Log => LogManager.Singleton;
+
         public ImmutableDictionary<NewTKey, NewTValue> ToDictionary<NewTKey, NewTValue>(
             Func<KeyValuePair<TKey, TValue>, NewTKey> keySelector,
             Func<KeyValuePair<TKey, TValue>, NewTValue> valueSelector
         )
         {
-            return new ImmutableDictionary<NewTKey, NewTValue>(_dictionary.ToDictionary(keySelector, valueSelector));
+            try
+            {
+                return new ImmutableDictionary<NewTKey, NewTValue>(_dictionary.ToDictionary(keySelector, valueSelector));
+            }
+            catch
+            {
+                foreach ((var k, var v) in _dictionary)
+                {
+                    Log.Error($"{{ {k}: {v} }}");
+                }
+
+                throw;
+            }
         }
     }
 }

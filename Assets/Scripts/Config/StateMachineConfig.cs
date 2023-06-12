@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,62 +11,146 @@ namespace InterruptingCards.Config
     {
         Invalid,
 
-        // States
-        WaitingForClientsState,
-        WaitingForAllReadyState,
-        InitializingGameState,
-        EndingGameState,
-        StartingTurnState,
-        WaitingForDrawCardState,
-        WaitingForPlayCardState,
-        EndingTurnState,
-        StartingInterruptState,
-        WaitingForPlayCardInterruptState,
-        EndingInterruptState,
+        // Game States
+        WaitingForClients,
+        WaitingForAllReady,
+        InitializingGame,
 
-        // Triggers
-        AllReadyTrigger,
-        DrawCardTrigger,
-        ForceEndTurnTrigger,
-        ForceEndGameTrigger,
-        InterruptTrigger,
-        PlayCardTrigger,
-        PlayCardActiveEffectTrigger,
-        ReturnToWaitingForDrawCardTrigger,
-        ReturnToWaitingForPlayCardTrigger,
-        StartGameTrigger,
-        WaitForReadyTrigger,
+        // In-Game
+        Entry,
+        EndingGame,
+
+        // Start Phase
+        Recharging,
+        StartPhaseTriggeringAbilities,
+        Looting,
+        GamePriorityPassing,
+
+        // Action Phase
+        ActionPhaseIdling,
+        DeclaringAttack,
+        Attacking,
+        DeclaringPurchase,
+        Purchasing,
+        PlayingLoot,
+        ActivatingAbility,
+        DeclaringEndTurn,
+
+        // EndPhase
+        EndPhaseTriggeringAbilities,
+        Discarding,
+        ShiftingRoom,
+        TurnEnding,
+
+        // Game Triggers
+        ActionPhaseComplete,
+        ActivateAbility,
+        AllReady,
+        AttackComplete,
+        DeclareAttack,
+        DeclareEndTurn,
+        DeclarePurchase,
+        DiscardComplete,
+        EndGame,
+        EndTurn,
+        EndPhaseComplete,
+        ForceEndGame,
+        ForceEndTurn,
+        GamePriorityPassComplete,
+        LootComplete,
+        PlayLoot,
+        PurchaseComplete,
+        RechargeComplete,
+        ShiftRoomComplete,
+        StartGame,
+        StartPhaseComplete,
+        WaitForReady,
+
+        // The Stack States
+        TheStackIdling,
+        TheStackPriorityPassing,
+        TheStackPopping,
+        TheStackEnding,
+
+        // The Stack Triggers
+        TheStackEnded,
+        TheStackIsEmpty,
+        TheStackPopped,
+        TheStackBegin,
+        TheStackPriorityPassComplete,
     }
 
     public class StateMachineConfig
     {
         private static readonly Dictionary<StateMachine, string> Strings = new()
         {
-            // States
-            { StateMachine.WaitingForAllReadyState,          "Base." +                            "WaitingForAllReady"          },
-            { StateMachine.WaitingForClientsState,           "Base." +                            "WaitingForClients"           },
-            { StateMachine.InitializingGameState,            "Base." +                            "InitializingGame"            },
-            { StateMachine.EndingGameState,                  "Base.InGame." +                     "EndingGame"                  },
-            { StateMachine.StartingTurnState,                "Base.InGame.PlayerTurns." +         "StartingTurn"                },
-            { StateMachine.WaitingForDrawCardState,          "Base.InGame.PlayerTurns." +         "WaitingForDrawCard"          },
-            { StateMachine.WaitingForPlayCardState,          "Base.InGame.PlayerTurns." +         "WaitingForPlayCard"          },
-            { StateMachine.EndingTurnState,                  "Base.InGame.PlayerTurns." +         "EndingTurn"                  },
-            { StateMachine.StartingInterruptState,           "Base.InGame.PlayerTurns.Interrupting.StartingInterrupt"           },
-            { StateMachine.WaitingForPlayCardInterruptState, "Base.InGame.PlayerTurns.Interrupting.WaitingForPlayCardInterrupt" },
-            { StateMachine.EndingInterruptState,             "Base.InGame.PlayerTurns.Interrupting.EndingInterrupt"             },
+            // Game States
+            { StateMachine.WaitingForClients, "Base.WaitingForClients" },
+            { StateMachine.WaitingForAllReady, "Base.WaitingForAllReady" },
+            { StateMachine.InitializingGame, "Base.InitializingGame" },
 
-            // Triggers
-            { StateMachine.AllReadyTrigger,                   "allReady"                          },
-            { StateMachine.DrawCardTrigger,                   "drawCard"                          },
-            { StateMachine.ForceEndTurnTrigger,               "forceEndTurn"                      },
-            { StateMachine.ForceEndGameTrigger,               "forceEndGame"                      },
-            { StateMachine.InterruptTrigger,                  "interrupt"                         },
-            { StateMachine.PlayCardTrigger,                   "playCard"                          },
-            { StateMachine.PlayCardActiveEffectTrigger,       "playCardActiveEffect"              },
-            { StateMachine.ReturnToWaitingForDrawCardTrigger, "returnToWaitingForDrawCard" },
-            { StateMachine.ReturnToWaitingForPlayCardTrigger, "returnToWaitingForPlayCard" },
-            { StateMachine.StartGameTrigger,                  "startGame"                         },
-            { StateMachine.WaitForReadyTrigger,               "waitForReady"                      },
+            // In-Game
+            { StateMachine.Entry, "Base.InGame.Entry" },
+            { StateMachine.EndingGame, "Base.InGame.EndingGame" },
+
+            // Start Phase
+            { StateMachine.Recharging, "Base.InGame.PlayerTurns.StartPhase.Recharging"},
+            { StateMachine.StartPhaseTriggeringAbilities, "Base.InGame.PlayerTurns.StartPhase.TriggeringAbilities"},
+            { StateMachine.Looting, "Base.InGame.PlayerTurns.StartPhase.Looting"},
+            { StateMachine.GamePriorityPassing, "Base.InGame.PlayerTurns.StartPhase.PriorityPassing"},
+
+            // Action Phase
+            { StateMachine.ActionPhaseIdling, "Base.InGame.PlayerTurns.ActionPhase.Idling"},
+            { StateMachine.DeclaringAttack, "Base.InGame.PlayerTurns.ActionPhase.DeclaringAttack"},
+            { StateMachine.Attacking, "Base.InGame.PlayerTurns.ActionPhase.Attacking"},
+            { StateMachine.DeclaringPurchase, "Base.InGame.PlayerTurns.ActionPhase.DeclaringPurchase"},
+            { StateMachine.Purchasing, "Base.InGame.PlayerTurns.ActionPhase.Purchasing"},
+            { StateMachine.PlayingLoot, "Base.InGame.PlayerTurns.ActionPhase.PlayingLoot"},
+            { StateMachine.ActivatingAbility, "Base.InGame.PlayerTurns.ActionPhase.ActivatingAbility"},
+            { StateMachine.DeclaringEndTurn, "Base.InGame.PlayerTurns.ActionPhase.DeclaringEndTurn"},
+
+            // End Phase
+            { StateMachine.EndPhaseTriggeringAbilities, "Base.InGame.PlayerTurns.EndPhase.TriggeringAbilities"},
+            { StateMachine.Discarding, "Base.InGame.PlayerTurns.EndPhase.Discarding"},
+            { StateMachine.ShiftingRoom, "Base.InGame.PlayerTurns.EndPhase.ShiftingRoom"},
+            { StateMachine.TurnEnding, "Base.InGame.PlayerTurns.EndPhase.TurnEnding"},
+
+            // Game Triggers
+            { StateMachine.ActionPhaseComplete, "actionPhaseComplete"},
+            { StateMachine.ActivateAbility, "activateAbility"},
+            { StateMachine.AllReady, "allReady"},
+            { StateMachine.AttackComplete, "attackComplete"},
+            { StateMachine.DeclareAttack, "declareAttack"},
+            { StateMachine.DeclareEndTurn, "declareEndTurn"},
+            { StateMachine.DeclarePurchase, "declarePurchase"},
+            { StateMachine.DiscardComplete, "discardComplete"},
+            { StateMachine.EndGame, "endGame"},
+            { StateMachine.EndTurn, "endTurn"},
+            { StateMachine.EndPhaseComplete, "endPhaseComplete"},
+            { StateMachine.ForceEndGame, "forceEndGame"},
+            { StateMachine.ForceEndTurn, "forceEndTurn"},
+            { StateMachine.GamePriorityPassComplete, "gamePriorityPassComplete"},
+            { StateMachine.LootComplete, "lootComplete"},
+            { StateMachine.PlayLoot, "playLoot"},
+            { StateMachine.PurchaseComplete, "purchaseComplete"},
+            { StateMachine.RechargeComplete, "rechargeComplete"},
+            { StateMachine.ShiftRoomComplete, "shiftRoomComplete"},
+            { StateMachine.StartGame, "startGame"},
+            { StateMachine.StartPhaseComplete, "startPhaseComplete"},
+            { StateMachine.WaitForReady, "waitForReady" },
+
+            // The Stack States
+            { StateMachine.TheStackIdling, "Base.Idling" },
+            { StateMachine.TheStackPriorityPassing, "Base.PriorityPassing" },
+            { StateMachine.TheStackPopping, "Base.Popping" },
+            { StateMachine.TheStackEnding, "Base.Ending" },
+
+            // The Stack Triggers
+            { StateMachine.TheStackBegin, "begin" },
+            { StateMachine.TheStackEnded, "ended" },
+            { StateMachine.TheStackIsEmpty, "isEmpty" },
+            { StateMachine.TheStackPopped, "popped" },
+            { StateMachine.TheStackPriorityPassComplete, "theStackPriorityPassComplete" },
         };
 
         private static readonly ImmutableDictionary<StateMachine, int> Ids = 
@@ -93,16 +176,6 @@ namespace InterruptingCards.Config
         public string GetName(int id)
         {
             return GetEnum(id).ToString();
-        }
-
-        public StateMachine StateToTrigger(int stateId)
-        {
-            return ReverseLookup[stateId] switch
-            {
-                StateMachine.WaitingForPlayCardState => StateMachine.ReturnToWaitingForPlayCardTrigger,
-                StateMachine.WaitingForDrawCardState => StateMachine.ReturnToWaitingForDrawCardTrigger,
-                _ => throw new NotImplementedException(),
-            };
         }
     }
 }
