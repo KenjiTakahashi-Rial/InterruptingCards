@@ -82,20 +82,16 @@ namespace InterruptingCards.Managers
             base.OnNetworkSpawn();
             Log.Info("Network spawned");
 
-            //_deckManager.OnClicked += TryDrawCard;
-
-            //for (var i = 0; i < _handManagers.Length; i++)
-            //{
-            //    var j = i;
-            //    _handManagers[i].OnCardClicked += (int k) => TryPlayCard(j, k);
-            //}
+            for (var i = 0; i < _handManagers.Length; i++)
+            {
+                var j = i;
+                _handManagers[i].OnCardClicked += (int cardId) => TryPlayLoot(cardId);
+            }
         }
 
         public override void OnNetworkDespawn()
         {
             Log.Info("Network despawned");
-
-            //_deckManager.OnClicked -= TryDrawCard;
 
             //foreach (var handManager in _handManagers)
             //{
@@ -167,7 +163,6 @@ namespace InterruptingCards.Managers
 
         public void LootStep()
         {
-            // TODO: Give the active player a loot
             if (IsServer)
             {
                 var card = _deckManager.DrawTop();
@@ -228,19 +223,15 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public void TryPlayLoot()
+        public void TryPlayLoot(int cardId)
         {
-            // TODO: This should include which loot is attempting to be played
-            _playLoot.TryExecute(CardConfig.InvalidId);
+            _playLoot.TryExecute(cardId);
         }
 
-        public void PlayLoot()
+        public void PlayLoot(int cardId)
         {
-            // TODO: Get the loot to be played
-            if (IsServer)
-            {
-                _theStackManager.PushLoot(_playerManager.ActivePlayer, CardConfig.InvalidId);
-            }
+            _playerManager.ActivePlayer.Hand.Remove(cardId);
+            _theStackManager.PushLoot(_playerManager.ActivePlayer, cardId);
         }
 
         public void TryActivateAbility()
@@ -334,29 +325,6 @@ namespace InterruptingCards.Managers
         //    }
 
         //    return true;
-        //}
-
-        //private void TryDrawCard()
-        //{
-        //    Log.Info("Trying to draw card");
-        //    if (CanDrawCard(_playerManager.SelfId))
-        //    {
-        //        DrawCardServerRpc();
-        //    }
-        //}
-
-        //[ServerRpc(RequireOwnership = false)]
-        //private void DrawCardServerRpc(ServerRpcParams serverRpcParams = default)
-        //{
-        //    if (!CanDrawCard(serverRpcParams.Receive.SenderClientId))
-        //    {
-        //        return;
-        //    }
-
-        //    Log.Info("Drawing card");
-        //    var card = _deckManager.DrawTop();
-        //    _playerManager.ActivePlayer.Hand.Add(card);
-        //    _stateMachineManager.SetTrigger(StateMachine.LootComplete);
         //}
 
         //private bool CanPlayCard(ulong id, int handManagerIndex, int cardIndex)

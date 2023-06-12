@@ -11,7 +11,6 @@ namespace InterruptingCards.Managers
 
         [SerializeField] private Button _purchaseButton;
         [SerializeField] private Button _attackButton;
-        [SerializeField] private Button _lootPlayButton;
         [SerializeField] private Button _abilityButton;
         [SerializeField] private Button _endTurnButton;
 
@@ -24,7 +23,6 @@ namespace InterruptingCards.Managers
 
             _purchaseButton.onClick.AddListener(() => GameManager.Singleton.TryDeclarePurchase());
             _attackButton.onClick.AddListener(() => GameManager.Singleton.TryDeclareAttack());
-            _lootPlayButton.onClick.AddListener(() => GameManager.Singleton.TryPlayLoot());
             _abilityButton.onClick.AddListener(() => GameManager.Singleton.TryActivateAbility());
             _endTurnButton.onClick.AddListener(() => GameManager.Singleton.TryDeclareEndTurn());
 

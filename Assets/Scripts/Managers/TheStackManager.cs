@@ -14,6 +14,7 @@ namespace InterruptingCards.Managers
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
+        [SerializeField] private DeckManager _discardManager;
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _gameStateMachineManager;
@@ -48,25 +49,22 @@ namespace InterruptingCards.Managers
         public void PushLoot(Player player, int cardId)
         {
             Log.Info($"Player {player.Name} pushing {_cardConfig.GetName(cardId)} to The Stack");
-            LastPushBy = player;
             _theStack.Add(new TheStackElement(TheStackElementType.Loot, player.Id, cardId));
-            _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
+            Push(player);
         }
 
         public void PushAbility(Player player, CardAbility ability)
         {
             Log.Info($"Player {player.Name} pushing {ability} to The Stack");
-            LastPushBy = player;
             _theStack.Add(new TheStackElement(TheStackElementType.Ability, player.Id, (int)ability));
-            _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
+            Push(player);
         }
 
         public void PushDiceRoll(Player player, int diceRoll)
         {
             Log.Info($"Player {player.Name} pushing dice roll {diceRoll} to The Stack");
-            LastPushBy = player;
             _theStack.Add(new TheStackElement(TheStackElementType.DiceRoll, player.Id, diceRoll));
-            _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
+            Push(player);
         }
 
         public void Pop()
@@ -75,9 +73,9 @@ namespace InterruptingCards.Managers
             {
                 Log.Info("Popping The Stack");
                 var last = _theStack.Count - 1;
-                var item = _theStack[last];
+                var element = _theStack[last];
                 _theStack.RemoveAt(last);
-                OnResolve?.Invoke(item);
+                Resolve(element);
                 _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
                 _stateMachineManager.SetTrigger(StateMachine.TheStackPopped);
             }
@@ -89,7 +87,6 @@ namespace InterruptingCards.Managers
 
         // State Machine Operations
 
-        // TODO: Start putting actual elements on the stack and then remove this method
         public void Begin()
         {
             _stateMachineManager.SetTrigger(StateMachine.TheStackBegin);
@@ -112,6 +109,39 @@ namespace InterruptingCards.Managers
             {
                 Log.Warn($"Cannot end The Stack from {_stateMachineManager.CurrentStateName}");
             }
+        }
+
+        // Helper Methods
+
+        private void Push(Player player)
+        {
+            LastPushBy = player;
+            _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
+        }
+
+        private void Resolve(TheStackElement element)
+        {
+            switch (element.Type)
+            {
+                case TheStackElementType.Loot:
+                    if (element.Value == CardConfig.InvalidId)
+                    {
+                        Log.Warn($"The Stack resolved an invalid loot");
+                    }
+
+                    _discardManager.PlaceTop(element.Value);
+                    break;
+                case TheStackElementType.Ability:
+                    // TODO
+                    break;
+                case TheStackElementType.DiceRoll:
+                    // TODO
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            OnResolve?.Invoke(element);
         }
     }
 }

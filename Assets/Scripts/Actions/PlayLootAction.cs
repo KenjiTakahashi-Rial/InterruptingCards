@@ -5,9 +5,12 @@ namespace InterruptingCards.Actions
 {
     public class PlayLootAction : AbstractCardAction
     {
+        private readonly CardConfig _cardConfig = CardConfig.Singleton;
+
         protected override bool CanExecute(ulong playerId, int cardId)
         {
-            // TODO: Integrate stack and priority loot plays
+            // TODO: Integrate The Stack and priority loot plays (outside of active player's loot plays)
+            // TODO: Check the number of loot plays the player has
 
             if (playerId != _playerManager.ActivePlayer.Id)
             {
@@ -22,13 +25,19 @@ namespace InterruptingCards.Actions
                 return false;
             }
 
+            var hand = _playerManager.ActivePlayer.Hand;
+            if (!hand.Contains(cardId))
+            {
+                Log.Warn($"Cannot play loot {_cardConfig.GetName(cardId)} if hand does not contain it");
+                return false;
+            }
+
             return true;
         }
         protected override void Execute(int cardId)
         {
-            // TODO
             _gameStateMachineManager.SetTrigger(StateMachine.PlayLoot);
-            GameManager.Singleton.PlayLoot();
+            GameManager.Singleton.PlayLoot(cardId);
         }
     }
 }

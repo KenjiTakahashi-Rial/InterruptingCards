@@ -28,19 +28,19 @@ namespace InterruptingCards.Managers
         {
             for (var i = 0; i < _cardSlots.Length; i++)
             {
-                var j = i;
-                _cardSlots[i].OnClicked += () => OnCardClicked?.Invoke(j);
+                var card = _cardSlots[i];
+                card.OnClicked += () => OnCardClicked?.Invoke(card.CardId);
             }
         }
 
         public override void OnDestroy()
         {
-            base.OnDestroy();
-
             foreach (var slot in _cardSlots)
             {
                 slot.OnClicked = null;
             }
+
+            base.OnDestroy();
         }
         public void SetHidden(bool val)
         {
@@ -62,12 +62,11 @@ namespace InterruptingCards.Managers
             _cardSlots[Count].CardId = cardId;
         }
 
-        public int RemoveAt(int index)
+        public int Remove(int cardId)
         {
-            var cardId = _cardSlots[index].CardId;
+            Log.Info($"Removing {_cardConfig.GetName(cardId)} from hand");
 
-            Log.Info($"Removing {_cardConfig.GetName(cardId)} from hand index {index}");
-
+            var index = Array.FindIndex(_cardSlots, s => s.CardId == cardId);
             for (int i = index; i < _cardSlots.Length; i++)
             {
                 var nextId = i == _cardSlots.Length - 1 ? CardConfig.InvalidId : _cardSlots[i + 1].CardId;
@@ -88,13 +87,21 @@ namespace InterruptingCards.Managers
 
             foreach (var slot in _cardSlots)
             {
-                if (slot.CardId == CardConfig.InvalidId)
-                {
-                    break;
-                }
-                
                 slot.CardId = CardConfig.InvalidId;
             }
+        }
+
+        public bool Contains(int cardId)
+        {
+            foreach (var slot in _cardSlots)
+            {
+                if (slot.CardId == cardId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
