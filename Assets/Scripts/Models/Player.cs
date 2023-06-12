@@ -16,6 +16,6 @@ namespace InterruptingCards.Models
 
         public string Name { get; }
 
-        public HandManager Hand { get; set; }
+        public HandBehaviour Hand { get; set; }
     }
 }

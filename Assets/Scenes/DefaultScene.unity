@@ -2711,9 +2711,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cardPack: 1
-  _deckManager: {fileID: 2058083998825954505}
-  _discardManager: {fileID: 2058083998825954504}
-  _handManagers:
+  _lootDeck: {fileID: 2058083998825954505}
+  _lootDiscard: {fileID: 2058083998825954504}
+  _hands:
   - {fileID: 2058083998825954512}
   - {fileID: 2058083998825954511}
   _playerManager: {fileID: 1412915941}
@@ -3716,7 +3716,7 @@ PrefabInstance:
       objectReference: {fileID: 1729584386}
     - target: {fileID: 8505450586298749912, guid: 1366516c0c2bba34e9c5ee015ad030be, type: 3}
       propertyPath: m_Name
-      value: Discard
+      value: LootDiscard
       objectReference: {fileID: 0}
     - target: {fileID: 8505450586298749913, guid: 1366516c0c2bba34e9c5ee015ad030be, type: 3}
       propertyPath: m_Pivot.x
@@ -4139,7 +4139,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d05b74230176be4aa58375b5a3776f4, type: 3}
+  m_Script: {fileID: 11500000, guid: 63b7390d3e3a50d4d868f5aac7b7135c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &2058083998825954505 stripped
@@ -4150,7 +4150,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d05b74230176be4aa58375b5a3776f4, type: 3}
+  m_Script: {fileID: 11500000, guid: 63b7390d3e3a50d4d868f5aac7b7135c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!224 &2058083998825954507 stripped
@@ -4471,7 +4471,7 @@ PrefabInstance:
       objectReference: {fileID: 8505450587303944005}
     - target: {fileID: 8505450586298749912, guid: 1366516c0c2bba34e9c5ee015ad030be, type: 3}
       propertyPath: m_Name
-      value: Deck
+      value: LootDeck
       objectReference: {fileID: 0}
     - target: {fileID: 8505450586298749913, guid: 1366516c0c2bba34e9c5ee015ad030be, type: 3}
       propertyPath: m_Pivot.x

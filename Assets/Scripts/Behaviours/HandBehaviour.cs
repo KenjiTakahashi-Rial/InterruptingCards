@@ -9,7 +9,7 @@ using InterruptingCards.Config;
 
 namespace InterruptingCards.Managers
 {
-    public class HandManager : NetworkBehaviour
+    public class HandBehaviour : NetworkBehaviour
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 

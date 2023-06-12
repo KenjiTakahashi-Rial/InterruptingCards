@@ -77,7 +77,7 @@ namespace InterruptingCards.Managers
             return _players[++i == _players.Count ? 0 : i].Id;
         }
 
-        public void AssignHands(HandManager[] hands)
+        public void AssignHands(HandBehaviour[] hands)
         {
             if (_players.Count > hands.Length)
             {

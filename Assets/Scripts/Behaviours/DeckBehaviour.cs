@@ -10,7 +10,7 @@ using InterruptingCards.Config;
 
 namespace InterruptingCards.Managers
 {
-    public class DeckManager : NetworkBehaviour
+    public class DeckBehaviour : NetworkBehaviour
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
         private List<int> _cardIds = new();

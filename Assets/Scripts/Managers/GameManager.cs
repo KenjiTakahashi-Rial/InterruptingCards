@@ -15,10 +15,12 @@ namespace InterruptingCards.Managers
         [Header("Config")]
         [SerializeField] private CardPack _cardPack;
 
+        [Header("Behaviours")]
+        [SerializeField] private DeckBehaviour _lootDeck;
+        [SerializeField] private DeckBehaviour _lootDiscard;
+        [SerializeField] private HandBehaviour[] _hands;
+
         [Header("Managers")]
-        [SerializeField] private DeckManager _deckManager;
-        [SerializeField] private DeckManager _discardManager;
-        [SerializeField] private HandManager[] _handManagers;
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _theStackStateMachineManager;
@@ -82,10 +84,10 @@ namespace InterruptingCards.Managers
             base.OnNetworkSpawn();
             Log.Info("Network spawned");
 
-            for (var i = 0; i < _handManagers.Length; i++)
+            for (var i = 0; i < _hands.Length; i++)
             {
                 var j = i;
-                _handManagers[i].OnCardClicked += (int cardId) => TryPlayLoot(cardId);
+                _hands[i].OnCardClicked += (int cardId) => TryPlayLoot(cardId);
             }
         }
 
@@ -119,15 +121,15 @@ namespace InterruptingCards.Managers
             Log.Info("Initializing Game");
             _playerManager.Initialize();
 
-            _playerManager.AssignHands(_handManagers);
+            _playerManager.AssignHands(_hands);
 
             if (IsServer)
             {
-                _deckManager.Initialize();
-                _deckManager.Shuffle();
-                _deckManager.IsFaceUp = false;
-                _discardManager.Clear();
-                foreach (var hand in _handManagers)
+                _lootDeck.Initialize();
+                _lootDeck.Shuffle();
+                _lootDeck.IsFaceUp = false;
+                _lootDiscard.Clear();
+                foreach (var hand in _hands)
                 {
                     hand.Clear();
                 }
@@ -165,7 +167,7 @@ namespace InterruptingCards.Managers
         {
             if (IsServer)
             {
-                var card = _deckManager.DrawTop();
+                var card = _lootDeck.DrawTop();
                 _playerManager.ActivePlayer.Hand.Add(card);
                 _stateMachineManager.SetTrigger(StateMachine.LootComplete);
             }
@@ -389,10 +391,10 @@ namespace InterruptingCards.Managers
         private void SetCardsHidden(bool val)
         {
             Log.Info($"Setting cards hidden: {val}");
-            _deckManager.SetHidden(val);
-            _discardManager.SetHidden(val);
+            _lootDeck.SetHidden(val);
+            _lootDiscard.SetHidden(val);
 
-            foreach (var hand in _handManagers)
+            foreach (var hand in _hands)
             {
                 hand.SetHidden(val);
             }
@@ -409,9 +411,9 @@ namespace InterruptingCards.Managers
             Log.Info("Dealing hands");
             for (var i = 0; i < StartingHandCardCount; i++)
             {
-                foreach (var hand in _handManagers)
+                foreach (var hand in _hands)
                 {
-                    hand.Add(_deckManager.DrawTop());
+                    hand.Add(_lootDeck.DrawTop());
                 }
             }
         }

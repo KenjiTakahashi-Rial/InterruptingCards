@@ -14,7 +14,7 @@ namespace InterruptingCards.Managers
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
-        [SerializeField] private DeckManager _discardManager;
+        [SerializeField] private DeckBehaviour _discardManager;
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _gameStateMachineManager;
