@@ -4,7 +4,7 @@ using InterruptingCards.Managers;
 
 namespace InterruptingCards.Behaviours
 {
-    public class PriorityPassingStateBehaviour : StateMachineBehaviour
+    public class GamePriorityPassingStateBehaviour : StateMachineBehaviour
     {
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {

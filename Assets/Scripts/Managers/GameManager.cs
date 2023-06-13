@@ -198,6 +198,11 @@ namespace InterruptingCards.Managers
             }
         }
 
+        public void TryAutoPassPriority()
+        {
+            _priorityManager.TryAutoPass();
+        }
+
         public void AddLootPlay()
         {
             _playerManager.ActivePlayer.LootPlays++;
