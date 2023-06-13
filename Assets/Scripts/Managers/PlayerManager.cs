@@ -42,6 +42,9 @@ namespace InterruptingCards.Managers
 
         public ulong SelfId { get; private set; }
 
+        // TODO: This is temporary
+        public List<Player> TempPlayers => _players;
+
         private LogManager Log => LogManager.Singleton;
 
         public Player this[ulong id] => _players.Single(p => p.Id == id);
@@ -67,9 +70,14 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public void Initialize()
+        public void Initialize(uint startingMoney)
         {
             _activePlayerIndex.Value = 0;
+
+            foreach (var player in _players)
+            {
+                player.Money = startingMoney;
+            }
         }
 
         public ulong GetNextId(ulong id)

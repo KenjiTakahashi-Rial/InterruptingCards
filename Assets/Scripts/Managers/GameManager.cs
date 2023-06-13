@@ -1,3 +1,5 @@
+using System.Linq;
+
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
@@ -12,6 +14,9 @@ namespace InterruptingCards.Managers
 {
     public class GameManager : NetworkBehaviour
     {
+        private const uint StartingLoot = 3;
+        private const uint StartingMoney = 3;
+
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
         [Header("Config")]
@@ -24,6 +29,7 @@ namespace InterruptingCards.Managers
 
         [Header("Managers")]
         [SerializeField] private PlayerManager _playerManager;
+        [SerializeField] private PriorityManager _priorityManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _theStackStateMachineManager;
         [SerializeField] private TheStackManager _theStackManager;
@@ -39,13 +45,12 @@ namespace InterruptingCards.Managers
         [SerializeField] private PassPriorityAction _passPriority;
 
         [Header("Temp")]
-        [SerializeField] private TextMeshPro _tempInfoText;
+        [SerializeField] private TextMeshPro _tempStateText;
+        [SerializeField] private TextMeshPro _tempPlayerText;
 
         public static GameManager Singleton { get; private set; }
 
         private LogManager Log => LogManager.Singleton;
-
-        private int StartingHandCardCount => 4;
 
         // Unity Methods
 
@@ -69,16 +74,26 @@ namespace InterruptingCards.Managers
         {
             // TODO: This is temporary
 
-            if (_playerManager.ActivePlayer == null || _tempInfoText == null)
+            if (_tempStateText != null)
             {
-                return;
+                _tempStateText.SetText(
+                    $"{_stateMachineManager.CurrentStateName}\n{_theStackStateMachineManager.CurrentStateName}"
+                );
             }
 
-            _tempInfoText.SetText(
-                $"{_playerManager.ActivePlayer.Id}\n" +
-                $"{_stateMachineManager.CurrentStateName}\n" +
-                $"{_theStackStateMachineManager.CurrentStateName}"
-            );
+            if (_tempPlayerText != null)
+            {
+                var playerInfo = _playerManager.TempPlayers.Select(
+                    p =>
+                    {
+                        var activeString = p == _playerManager.ActivePlayer ? " A" : " _";
+                        var priorityString = p == _priorityManager.PriorityPlayer ? " P" : " _";
+                        return $"{p.Name}{activeString}{priorityString}: {p.Money}¢";
+                    }
+                );
+
+                _tempPlayerText.SetText(string.Join("\n", playerInfo));
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -121,7 +136,7 @@ namespace InterruptingCards.Managers
         public void Initialize()
         {
             Log.Info("Initializing Game");
-            _playerManager.Initialize();
+            _playerManager.Initialize(StartingMoney);
 
             _playerManager.AssignHands(_hands);
 
@@ -307,7 +322,6 @@ namespace InterruptingCards.Managers
         public void EndGame()
         {
             Log.Info("Ending game");
-            _tempInfoText.SetText("Start the game");
             _playerManager.Clear();
             SetCardsHidden(true);
         }
@@ -411,7 +425,7 @@ namespace InterruptingCards.Managers
             }
 
             Log.Info("Dealing hands");
-            for (var i = 0; i < StartingHandCardCount; i++)
+            for (var i = 0; i < StartingLoot; i++)
             {
                 foreach (var hand in _hands)
                 {
