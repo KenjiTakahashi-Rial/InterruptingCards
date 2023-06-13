@@ -22,18 +22,17 @@ namespace InterruptingCards.Managers
         [Header("Config")]
         [SerializeField] private CardPack _cardPack;
 
-        // TODO: Consider making accessors for behaviours and managers instead of all managers using serializefield
-        [Header("Behaviours")]
-        [SerializeField] private DeckBehaviour _lootDeck;
-        [SerializeField] private DeckBehaviour _lootDiscard;
-        [SerializeField] private HandBehaviour[] _hands;
-
         [Header("Managers")]
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private PriorityManager _priorityManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _theStackStateMachineManager;
         [SerializeField] private TheStackManager _theStackManager;
+
+        [Header("Behaviours")]
+        [SerializeField] private DeckBehaviour _lootDeck;
+        [SerializeField] private DeckBehaviour _lootDiscard;
+        [SerializeField] private HandBehaviour[] _hands;
 
         [Header("Actions")]
         [SerializeField] private DeclareAttackAction _declareAttack;
@@ -50,6 +49,16 @@ namespace InterruptingCards.Managers
         [SerializeField] private TextMeshPro _tempPlayerText;
 
         public static GameManager Singleton { get; private set; }
+
+
+        public PlayerManager PlayerManager => _playerManager;
+        public PriorityManager PriorityManager => _priorityManager;
+        public StateMachineManager StateMachineManager => _stateMachineManager;
+        public StateMachineManager TheStackStateMachineManager => _theStackStateMachineManager;
+        public TheStackManager TheStackManager => _theStackManager;
+
+        public DeckBehaviour LootDeck => _lootDeck;
+        public DeckBehaviour LootDiscard => _lootDiscard;
 
         private LogManager Log => LogManager.Singleton;
 

@@ -19,11 +19,13 @@ namespace InterruptingCards.Managers
         private readonly NetworkVariable<int> _activePlayerIndex = new();
         private readonly Dictionary<int, NetworkVariable<int>.OnValueChangedDelegate> _onActivePlayerChangedHandlers = new();
 
-        [SerializeField] private StateMachineManager _gameStateMachineManager;
         [SerializeField] private int _minPlayers;
         [SerializeField] private int _maxPlayers;
 
         public Player ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex.Value];
+
+        private GameManager Game => GameManager.Singleton;
+        private StateMachineManager GameStateMachineManager => Game.StateMachineManager;
 
         public event Action<Player> OnActivePlayerChanged
         {
@@ -147,7 +149,7 @@ namespace InterruptingCards.Managers
         {
             Log.Info($"Adding player {clientId}");
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.WaitingForClients)
+            if (GameStateMachineManager.CurrentState != StateMachine.WaitingForClients)
             {
                 Log.Warn($"Cannnot add player {clientId} when game already started");
                 return;
@@ -164,7 +166,7 @@ namespace InterruptingCards.Managers
             if (_lobby.Count == _maxPlayers)
             {
                 _notReadyPlayers.UnionWith(_lobby);
-                _gameStateMachineManager.SetTrigger(StateMachine.WaitForReady);
+                GameStateMachineManager.SetTrigger(StateMachine.WaitForReady);
                 SetPlayersClientRpc(_lobby.ToArray());
             }
         }
@@ -174,18 +176,18 @@ namespace InterruptingCards.Managers
         {
             Log.Info($"Removing player {clientId}");
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.WaitingForClients)
+            if (GameStateMachineManager.CurrentState != StateMachine.WaitingForClients)
             {
                 if (clientId == ActivePlayer.Id)
                 {
-                    _gameStateMachineManager.SetTrigger(StateMachine.ForceEndTurn);
+                    GameStateMachineManager.SetTrigger(StateMachine.ForceEndTurn);
                 }
 
                 Log.Warn($"Player {clientId} removed while game is playing");
             }
 
             // TODO: Continue game if enough players left
-            _gameStateMachineManager.SetTrigger(StateMachine.ForceEndGame);
+            GameStateMachineManager.SetTrigger(StateMachine.ForceEndGame);
             _lobby.Remove(clientId);
         }
 
@@ -207,7 +209,7 @@ namespace InterruptingCards.Managers
             
             if (_notReadyPlayers.Count == 0)
             {
-                _gameStateMachineManager.SetTrigger(StateMachine.AllReady);
+                GameStateMachineManager.SetTrigger(StateMachine.AllReady);
             }
         }
     }

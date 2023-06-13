@@ -7,14 +7,14 @@ namespace InterruptingCards.Actions
 {
     public abstract class AbstractCardAction : NetworkBehaviour
     {
-        [SerializeField] protected PlayerManager _playerManager;
-        [SerializeField] protected StateMachineManager _gameStateMachineManager;
-
+        protected GameManager Game => GameManager.Singleton;
         protected LogManager Log => LogManager.Singleton;
+        protected PlayerManager PlayerManager => Game.PlayerManager;
+        protected StateMachineManager GameStateMachineManager => Game.StateMachineManager;
 
         public void TryExecute(int cardId)
         {
-            if (CanExecute(_playerManager.SelfId, cardId))
+            if (CanExecute(PlayerManager.SelfId, cardId))
             {
                 ExecuteServerRpc(cardId);
             }

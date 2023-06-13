@@ -9,18 +9,18 @@ namespace InterruptingCards.Actions
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
-        [SerializeField] private PriorityManager _priorityManager;
-        [SerializeField] private StateMachineManager _theStackStateMachineManager;
+        private PriorityManager PriorityManager => Game.PriorityManager;
+        private StateMachineManager TheStackStateMachineManager => Game.TheStackStateMachineManager;
 
         protected override bool CanExecute(ulong playerId, int cardId)
         {
-            var priorityPlayer = _priorityManager.PriorityPlayer;
+            var priorityPlayer = PriorityManager.PriorityPlayer;
 
             if (playerId != priorityPlayer.Id)
             {
                 Log.Warn(
                     $"Cannot play loot if not priority player (priority player: " +
-                    $"{_priorityManager.PriorityPlayer.Name})");
+                    $"{PriorityManager.PriorityPlayer.Name})");
                 return false;
             }
 
@@ -31,15 +31,15 @@ namespace InterruptingCards.Actions
                 return false;
             }
 
-            var gameState = _gameStateMachineManager.CurrentState;
-            var theStackState = _theStackStateMachineManager.CurrentState;
+            var gameState = GameStateMachineManager.CurrentState;
+            var theStackState = TheStackStateMachineManager.CurrentState;
             if (gameState != StateMachine.ActionPhaseIdling && theStackState != StateMachine.TheStackPriorityPassing)
             {
                 Log.Warn($"Cannot play loot from {gameState} or {theStackState}");
                 return false;
             }
 
-            var hand = _playerManager.ActivePlayer.Hand;
+            var hand = PlayerManager.ActivePlayer.Hand;
             if (!hand.Contains(cardId))
             {
                 Log.Warn($"Cannot play loot {_cardConfig.GetName(cardId)} if hand does not contain it");
@@ -50,7 +50,7 @@ namespace InterruptingCards.Actions
         }
         protected override void Execute(int cardId)
         {
-            _gameStateMachineManager.SetTrigger(StateMachine.PlayLoot);
+            GameStateMachineManager.SetTrigger(StateMachine.PlayLoot);
             GameManager.Singleton.PlayLoot(cardId);
         }
     }

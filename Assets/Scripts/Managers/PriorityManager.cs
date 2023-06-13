@@ -1,5 +1,4 @@
 using Unity.Netcode;
-using UnityEngine;
 
 using InterruptingCards.Config;
 using InterruptingCards.Managers.TheStack;
@@ -14,29 +13,28 @@ namespace InterruptingCards.Managers
 
         private readonly NetworkVariable<ulong> _priorityPlayerId = new();
 
-        [SerializeField] private PlayerManager _playerManager;
-        [SerializeField] private StateMachineManager _gameStateMachineManager;
-        [SerializeField] private StateMachineManager _theStackStateMachineManager;
-        [SerializeField] private TheStackManager _theStackManager;
+        private GameManager Game => GameManager.Singleton;
+        private PlayerManager PlayerManager => Game.PlayerManager;
+        private StateMachineManager TheStackStateMachineManager => Game.TheStackStateMachineManager;
+        private TheStackManager TheStackManager => Game.TheStackManager;
 
-        public Player PriorityPlayer => _playerManager[_priorityPlayerId.Value];
+        public Player PriorityPlayer => PlayerManager[_priorityPlayerId.Value];
 
         // TODO: Add other factors (ability to purchase, activate abilities, etc.)
         public bool PriorityPlayerHasActions => PriorityPlayer.LootPlays > 0;
 
         private LogManager Log => LogManager.Singleton;
 
-        public void Awake()
+        public void Start()
         {
-            _playerManager.OnActivePlayerChanged += SetPlayerPriority;
-            _theStackManager.OnResolve += SetPlayerPriority;
+            PlayerManager.OnActivePlayerChanged += SetPlayerPriority;
+            TheStackManager.OnResolve += SetPlayerPriority;
         }
 
-        public override void OnDestroy()
+        public void OnApplicationQuit()
         {
-            _playerManager.OnActivePlayerChanged -= SetPlayerPriority;
-            _theStackManager.OnResolve -= SetPlayerPriority;
-            base.OnDestroy();
+            PlayerManager.OnActivePlayerChanged -= SetPlayerPriority;
+            TheStackManager.OnResolve -= SetPlayerPriority;
         }
 
         public void PassPriority()
@@ -47,21 +45,21 @@ namespace InterruptingCards.Managers
                 return;
             }
 
-            var theStackState = _theStackStateMachineManager.CurrentState;
+            var theStackState = TheStackStateMachineManager.CurrentState;
             if (theStackState != StateMachine.TheStackPriorityPassing)
             {
                 Log.Warn($"Cannot pass priority from {theStackState}");
             }
 
             var prevPriorityPlayer = PriorityPlayer;
-            PriorityPlayer.LootPlays = 0;
-            _priorityPlayerId.Value = _playerManager.GetNextId(_priorityPlayerId.Value);
+            PriorityPlayer.LootPlays = PriorityPlayer == PlayerManager.ActivePlayer ? PriorityPlayer.LootPlays : 0;
+            _priorityPlayerId.Value = PlayerManager.GetNextId(_priorityPlayerId.Value);
             Log.Info($"Passed priority from {prevPriorityPlayer.Name} to {PriorityPlayer.Name}");
 
-            var lastPushBy = _theStackManager.LastPushBy;
-            if (PriorityPlayer == lastPushBy || lastPushBy == null && PriorityPlayer == _playerManager.ActivePlayer)
+            var lastPushBy = TheStackManager.LastPushBy;
+            if (PriorityPlayer == lastPushBy || lastPushBy == null && PriorityPlayer == PlayerManager.ActivePlayer)
             {
-                _theStackStateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
+                TheStackStateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
                 return;
             }
 

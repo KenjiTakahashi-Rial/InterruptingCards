@@ -12,29 +12,23 @@ namespace InterruptingCards.Managers.TheStack
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
-        [Header("Managers")]
-        [SerializeField] private PlayerManager _playerManager;
-        [SerializeField] private StateMachineManager _stateMachineManager;
-        [SerializeField] private StateMachineManager _gameStateMachineManager;
-
-        [Header("Resolution")]
         [SerializeField] private ResolveLoot _resolveLoot;
 
         private NetworkList<TheStackElement> _theStack;
 
         public event Action<TheStackElement> OnResolve;
 
-        public static TheStackManager Singleton { get; private set; }
-
         public Player LastPushBy { get; private set; }
 
+        private GameManager Game => GameManager.Singleton;
         private LogManager Log => LogManager.Singleton;
+        private StateMachineManager StateMachineManager => Game.TheStackStateMachineManager;
+        private StateMachineManager GameStateMachineManager => Game.StateMachineManager;
 
         // Unity Methods
 
         public void Awake()
         {
-            Singleton = this;
             _theStack = new();
         }
 
@@ -42,7 +36,6 @@ namespace InterruptingCards.Managers.TheStack
 
         public override void OnDestroy()
         {
-            Singleton = null;
             _theStack = null;
             base.OnDestroy();
         }
@@ -72,19 +65,19 @@ namespace InterruptingCards.Managers.TheStack
 
         public void Pop()
         {
-            if (_stateMachineManager.CurrentState == StateMachine.TheStackPopping)
+            if (StateMachineManager.CurrentState == StateMachine.TheStackPopping)
             {
                 Log.Info("Popping The Stack");
                 var last = _theStack.Count - 1;
                 var element = _theStack[last];
                 _theStack.RemoveAt(last);
                 Resolve(element);
-                _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
-                _stateMachineManager.SetTrigger(StateMachine.TheStackPopped);
+                StateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
+                StateMachineManager.SetTrigger(StateMachine.TheStackPopped);
             }
             else
             {
-                Log.Warn($"Cannot pop The Stack in state {_stateMachineManager.CurrentStateName}");
+                Log.Warn($"Cannot pop The Stack in state {StateMachineManager.CurrentStateName}");
             }
         }
 
@@ -92,7 +85,7 @@ namespace InterruptingCards.Managers.TheStack
 
         public void Begin()
         {
-            _stateMachineManager.SetTrigger(StateMachine.TheStackBegin);
+            StateMachineManager.SetTrigger(StateMachine.TheStackBegin);
         }
 
         public void End()
@@ -102,15 +95,15 @@ namespace InterruptingCards.Managers.TheStack
                 return;
             }
 
-            if (_stateMachineManager.CurrentState == StateMachine.TheStackEnding)
+            if (StateMachineManager.CurrentState == StateMachine.TheStackEnding)
             {
                 LastPushBy = null;
-                _gameStateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
-                _stateMachineManager.SetTrigger(StateMachine.TheStackEnded);
+                GameStateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
+                StateMachineManager.SetTrigger(StateMachine.TheStackEnded);
             }
             else
             {
-                Log.Warn($"Cannot end The Stack from {_stateMachineManager.CurrentStateName}");
+                Log.Warn($"Cannot end The Stack from {StateMachineManager.CurrentStateName}");
             }
         }
 
@@ -119,7 +112,7 @@ namespace InterruptingCards.Managers.TheStack
         private void Push(Player player)
         {
             LastPushBy = player;
-            _stateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
+            StateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
         }
 
         private void Resolve(TheStackElement element)

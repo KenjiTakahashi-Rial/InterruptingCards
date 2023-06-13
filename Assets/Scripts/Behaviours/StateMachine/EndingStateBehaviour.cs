@@ -1,6 +1,6 @@
 using UnityEngine;
 
-using InterruptingCards.Managers.TheStack;
+using InterruptingCards.Managers;
 
 namespace InterruptingCards.Behaviours
 {
@@ -8,7 +8,7 @@ namespace InterruptingCards.Behaviours
     {
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            TheStackManager.Singleton.End();
+            GameManager.Singleton.TheStackManager.End();
         }
     }
 }

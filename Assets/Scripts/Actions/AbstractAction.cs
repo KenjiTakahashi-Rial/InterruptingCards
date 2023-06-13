@@ -1,5 +1,4 @@
 using Unity.Netcode;
-using UnityEngine;
 
 using InterruptingCards.Managers;
 
@@ -7,14 +6,14 @@ namespace InterruptingCards.Actions
 {
     public abstract class AbstractAction : NetworkBehaviour
     {
-        [SerializeField] protected PlayerManager _playerManager;
-        [SerializeField] protected StateMachineManager _gameStateMachineManager;
-
+        protected GameManager Game => GameManager.Singleton;
         protected LogManager Log => LogManager.Singleton;
+        protected PlayerManager PlayerManager => Game.PlayerManager;
+        protected StateMachineManager GameStateMachineManager => Game.StateMachineManager;
 
         public void TryExecute()
         {
-            if (CanExecute(_playerManager.SelfId))
+            if (CanExecute(PlayerManager.SelfId))
             {
                 ExecuteServerRpc();
             }

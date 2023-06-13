@@ -6,17 +6,17 @@ namespace InterruptingCards.Actions
     {
         protected override bool CanExecute(ulong playerId)
         {
-            if (playerId != _playerManager.ActivePlayer.Id)
+            if (playerId != PlayerManager.ActivePlayer.Id)
             {
                 Log.Warn(
-                    $"Cannot declare attack if not active player (active player: {_playerManager.ActivePlayer.Id})"
+                    $"Cannot declare attack if not active player (active player: {PlayerManager.ActivePlayer.Id})"
                 );
                 return false;
             }
 
             // TODO: Check for number of attacks remaining this turn
 
-            var gameState = _gameStateMachineManager.CurrentState;
+            var gameState = GameStateMachineManager.CurrentState;
             if (gameState != StateMachine.ActionPhaseIdling)
             {
                 Log.Warn($"Cannot declare attack from {gameState}");
@@ -29,7 +29,7 @@ namespace InterruptingCards.Actions
         protected override void Execute()
         {
             // TODO
-            _gameStateMachineManager.SetTrigger(StateMachine.DeclareAttack);
+            GameStateMachineManager.SetTrigger(StateMachine.DeclareAttack);
         }
     }
 }

@@ -6,13 +6,13 @@ namespace InterruptingCards.Actions
     {
         protected override bool CanExecute(ulong playerId, int cardId)
         {
-            if (playerId != _playerManager.ActivePlayer.Id)
+            if (playerId != PlayerManager.ActivePlayer.Id)
             {
-                Log.Warn($"Cannot purchase if not active player (active player: {_playerManager.ActivePlayer.Name})");
+                Log.Warn($"Cannot purchase if not active player (active player: {PlayerManager.ActivePlayer.Name})");
                 return false;
             }
 
-            var gameState = _gameStateMachineManager.CurrentState;
+            var gameState = GameStateMachineManager.CurrentState;
             if (gameState != StateMachine.Purchasing)
             {
                 Log.Warn($"Cannot purchase from {gameState}");
@@ -25,7 +25,7 @@ namespace InterruptingCards.Actions
         protected override void Execute(int cardId)
         {
             // TODO
-            _gameStateMachineManager.SetTrigger(StateMachine.PurchaseComplete);
+            GameStateMachineManager.SetTrigger(StateMachine.PurchaseComplete);
         }
     }
 }

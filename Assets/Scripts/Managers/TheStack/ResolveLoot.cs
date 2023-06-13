@@ -12,12 +12,12 @@ namespace InterruptingCards.Managers.TheStack
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
-        [SerializeField] private PlayerManager _playerManager;
-        [SerializeField] private TheStackManager _theStackManager;
-
-        [SerializeField] private DeckBehaviour _lootDiscard;
-
+        private GameManager Game => GameManager.Singleton;
         private LogManager Log => LogManager.Singleton;
+        private PlayerManager PlayerManager => Game.PlayerManager;
+
+        private DeckBehaviour LootDiscard => Game.LootDiscard;
+
 
         public void Resolve(TheStackElement element)
         {
@@ -31,13 +31,13 @@ namespace InterruptingCards.Managers.TheStack
             switch (card.PlayedEffect)
             {
                 case CardPlayedEffect.GainCents:
-                    _playerManager[element.PushedById].Money += (uint)card.Value;
+                    PlayerManager[element.PushedById].Money += (uint)card.Value;
                     break;
                 default:
                     throw new NotImplementedException();
             }
 
-            _lootDiscard.PlaceTop(card.Id);
+            LootDiscard.PlaceTop(card.Id);
         }
     }
 }
