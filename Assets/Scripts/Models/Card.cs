@@ -8,6 +8,8 @@ namespace InterruptingCards.Models
             Suit = metadataCard.Suit;
             Rank = metadataCard.Rank;
             Name = metadataCard.Name;
+            Value = metadataCard.Value;
+            PlayedEffect = metadataCard.PlayedEffect;
             ActiveEffect = metadataCard.ActiveEffect;
         }
 
@@ -22,6 +24,9 @@ namespace InterruptingCards.Models
 
         public string Name { get; }
 
+        public int Value { get; }
+
+        public CardPlayedEffect PlayedEffect { get; }
 
         public CardActiveEffect ActiveEffect { get; }
 

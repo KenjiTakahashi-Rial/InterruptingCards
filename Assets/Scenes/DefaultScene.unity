@@ -2710,7 +2710,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abee9146534a3104fa53e8ee7d03b81c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cardPack: 1
+  _cardPack: 2
   _lootDeck: {fileID: 2058083998825954505}
   _lootDiscard: {fileID: 2058083998825954504}
   _hands:
