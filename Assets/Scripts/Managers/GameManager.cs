@@ -200,13 +200,19 @@ namespace InterruptingCards.Managers
 
         public void TryAutoPassPriority()
         {
-            _priorityManager.TryAutoPass();
+            if (IsServer)
+            {
+                _priorityManager.TryAutoPass();
+            }
         }
 
         public void AddLootPlay()
         {
-            _playerManager.ActivePlayer.LootPlays++;
-            _stateMachineManager.SetTrigger(StateMachine.AddLootPlayComplete);
+            if (IsServer)
+            {
+                _playerManager.ActivePlayer.LootPlays++;
+                _stateMachineManager.SetTrigger(StateMachine.AddLootPlayComplete);
+            }
         }
 
         public void TryDeclareAttack()
