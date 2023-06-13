@@ -2,6 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 using InterruptingCards.Config;
+using InterruptingCards.Managers.TheStack;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers

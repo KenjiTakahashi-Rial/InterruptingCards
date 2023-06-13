@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
+using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
 using InterruptingCards.Models;
 

@@ -2,7 +2,7 @@ using System;
 
 using Unity.Netcode;
 
-namespace InterruptingCards.Models
+namespace InterruptingCards.Managers.TheStack
 {
     public enum TheStackElementType
     {

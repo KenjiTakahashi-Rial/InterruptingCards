@@ -4,10 +4,10 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
-using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
+using InterruptingCards.Managers;
 
-namespace InterruptingCards.Managers
+namespace InterruptingCards.Behaviours
 {
     public class HandBehaviour : NetworkBehaviour
     {

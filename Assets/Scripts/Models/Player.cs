@@ -1,6 +1,4 @@
-using Unity.Netcode;
-
-using InterruptingCards.Managers;
+using InterruptingCards.Behaviours;
 
 namespace InterruptingCards.Models
 {

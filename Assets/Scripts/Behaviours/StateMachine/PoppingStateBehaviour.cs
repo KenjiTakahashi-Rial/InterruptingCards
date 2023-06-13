@@ -1,6 +1,6 @@
 using UnityEngine;
 
-using InterruptingCards.Managers;
+using InterruptingCards.Managers.TheStack;
 
 namespace InterruptingCards.Behaviours
 {

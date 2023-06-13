@@ -6,20 +6,23 @@ using UnityEngine;
 using InterruptingCards.Config;
 using InterruptingCards.Models;
 
-namespace InterruptingCards.Managers
+namespace InterruptingCards.Managers.TheStack
 {
     public class TheStackManager : NetworkBehaviour
     {
-        public event Action<TheStackElement> OnResolve;
-
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
-        [SerializeField] private DeckBehaviour _discardManager;
+        [Header("Managers")]
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _gameStateMachineManager;
 
+        [Header("Resolution")]
+        [SerializeField] private ResolveLoot _resolveLoot;
+
         private NetworkList<TheStackElement> _theStack;
+
+        public event Action<TheStackElement> OnResolve;
 
         public static TheStackManager Singleton { get; private set; }
 
@@ -124,12 +127,7 @@ namespace InterruptingCards.Managers
             switch (element.Type)
             {
                 case TheStackElementType.Loot:
-                    if (element.Value == CardConfig.InvalidId)
-                    {
-                        Log.Warn($"The Stack resolved an invalid loot");
-                    }
-
-                    _discardManager.PlaceTop(element.Value);
+                    _resolveLoot.Resolve(element);
                     break;
                 case TheStackElementType.Ability:
                     // TODO

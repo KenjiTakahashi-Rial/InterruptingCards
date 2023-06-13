@@ -2,9 +2,11 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
-using InterruptingCards.Config;
-using InterruptingCards.Models;
 using InterruptingCards.Actions;
+using InterruptingCards.Behaviours;
+using InterruptingCards.Config;
+using InterruptingCards.Managers.TheStack;
+using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
