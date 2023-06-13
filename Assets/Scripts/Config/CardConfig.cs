@@ -53,7 +53,7 @@ namespace InterruptingCards.Config
             for (var i = 0; i < cardPaths.Length; i++)
             {
                 var json = File.ReadAllText(cardPaths[i]);
-                var card = JsonUtility.FromJson<ParserCard>(json);
+                var card = JsonUtility.FromJson<MetadataCard>(json);
 
                 for (var j = 0; j < card.Count; j++)
                 {

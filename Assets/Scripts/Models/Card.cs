@@ -2,13 +2,12 @@ namespace InterruptingCards.Models
 {
     public class Card
     {
-        public Card(int id, ParserCard metadataCard)
+        public Card(int id, MetadataCard metadataCard)
         {
             Id = id;
             Suit = metadataCard.Suit;
             Rank = metadataCard.Rank;
             Name = metadataCard.Name;
-            Count = metadataCard.Count;
             ActiveEffect = metadataCard.ActiveEffect;
         }
 
@@ -23,7 +22,6 @@ namespace InterruptingCards.Models
 
         public string Name { get; }
 
-        public int Count { get; }
 
         public CardActiveEffect ActiveEffect { get; }
 
