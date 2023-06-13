@@ -16,6 +16,7 @@ namespace InterruptingCards.Models
 
         public HandBehaviour Hand { get; set; }
 
+        // TODO: Make money and loot plays into NetworkVariables and this class into NetworkBehaviour
         public uint Money { get; set; }
 
         public uint LootPlays { get; set; }

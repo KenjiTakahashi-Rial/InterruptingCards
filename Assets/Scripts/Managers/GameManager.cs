@@ -22,6 +22,7 @@ namespace InterruptingCards.Managers
         [Header("Config")]
         [SerializeField] private CardPack _cardPack;
 
+        // TODO: Consider making accessors for behaviours and managers instead of all managers using serializefield
         [Header("Behaviours")]
         [SerializeField] private DeckBehaviour _lootDeck;
         [SerializeField] private DeckBehaviour _lootDiscard;
