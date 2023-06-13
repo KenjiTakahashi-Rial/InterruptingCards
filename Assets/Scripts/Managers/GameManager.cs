@@ -102,10 +102,9 @@ namespace InterruptingCards.Managers
             base.OnNetworkSpawn();
             Log.Info("Network spawned");
 
-            for (var i = 0; i < _hands.Length; i++)
+            foreach (var hand in _hands)
             {
-                var j = i;
-                _hands[i].OnCardClicked += (int cardId) => TryPlayLoot(cardId);
+                hand.OnCardClicked += (int cardId) => TryPlayLoot(cardId);
             }
         }
 
@@ -113,10 +112,10 @@ namespace InterruptingCards.Managers
         {
             Log.Info("Network despawned");
 
-            //foreach (var handManager in _handManagers)
-            //{
-            //    handManager.OnCardClicked = null;
-            //}
+            foreach (var hand in _hands)
+            {
+                hand.OnCardClicked = null;
+            }
 
             if (_stateMachineManager.CurrentState != StateMachine.WaitingForClients)
             {
@@ -340,82 +339,6 @@ namespace InterruptingCards.Managers
             _playerManager.Clear();
             SetCardsHidden(true);
         }
-
-        //// ServerRpc Methods & Tries
-
-        //private bool CanDrawCard(ulong id)
-        //{
-        //    if (id != _playerManager.ActivePlayer.Id)
-        //    {
-        //        Log.Info($"Cannot draw a card unless it is their turn");
-        //        return false;
-        //    }
-
-        //    if (_stateMachineManager.CurrentState != StateMachine.Looting)
-        //    {
-        //        Log.Info($"Player {id} cannot draw a card in the wrong state");
-        //        return false;
-        //    }
-
-        //    return true;
-        //}
-
-        //private bool CanPlayCard(ulong id, int handManagerIndex, int cardIndex)
-        //{
-        //    if (id != _playerManager.ActivePlayer.Id)
-        //    {
-        //        Log.Info($"Player {id} cannot play a card unless it is their turn or they are interrupting");
-        //        return false;
-        //    }
-
-        //    var hand = _handManagers[handManagerIndex];
-
-        //    if (hand != _playerManager.ActivePlayer.Hand)
-        //    {
-        //        Log.Info($"Player {id} can only play cards from their own hand");
-        //        return false;
-        //    }
-
-        //    if (cardIndex < 0 || hand.Count <= cardIndex)
-        //    {
-        //        Log.Info($"Player {id} cannot play a card from an invalid index of their hand");
-        //        return false;
-        //    }
-
-        //    if (_stateMachineManager.CurrentState != StateMachine.PlayingLoot)
-        //    {
-        //        Log.Info($"Player {id} cannot play a card in the wrong state");
-        //        return false;
-        //    }
-
-        //    return true;
-        //}
-
-        //private void TryPlayCard(int handManagerIndex, int cardIndex)
-        //{
-        //    var cardId = _handManagers[handManagerIndex][cardIndex];
-        //    Log.Info($"Trying to play card {_cardConfig.GetName(cardId)}");
-
-        //    if (CanPlayCard(_playerManager.SelfId, handManagerIndex, cardIndex))
-        //    {
-        //        PlayCardServerRpc(handManagerIndex, cardIndex);
-        //    }
-        //}
-
-        //[ServerRpc(RequireOwnership = false)]
-        //private void PlayCardServerRpc(int handManagerIndex, int cardIndex, ServerRpcParams serverRpcParams = default)
-        //{
-        //    var senderId = serverRpcParams.Receive.SenderClientId;
-        //    if (!CanPlayCard(senderId, handManagerIndex, cardIndex))
-        //    {
-        //        return;
-        //    }
-
-        //    Log.Info("Playing card");
-        //    var cardId = _handManagers[handManagerIndex].RemoveAt(cardIndex);
-        //    _discardManager.PlaceTop(cardId);
-        //    _theStackManager.Begin();
-        //}
 
         // Helper Methods
 
