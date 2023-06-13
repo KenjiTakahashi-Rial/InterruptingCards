@@ -41,7 +41,14 @@ namespace InterruptingCards.Managers
                 return;
             }
 
+            var theStackState = _theStackStateMachineManager.CurrentState;
+            if (theStackState != StateMachine.TheStackPriorityPassing)
+            {
+                Log.Warn($"Cannot pass priority from {theStackState}");
+            }
+
             var prevPriorityPlayer = PriorityPlayer;
+            PriorityPlayer.LootPlays = 0;
             _priorityPlayerId.Value = _playerManager.GetNextId(_priorityPlayerId.Value);
             var nextPriorityPlayer = PriorityPlayer;
             Log.Info($"Passing priority from {prevPriorityPlayer.Name} to {nextPriorityPlayer.Name}");
@@ -49,16 +56,7 @@ namespace InterruptingCards.Managers
             var lastPushBy = _theStackManager.LastPushBy;
             if (PriorityPlayer == lastPushBy || lastPushBy == null && PriorityPlayer == _playerManager.ActivePlayer)
             {
-                var theStackState = _theStackStateMachineManager.CurrentState;
-
-                if (theStackState == StateMachine.TheStackPriorityPassing)
-                {
-                    _theStackStateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
-                }
-                else
-                {
-                    Log.Warn($"Cannot pass priority from {theStackState}");
-                }
+                _theStackStateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
             }
         }
 

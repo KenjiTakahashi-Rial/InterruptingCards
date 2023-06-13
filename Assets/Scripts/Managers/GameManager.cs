@@ -198,6 +198,12 @@ namespace InterruptingCards.Managers
             }
         }
 
+        public void AddLootPlay()
+        {
+            _playerManager.ActivePlayer.LootPlays++;
+            _stateMachineManager.SetTrigger(StateMachine.AddLootPlayComplete);
+        }
+
         public void TryDeclareAttack()
         {
             _declareAttack.TryExecute();
@@ -249,7 +255,9 @@ namespace InterruptingCards.Managers
 
         public void PlayLoot(int cardId)
         {
-            _playerManager.ActivePlayer.Hand.Remove(cardId);
+            var player = _priorityManager.PriorityPlayer;
+            player.LootPlays--;
+            player.Hand.Remove(cardId);
             _theStackManager.PushLoot(_playerManager.ActivePlayer, cardId);
         }
 
@@ -314,6 +322,7 @@ namespace InterruptingCards.Managers
             // TODO
             if (IsServer)
             {
+                _playerManager.ActivePlayer.LootPlays = 0;
                 _playerManager.ShiftTurn();
                 _stateMachineManager.SetTrigger(StateMachine.EndTurn);
             }

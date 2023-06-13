@@ -1,3 +1,5 @@
+using UnityEngine;
+
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
 
@@ -7,21 +9,33 @@ namespace InterruptingCards.Actions
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
+        [SerializeField] private PriorityManager _priorityManager;
+        [SerializeField] private StateMachineManager _theStackStateMachineManager;
+
         protected override bool CanExecute(ulong playerId, int cardId)
         {
-            // TODO: Integrate The Stack and priority loot plays (outside of active player's loot plays)
-            // TODO: Check the number of loot plays the player has
+            var priorityPlayer = _priorityManager.PriorityPlayer;
 
-            if (playerId != _playerManager.ActivePlayer.Id)
+            if (playerId != priorityPlayer.Id)
             {
-                Log.Warn($"Cannot play loot if not active player (active player: {_playerManager.ActivePlayer.Name})");
+                Log.Warn(
+                    $"Cannot play loot if not priority player (priority player: " +
+                    $"{_priorityManager.PriorityPlayer.Name})");
+                return false;
+            }
+
+            var lootPlays = priorityPlayer.LootPlays;
+            if (lootPlays < 1)
+            {
+                Log.Warn($"Cannot play loot with {lootPlays} loot plays");
                 return false;
             }
 
             var gameState = _gameStateMachineManager.CurrentState;
-            if (gameState != StateMachine.ActionPhaseIdling)
+            var theStackState = _theStackStateMachineManager.CurrentState;
+            if (gameState != StateMachine.ActionPhaseIdling && theStackState != StateMachine.TheStackPriorityPassing)
             {
-                Log.Warn($"Cannot play loot from {gameState}");
+                Log.Warn($"Cannot play loot from {gameState} or {theStackState}");
                 return false;
             }
 

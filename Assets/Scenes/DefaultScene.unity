@@ -4217,6 +4217,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerManager: {fileID: 1412915941}
   _gameStateMachineManager: {fileID: 1138538691}
+  _priorityManager: {fileID: 754022905}
+  _theStackStateMachineManager: {fileID: 1458435635}
 --- !u!114 &2012009769
 MonoBehaviour:
   m_ObjectHideFlags: 0
