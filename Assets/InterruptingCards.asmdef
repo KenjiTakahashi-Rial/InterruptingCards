@@ -2,11 +2,9 @@
     "name": "InterruptingCards",
     "rootNamespace": "",
     "references": [
+        "GUID:e0cd26848372d4e5c891c569017e11f1",
         "GUID:1491147abca9d7d4bb7105af628b223e",
-        "GUID:6055be8ebefd69e48b49212b09b47b2f",
-        "GUID:101012598ee9f064da897a34e72947f9",
-        "GUID:f4b32a61037094d40b0bee1993e741d9",
-        "GUID:23399e55e81474d1e8f2ec5a448e8b2a"
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

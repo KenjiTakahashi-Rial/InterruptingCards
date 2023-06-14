@@ -13,7 +13,7 @@ namespace InterruptingCards.Actions
 
         public void TryExecute()
         {
-            if (CanExecute(PlayerManager.SelfId))
+            if (CanExecute(NetworkManager.LocalClientId))
             {
                 ExecuteServerRpc();
             }

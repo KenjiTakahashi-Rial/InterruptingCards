@@ -1,8 +1,8 @@
 using Unity.Netcode;
 
+using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
 using InterruptingCards.Managers.TheStack;
-using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
@@ -18,7 +18,7 @@ namespace InterruptingCards.Managers
         private StateMachineManager TheStackStateMachineManager => Game.TheStackStateMachineManager;
         private TheStackManager TheStackManager => Game.TheStackManager;
 
-        public Player PriorityPlayer => PlayerManager[_priorityPlayerId.Value];
+        public PlayerBehaviour PriorityPlayer => PlayerManager[_priorityPlayerId.Value];
 
         // TODO: Add other factors (ability to purchase, activate abilities, etc.)
         public bool PriorityPlayerHasActions => PriorityPlayer.LootPlays > 0;
@@ -75,7 +75,7 @@ namespace InterruptingCards.Managers
             }
         }
 
-        private void SetPlayerPriority(Player player)
+        private void SetPlayerPriority(PlayerBehaviour player)
         {
             _priorityPlayerId.Value = player.Id;
         }

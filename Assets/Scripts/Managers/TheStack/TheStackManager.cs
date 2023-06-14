@@ -3,6 +3,7 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
+using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
 using InterruptingCards.Models;
 
@@ -18,7 +19,7 @@ namespace InterruptingCards.Managers.TheStack
 
         public event Action<TheStackElement> OnResolve;
 
-        public Player LastPushBy { get; private set; }
+        public PlayerBehaviour LastPushBy { get; private set; }
 
         private GameManager Game => GameManager.Singleton;
         private LogManager Log => LogManager.Singleton;
@@ -42,21 +43,21 @@ namespace InterruptingCards.Managers.TheStack
 
         // The Stack Operations
 
-        public void PushLoot(Player player, int cardId)
+        public void PushLoot(PlayerBehaviour player, int cardId)
         {
             Log.Info($"Player {player.Name} pushing {_cardConfig.GetName(cardId)} to The Stack");
             _theStack.Add(new TheStackElement(TheStackElementType.Loot, player.Id, cardId));
             Push(player);
         }
 
-        public void PushAbility(Player player, CardAbility ability)
+        public void PushAbility(PlayerBehaviour player, CardAbility ability)
         {
             Log.Info($"Player {player.Name} pushing {ability} to The Stack");
             _theStack.Add(new TheStackElement(TheStackElementType.Ability, player.Id, (int)ability));
             Push(player);
         }
 
-        public void PushDiceRoll(Player player, int diceRoll)
+        public void PushDiceRoll(PlayerBehaviour player, int diceRoll)
         {
             Log.Info($"Player {player.Name} pushing dice roll {diceRoll} to The Stack");
             _theStack.Add(new TheStackElement(TheStackElementType.DiceRoll, player.Id, diceRoll));
@@ -109,7 +110,7 @@ namespace InterruptingCards.Managers.TheStack
 
         // Helper Methods
 
-        private void Push(Player player)
+        private void Push(PlayerBehaviour player)
         {
             LastPushBy = player;
             StateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);

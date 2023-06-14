@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 
 namespace InterruptingCards.Utilities
 {
@@ -11,6 +11,15 @@ namespace InterruptingCards.Utilities
             {
                 yield return enumerator.Current;
             }
+        }
+
+        public static string Truncate(string s, uint byteLimit)
+        {
+            while (Encoding.UTF8.GetByteCount(s) > byteLimit)
+            {
+                s = s[..^1];
+            }
+            return s;
         }
     }
 }

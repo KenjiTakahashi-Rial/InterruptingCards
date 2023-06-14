@@ -240,7 +240,7 @@ namespace InterruptingCards.Managers
         public void Attack()
         {
             // TODO: Prompt the active player to select a monster
-            if (_playerManager.SelfId == _playerManager.ActivePlayer.Id)
+            if (NetworkManager.LocalClientId == _playerManager.ActivePlayer.Id)
             {
                 _attack.TryExecute(CardConfig.InvalidId);
             }
@@ -262,7 +262,7 @@ namespace InterruptingCards.Managers
         public void Purchase()
         {
             // TODO: Prompt the active player to select an item
-            if (_playerManager.SelfId == _playerManager.ActivePlayer.Id)
+            if (NetworkManager.LocalClientId == _playerManager.ActivePlayer.Id)
             {
                 _purchase.TryExecute(CardConfig.InvalidId);
             }

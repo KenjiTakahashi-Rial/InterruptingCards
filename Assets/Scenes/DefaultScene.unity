@@ -457,6 +457,38 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 59696982}
   m_CullTransparentMesh: 1
+--- !u!1 &132889548
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 132889549}
+  m_Layer: 0
+  m_Name: Players
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &132889549
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 132889548}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1412915942}
+  m_Father: {fileID: 2086220367}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &135779738
 GameObject:
   m_ObjectHideFlags: 0
@@ -637,8 +669,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40dfa52eccd9ae046837e061908b2fa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerManager: {fileID: 1412915941}
-  _gameStateMachineManager: {fileID: 1138538691}
 --- !u!114 &239110703
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1447,8 +1477,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b31ef72d6c9308408f20131acf75902, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerManager: {fileID: 1412915941}
-  _gameStateMachineManager: {fileID: 1138538691}
 --- !u!114 &474602278
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1632,8 +1660,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c64c5906d1fac16459d687f016b5b6cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerManager: {fileID: 1412915941}
-  _gameStateMachineManager: {fileID: 1138538691}
 --- !u!1 &754022904
 GameObject:
   m_ObjectHideFlags: 0
@@ -1664,10 +1690,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1979b594a80dcd9478f90900af8db505, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerManager: {fileID: 1412915941}
-  _gameStateMachineManager: {fileID: 1138538691}
-  _theStackStateMachineManager: {fileID: 1458435635}
-  _theStackManager: {fileID: 1458435631}
 --- !u!4 &754022906
 Transform:
   m_ObjectHideFlags: 0
@@ -2341,8 +2363,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dce064b9383ba14f9651c4f8fb3ca42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerManager: {fileID: 1412915941}
-  _gameStateMachineManager: {fileID: 1138538691}
 --- !u!114 &985677508
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2426,10 +2446,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47b9605d8e4d61345a727cea03ca1c08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerManager: {fileID: 1412915941}
-  _gameStateMachineManager: {fileID: 1138538691}
-  _priorityManager: {fileID: 754022905}
-  _theStackStateMachineManager: {fileID: 1458435635}
 --- !u!1 &1035474967
 GameObject:
   m_ObjectHideFlags: 0
@@ -2884,16 +2900,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cardPack: 2
-  _lootDeck: {fileID: 2058083998825954505}
-  _lootDiscard: {fileID: 2058083998825954504}
-  _hands:
-  - {fileID: 2058083998825954512}
-  - {fileID: 2058083998825954511}
   _playerManager: {fileID: 1412915941}
   _priorityManager: {fileID: 754022905}
   _stateMachineManager: {fileID: 1138538691}
   _theStackStateMachineManager: {fileID: 1458435635}
   _theStackManager: {fileID: 1458435631}
+  _lootDeck: {fileID: 2058083998825954505}
+  _lootDiscard: {fileID: 2058083998825954504}
+  _hands:
+  - {fileID: 2058083998825954512}
+  - {fileID: 2058083998825954511}
   _declareAttack: {fileID: 239110702}
   _attack: {fileID: 474602277}
   _declarePurchase: {fileID: 731158877}
@@ -3231,8 +3247,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f08f54357f258546b0122a793d8d038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerManager: {fileID: 1412915941}
-  _gameStateMachineManager: {fileID: 1138538691}
 --- !u!1 &1252620162
 GameObject:
   m_ObjectHideFlags: 0
@@ -3535,7 +3549,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 448741d22f7be58469b91a4eaf999063, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gameStateMachineManager: {fileID: 1138538691}
   _minPlayers: 2
   _maxPlayers: 2
 --- !u!4 &1412915942
@@ -3545,12 +3558,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1412915940}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2086220367}
+  m_Father: {fileID: 132889549}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1412915943
@@ -3604,9 +3617,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9437fa2ed0c9a244794b26d58200fefd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerManager: {fileID: 1412915941}
-  _stateMachineManager: {fileID: 1458435635}
-  _gameStateMachineManager: {fileID: 1138538691}
   _resolveLoot: {fileID: 2081885973}
 --- !u!4 &1458435632
 Transform:
@@ -3710,7 +3720,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 1526035796}
-    PlayerPrefab: {fileID: 0}
+    PlayerPrefab: {fileID: 5828435173210392598, guid: b8e15386f093c784c996ea7fe456f738, type: 3}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 2a06f76f523839e42b261d5de8d1ae35, type: 2}
@@ -4215,10 +4225,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 336d3299ac3aa744580cd5362f690d9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerManager: {fileID: 1412915941}
-  _gameStateMachineManager: {fileID: 1138538691}
-  _priorityManager: {fileID: 754022905}
-  _theStackStateMachineManager: {fileID: 1458435635}
 --- !u!114 &2012009769
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4267,9 +4273,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1116bf2ec0a3e0c4c92b85223b778bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerManager: {fileID: 1412915941}
-  _theStackManager: {fileID: 1458435631}
-  _lootDiscard: {fileID: 2058083998825954504}
 --- !u!4 &2081885974
 Transform:
   m_ObjectHideFlags: 0
@@ -4316,7 +4319,7 @@ Transform:
   - {fileID: 1308684374}
   - {fileID: 1138538689}
   - {fileID: 1324095580}
-  - {fileID: 1412915942}
+  - {fileID: 132889549}
   - {fileID: 754022906}
   - {fileID: 1388920698}
   m_Father: {fileID: 0}
@@ -4367,8 +4370,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 261c692ebafc3944bb654e653d3529c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerManager: {fileID: 1412915941}
-  _gameStateMachineManager: {fileID: 1138538691}
 --- !u!114 &2109288887
 MonoBehaviour:
   m_ObjectHideFlags: 0

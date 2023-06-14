@@ -7,27 +7,25 @@ using UnityEngine;
 
 using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
-using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
     public class PlayerManager : NetworkBehaviour
     {
-        private readonly List<ulong> _lobby = new();
         private readonly HashSet<ulong> _notReadyPlayers = new();
-        private readonly List<Player> _players = new();
+        private readonly List<PlayerBehaviour> _players = new();
         private readonly NetworkVariable<int> _activePlayerIndex = new();
         private readonly Dictionary<int, NetworkVariable<int>.OnValueChangedDelegate> _onActivePlayerChangedHandlers = new();
 
         [SerializeField] private int _minPlayers;
         [SerializeField] private int _maxPlayers;
 
-        public Player ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex.Value];
+        public PlayerBehaviour ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex.Value];
 
         private GameManager Game => GameManager.Singleton;
         private StateMachineManager GameStateMachineManager => Game.StateMachineManager;
 
-        public event Action<Player> OnActivePlayerChanged
+        public event Action<PlayerBehaviour> OnActivePlayerChanged
         {
             add
             {
@@ -36,25 +34,18 @@ namespace InterruptingCards.Managers
                 _activePlayerIndex.OnValueChanged += IndexToPlayer;
             }
 
-// Needs to be a delegate. Action<int, int> gives an error
-#pragma warning disable S3172 // Delegates should not be subtracted
             remove => _activePlayerIndex.OnValueChanged -= _onActivePlayerChangedHandlers[value.GetHashCode()];
-#pragma warning restore S3172 // Delegates should not be subtracted
         }
 
-        public ulong SelfId { get; private set; }
-
         // TODO: This is temporary
-        public List<Player> TempPlayers => _players;
+        public List<PlayerBehaviour> TempPlayers => _players;
 
         private LogManager Log => LogManager.Singleton;
 
-        public Player this[ulong id] => _players.Single(p => p.Id == id);
+        public PlayerBehaviour this[ulong id] => _players.Single(p => p.Id == id);
 
         public override void OnNetworkSpawn()
         {
-            GetSelfServerRpc();
-
             if (IsServer)
             {
                 NetworkManager.OnClientConnectedCallback += AddPlayerServerRpc;
@@ -119,34 +110,10 @@ namespace InterruptingCards.Managers
             _players.Clear();
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        private void GetSelfServerRpc(ServerRpcParams serverRpcParams = default)
-        {
-            var clientId = serverRpcParams.Receive.SenderClientId;
-
-            Log.Info($"Getting self {clientId}");
-
-            var clientRpcParams = new ClientRpcParams
-            {
-                Send = new ClientRpcSendParams
-                {
-                    TargetClientIds = new ulong[] { clientId }
-                }
-            };
-
-            AssignSelfClientRpc(clientId, clientRpcParams);
-        }
-
-        [ClientRpc]
-        private void AssignSelfClientRpc(ulong selfId, ClientRpcParams _)
-        {
-            Log.Info($"Assigning self {selfId}");
-            SelfId = selfId;
-        }
-
         [ServerRpc]
         private void AddPlayerServerRpc(ulong clientId)
         {
+            // TODO: Look into using Unity Network Lobby Manager instead of managing it myself
             Log.Info($"Adding player {clientId}");
 
             if (GameStateMachineManager.CurrentState != StateMachine.WaitingForClients)
@@ -155,19 +122,27 @@ namespace InterruptingCards.Managers
                 return;
             }
 
-            if (_lobby.Count >= _maxPlayers)
+            var clients = NetworkManager.ConnectedClientsList;
+            if (clients.Count > _maxPlayers)
             {
-                Log.Warn($"Cannnot add player {clientId} when lobby is full");
-                return;
+                Log.Warn($"Found {clients.Count} clients, but max is {_maxPlayers}");
             }
 
-            _lobby.Add(clientId);
-
-            if (_lobby.Count == _maxPlayers)
+            if (clients.Count >= _maxPlayers)
             {
-                _notReadyPlayers.UnionWith(_lobby);
+                var networkObjIds = new ulong[_maxPlayers];
+                for (var i = 0; i < _maxPlayers; i++)
+                {
+                    var client = clients[i];
+                    var player = client.PlayerObject.gameObject.GetComponent<PlayerBehaviour>();
+                    player.Id = client.ClientId;
+                    player.Name = player.Id.ToString();
+                    networkObjIds[i] = client.PlayerObject.NetworkObjectId;
+                }
+
+                _notReadyPlayers.UnionWith(NetworkManager.ConnectedClientsIds);
                 GameStateMachineManager.SetTrigger(StateMachine.WaitForReady);
-                SetPlayersClientRpc(_lobby.ToArray());
+                SetPlayersClientRpc(networkObjIds);
             }
         }
 
@@ -188,15 +163,17 @@ namespace InterruptingCards.Managers
 
             // TODO: Continue game if enough players left
             GameStateMachineManager.SetTrigger(StateMachine.ForceEndGame);
-            _lobby.Remove(clientId);
+            _players.RemoveAll(p => p.Id == clientId);
         }
 
         [ClientRpc]
-        private void SetPlayersClientRpc(ulong[] playerIds)
+        private void SetPlayersClientRpc(ulong[] playerNetworkObjIds)
         {
-            foreach (var playerId in playerIds)
+            foreach (var networkObjId in playerNetworkObjIds)
             {
-               _players.Add(new Player(playerId, playerId.ToString()));
+                var playerNetworkObj = NetworkManager.SpawnManager.SpawnedObjects[networkObjId];
+                var player = playerNetworkObj.gameObject.GetComponent<PlayerBehaviour>();
+                _players.Add(player);
             }
 
             PlayerReadyServerRpc();
