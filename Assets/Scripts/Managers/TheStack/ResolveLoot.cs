@@ -28,9 +28,9 @@ namespace InterruptingCards.Managers.TheStack
 
             var card = _cardConfig[element.Value];
 
-            switch (card.PlayedEffect)
+            switch (card.LootAbility)
             {
-                case CardPlayedEffect.GainCents:
+                case Ability.GainCents:
                     PlayerManager[element.PushedById].Money += (uint)card.Value;
                     break;
                 default:

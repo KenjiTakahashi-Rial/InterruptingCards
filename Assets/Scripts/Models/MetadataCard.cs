@@ -19,9 +19,9 @@ namespace InterruptingCards.Models
 
         [SerializeField] private int _value;
 
-        [SerializeField] private string _playedEffectName;
+        [SerializeField] private string _lootAbilityName;
 
-        [SerializeField] private string _activeEffectName;
+        [SerializeField] private string _activatedAbilityName;
 
         // Lazy Backing Fields
 
@@ -29,9 +29,9 @@ namespace InterruptingCards.Models
 
         private Lazy<CardRank> _rank;
 
-        private Lazy<CardPlayedEffect> _playedEffect;
+        private Lazy<Ability> _lootAbility;
 
-        private Lazy<CardActiveEffect> _activeEffect;
+        private Lazy<Ability> _activatedAbility;
 
         // Public Getters
 
@@ -59,21 +59,21 @@ namespace InterruptingCards.Models
 
         public int Value => _value;
 
-        public CardPlayedEffect PlayedEffect
+        public Ability LootAbility
         {
             get
             {
-                _playedEffect ??= new(EnumValueFactory<CardPlayedEffect>(_playedEffectName));
-                return _playedEffect.Value;
+                _lootAbility ??= new(EnumValueFactory<Ability>(_lootAbilityName));
+                return _lootAbility.Value;
             }
         }
 
-        public CardActiveEffect ActiveEffect
+        public Ability ActivatedAbility
         {
             get
             {
-                _activeEffect ??= new(EnumValueFactory<CardActiveEffect>(_activeEffectName));
-                return _activeEffect.Value;
+                _activatedAbility ??= new(EnumValueFactory<Ability>(_activatedAbilityName));
+                return _activatedAbility.Value;
             }
         }
 

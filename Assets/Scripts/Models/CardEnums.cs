@@ -57,19 +57,10 @@ namespace InterruptingCards.Models
         ADime,
     }
 
-    public enum CardPlayedEffect
+    public enum Ability
     {
         Invalid,
         GainCents,
-    }
-
-    public enum CardActiveEffect
-    {
-        Invalid,
-    }
-
-    public enum CardAbility
-    {
-        Invalid,
+        AddLootPlay,
     }
 }

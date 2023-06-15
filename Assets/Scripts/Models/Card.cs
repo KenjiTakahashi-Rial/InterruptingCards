@@ -9,8 +9,8 @@ namespace InterruptingCards.Models
             Rank = metadataCard.Rank;
             Name = metadataCard.Name;
             Value = metadataCard.Value;
-            PlayedEffect = metadataCard.PlayedEffect;
-            ActiveEffect = metadataCard.ActiveEffect;
+            LootAbility = metadataCard.LootAbility;
+            ActivatedAbility = metadataCard.ActivatedAbility;
         }
 
         // All attributes must be readonly
@@ -26,9 +26,9 @@ namespace InterruptingCards.Models
 
         public int Value { get; }
 
-        public CardPlayedEffect PlayedEffect { get; }
+        public Ability LootAbility { get; }
 
-        public CardActiveEffect ActiveEffect { get; }
+        public Ability ActivatedAbility { get; }
 
         public override string ToString()
         {

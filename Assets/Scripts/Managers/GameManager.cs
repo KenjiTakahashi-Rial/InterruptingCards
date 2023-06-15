@@ -180,7 +180,6 @@ namespace InterruptingCards.Managers
             // TODO: Look up the abilities from the player
             if (IsServer)
             {
-                _theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
             }
         }
 
@@ -292,7 +291,6 @@ namespace InterruptingCards.Managers
             // TODO: Get the ability to be activated
             if (IsServer)
             {
-                _theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
             }
         }
 
@@ -315,7 +313,7 @@ namespace InterruptingCards.Managers
             // TODO: Look up player's abilities
             if (IsServer)
             {
-                _theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
+                _theStackManager.PushAbility(_playerManager.ActivePlayer, Ability.Invalid);
             }
         }
 
