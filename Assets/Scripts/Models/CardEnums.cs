@@ -48,7 +48,11 @@ namespace InterruptingCards.Models
         Queen,
         King,
 
-        // Four Souls
+        // Four Souls Characters
+        Isaac,
+        Maggie,
+
+        // Four Souls Loot
         APenny,
         TwoCents,
         ThreeCents,
