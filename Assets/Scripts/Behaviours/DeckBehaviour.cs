@@ -7,6 +7,7 @@ using UnityEngine;
 
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
+using InterruptingCards.Models;
 
 namespace InterruptingCards.Behaviours
 {
@@ -66,9 +67,9 @@ namespace InterruptingCards.Behaviours
             return cardId;
         }
 
-        public void Initialize()
+        public void Initialize(Func<Card, bool> predicate = null)
         {
-            _cardIds = _cardConfig.GenerateIdDeck();
+            _cardIds = _cardConfig.GenerateIdDeck(predicate);
             SetTop();
         }
 

@@ -151,7 +151,7 @@ namespace InterruptingCards.Managers
 
             if (IsServer)
             {
-                _lootDeck.Initialize();
+                _lootDeck.Initialize(c => c.Suit == CardSuit.Loot);
                 _lootDeck.Shuffle();
                 _lootDeck.IsFaceUp = false;
                 _lootDiscard.Clear();

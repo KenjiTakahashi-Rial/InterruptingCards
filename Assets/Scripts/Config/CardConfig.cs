@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using UnityEngine;
 
 using InterruptingCards.Managers;
 using InterruptingCards.Models;
+using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Config
 {
@@ -30,12 +32,7 @@ namespace InterruptingCards.Config
 
         public string GetName(int id)
         {
-            if (id == InvalidId)
-            {
-                return InvalidName;
-            }
-
-            return _cards[id].ToString();
+            return id == InvalidId ? InvalidName : _cards[id].ToString();
         }
 
         public void Load(CardPack cardPack)
@@ -64,9 +61,14 @@ namespace InterruptingCards.Config
             Helpers.ForEachFile(packPath, LoadCard, recursive: true, fileSearchPattern: searchPattern);
         }
 
-        public List<int> GenerateIdDeck()
+        public List<int> GenerateIdDeck(Func<Card, bool> predicate = null)
         {
-            return _cards.Keys.ToList();
+            predicate ??= c => true;
+
+            return _cards
+                .Where(pair => predicate(pair.Value))
+                .Select(pair => pair.Key)
+                .ToList();
         }
     }
 }
