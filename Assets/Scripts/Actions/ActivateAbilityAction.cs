@@ -31,7 +31,7 @@ namespace InterruptingCards.Actions
         {
             // TODO
             GameStateMachineManager.SetTrigger(StateMachine.ActivateAbility);
-            GameManager.Singleton.ActivateAbility();
+            GameManager.Singleton.ActivateAbility(cardId);
         }
     }
 }

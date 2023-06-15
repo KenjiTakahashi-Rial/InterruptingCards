@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 
 using Unity.Collections;
@@ -40,6 +41,8 @@ namespace InterruptingCards.Behaviours
         }
 
         public HandBehaviour Hand { get; set; }
+
+        public Dictionary<int, CardBehaviour> ActiveItems { get; set; }
 
         public uint Money { get => _money.Value; set => _money.Value = value; }
 

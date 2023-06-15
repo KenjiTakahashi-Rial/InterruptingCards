@@ -30,6 +30,7 @@ namespace InterruptingCards.Managers
         [SerializeField] private TheStackManager _theStackManager;
 
         [Header("Behaviours")]
+        [SerializeField] private CardBehaviour[] _playerCards;
         [SerializeField] private DeckBehaviour _lootDeck;
         [SerializeField] private DeckBehaviour _lootDiscard;
         [SerializeField] private HandBehaviour[] _hands;
@@ -111,6 +112,11 @@ namespace InterruptingCards.Managers
             base.OnNetworkSpawn();
             Log.Info("Network spawned");
 
+            foreach (var card in _playerCards)
+            {
+                card.OnClicked += () => _activateAbility.TryExecute(card.CardId);
+            }
+
             foreach (var hand in _hands)
             {
                 hand.OnCardClicked += (int cardId) => TryPlayLoot(cardId);
@@ -120,6 +126,11 @@ namespace InterruptingCards.Managers
         public override void OnNetworkDespawn()
         {
             Log.Info("Network despawned");
+
+            foreach (var card in _playerCards)
+            {
+                card.OnClicked = null;
+            }
 
             foreach (var hand in _hands)
             {
@@ -168,9 +179,13 @@ namespace InterruptingCards.Managers
 
         public void RechargeStep()
         {
-            // TODO: Recharge all active items
             if (IsServer)
             {
+                foreach (var card in _priorityManager.PriorityPlayer.ActiveItems.Values)
+                {
+                    card.IsActivated = false;
+                }
+
                 _stateMachineManager.SetTrigger(StateMachine.RechargeComplete);
             }
         }
@@ -180,6 +195,7 @@ namespace InterruptingCards.Managers
             // TODO: Look up the abilities from the player
             if (IsServer)
             {
+                //_theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
             }
         }
 
@@ -286,11 +302,15 @@ namespace InterruptingCards.Managers
             _activateAbility.TryExecute(CardConfig.InvalidId);
         }
 
-        public void ActivateAbility()
+        public void ActivateAbility(int cardId)
         {
             // TODO: Get the ability to be activated
             if (IsServer)
             {
+                var cardBehaviour = _priorityManager.PriorityPlayer.ActiveItems[cardId];
+                cardBehaviour.IsActivated = true;
+                var card = _cardConfig[cardBehaviour.CardId];
+                _theStackManager.PushAbility(_playerManager.ActivePlayer, card.ActivatedAbility);
             }
         }
 
