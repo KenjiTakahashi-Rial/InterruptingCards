@@ -57,7 +57,7 @@ namespace InterruptingCards.Models
         ADime,
     }
 
-    public enum Ability
+    public enum CardAbility
     {
         Invalid,
         GainCents,

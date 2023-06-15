@@ -26,9 +26,9 @@ namespace InterruptingCards.Models
 
         public int Value { get; }
 
-        public Ability LootAbility { get; }
+        public CardAbility LootAbility { get; }
 
-        public Ability ActivatedAbility { get; }
+        public CardAbility ActivatedAbility { get; }
 
         public override string ToString()
         {

@@ -50,7 +50,7 @@ namespace InterruptingCards.Managers.TheStack
             Push(player);
         }
 
-        public void PushAbility(PlayerBehaviour player, Ability ability)
+        public void PushAbility(PlayerBehaviour player, CardAbility ability)
         {
             Log.Info($"Player {player.Name} pushing {ability} to The Stack");
             _theStack.Add(new TheStackElement(TheStackElementType.Ability, player.Id, (int)ability));

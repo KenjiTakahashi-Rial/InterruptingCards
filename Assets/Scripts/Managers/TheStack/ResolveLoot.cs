@@ -30,7 +30,7 @@ namespace InterruptingCards.Managers.TheStack
 
             switch (card.LootAbility)
             {
-                case Ability.GainCents:
+                case CardAbility.GainCents:
                     PlayerManager[element.PushedById].Money += (uint)card.Value;
                     break;
                 default:

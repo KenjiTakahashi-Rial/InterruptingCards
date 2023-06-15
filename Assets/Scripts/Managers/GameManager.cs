@@ -313,7 +313,7 @@ namespace InterruptingCards.Managers
             // TODO: Look up player's abilities
             if (IsServer)
             {
-                _theStackManager.PushAbility(_playerManager.ActivePlayer, Ability.Invalid);
+                _theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
             }
         }
 

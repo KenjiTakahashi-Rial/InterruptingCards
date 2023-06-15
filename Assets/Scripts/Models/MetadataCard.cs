@@ -29,9 +29,9 @@ namespace InterruptingCards.Models
 
         private Lazy<CardRank> _rank;
 
-        private Lazy<Ability> _lootAbility;
+        private Lazy<CardAbility> _lootAbility;
 
-        private Lazy<Ability> _activatedAbility;
+        private Lazy<CardAbility> _activatedAbility;
 
         // Public Getters
 
@@ -59,20 +59,20 @@ namespace InterruptingCards.Models
 
         public int Value => _value;
 
-        public Ability LootAbility
+        public CardAbility LootAbility
         {
             get
             {
-                _lootAbility ??= new(EnumValueFactory<Ability>(_lootAbilityName));
+                _lootAbility ??= new(EnumValueFactory<CardAbility>(_lootAbilityName));
                 return _lootAbility.Value;
             }
         }
 
-        public Ability ActivatedAbility
+        public CardAbility ActivatedAbility
         {
             get
             {
-                _activatedAbility ??= new(EnumValueFactory<Ability>(_activatedAbilityName));
+                _activatedAbility ??= new(EnumValueFactory<CardAbility>(_activatedAbilityName));
                 return _activatedAbility.Value;
             }
         }
