@@ -46,13 +46,13 @@ namespace InterruptingCards.Config
 
             var packName = cardPack.ToString();
             var packPath = Path.Combine(_packDirectory, packName);
-            var cardPaths = Directory.GetFiles(packPath, "*." + PackFileExtension);
+            var searchPattern = "*." + PackFileExtension;
 
             var id = 1;
 
-            for (var i = 0; i < cardPaths.Length; i++)
+            void LoadCard(string fileName)
             {
-                var json = File.ReadAllText(cardPaths[i]);
+                var json = File.ReadAllText(fileName);
                 var card = JsonUtility.FromJson<MetadataCard>(json);
 
                 for (var j = 0; j < card.Count; j++)
@@ -60,6 +60,8 @@ namespace InterruptingCards.Config
                     _cards[id] = new Card(id++, card);
                 }
             }
+
+            Helpers.ForEachFile(packPath, LoadCard, recursive: true, fileSearchPattern: searchPattern);
         }
 
         public List<int> GenerateIdDeck()
