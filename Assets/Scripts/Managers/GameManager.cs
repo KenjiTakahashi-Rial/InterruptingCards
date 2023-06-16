@@ -9,12 +9,13 @@ using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
 using InterruptingCards.Managers.TheStack;
 using InterruptingCards.Models;
+using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Managers
 {
     public class GameManager : NetworkBehaviour
     {
-        private const uint StartingLoot = 3;
+        private const uint StartingLootCount = 3;
         private const uint StartingMoney = 3;
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
@@ -30,7 +31,7 @@ namespace InterruptingCards.Managers
         [SerializeField] private TheStackManager _theStackManager;
 
         [Header("Behaviours")]
-        [SerializeField] private CardBehaviour[] _playerCards;
+        [SerializeField] private CardBehaviour[] _character;
         [SerializeField] private DeckBehaviour _lootDeck;
         [SerializeField] private DeckBehaviour _lootDiscard;
         [SerializeField] private HandBehaviour[] _hands;
@@ -50,7 +51,6 @@ namespace InterruptingCards.Managers
         [SerializeField] private TextMeshPro _tempPlayerText;
 
         public static GameManager Singleton { get; private set; }
-
 
         public PlayerManager PlayerManager => _playerManager;
         public PriorityManager PriorityManager => _priorityManager;
@@ -112,7 +112,7 @@ namespace InterruptingCards.Managers
             base.OnNetworkSpawn();
             Log.Info("Network spawned");
 
-            foreach (var card in _playerCards)
+            foreach (var card in _character)
             {
                 card.OnClicked += () => _activateAbility.TryExecute(card.CardId);
             }
@@ -127,7 +127,7 @@ namespace InterruptingCards.Managers
         {
             Log.Info("Network despawned");
 
-            foreach (var card in _playerCards)
+            foreach (var card in _character)
             {
                 card.OnClicked = null;
             }
@@ -156,24 +156,17 @@ namespace InterruptingCards.Managers
         public void Initialize()
         {
             Log.Info("Initializing Game");
-            _playerManager.Initialize(StartingMoney);
-
-            _playerManager.AssignHands(_hands);
 
             if (IsServer)
             {
-                _lootDeck.Initialize(c => c.Suit == CardSuit.Loot);
-                _lootDeck.Shuffle();
-                _lootDeck.IsFaceUp = false;
-                _lootDiscard.Clear();
-                foreach (var hand in _hands)
-                {
-                    hand.Clear();
-                }
-                DealHands();
+                InitializeCharacters();
+                InitializeLoot();
+                _playerManager.Initialize(StartingMoney);
                 _stateMachineManager.SetTrigger(StateMachine.StartGame);
             }
 
+            _playerManager.AssignCharacters(_character);
+            _playerManager.AssignHands(_hands);
             SetCardsHidden(false);
         }
 
@@ -181,7 +174,7 @@ namespace InterruptingCards.Managers
         {
             if (IsServer)
             {
-                foreach (var card in _priorityManager.PriorityPlayer.ActiveItems.Values)
+                foreach (var card in _priorityManager.PriorityPlayer.ActivatedCards.Values)
                 {
                     card.IsActivated = false;
                 }
@@ -192,10 +185,10 @@ namespace InterruptingCards.Managers
 
         public void TriggerStartOfTurnAbilities()
         {
-            // TODO: Look up the abilities from the player
             if (IsServer)
             {
-                //_theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
+                // TODO: Look up the abilities from the player and push them to the stack
+                _stateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
             }
         }
 
@@ -304,10 +297,9 @@ namespace InterruptingCards.Managers
 
         public void ActivateAbility(int cardId)
         {
-            // TODO: Get the ability to be activated
             if (IsServer)
             {
-                var cardBehaviour = _priorityManager.PriorityPlayer.ActiveItems[cardId];
+                var cardBehaviour = _priorityManager.PriorityPlayer.ActivatedCards[cardId];
                 cardBehaviour.IsActivated = true;
                 var card = _cardConfig[cardBehaviour.CardId];
                 _theStackManager.PushAbility(_playerManager.ActivePlayer, card.ActivatedAbility);
@@ -381,22 +373,57 @@ namespace InterruptingCards.Managers
             _lootDeck.SetHidden(val);
             _lootDiscard.SetHidden(val);
 
+            foreach (var card in _character)
+            {
+                card.SetHidden(val);
+            }
+
             foreach (var hand in _hands)
             {
                 hand.SetHidden(val);
             }
         }
 
-        private void DealHands()
+        private void InitializeCharacters()
         {
             if (_stateMachineManager.CurrentState != StateMachine.InitializingGame)
             {
-                Log.Warn("Cannot deal hands outside of game initialization state");
+                Log.Warn("Cannot initialize characters outside of game initialization state");
                 return;
             }
 
-            Log.Info("Dealing hands");
-            for (var i = 0; i < StartingLoot; i++)
+            Log.Info("Initializing characters");
+
+            var characterDeck = _cardConfig.GenerateIdDeck(c => c.Suit == CardSuit.Characters);
+            Functions.Shuffle(characterDeck);
+
+            for (var i = 0; i < _character.Length; i++)
+            {
+                _character[i].CardId = characterDeck[i];
+            }
+        }
+
+        private void InitializeLoot()
+        {
+            if (_stateMachineManager.CurrentState != StateMachine.InitializingGame)
+            {
+                Log.Warn("Cannot initialize loot outside of game initialization state");
+                return;
+            }
+
+            Log.Info("Initializing loot");
+
+            _lootDeck.Initialize(c => c.Suit == CardSuit.Loot);
+            _lootDeck.Shuffle();
+            _lootDeck.IsFaceUp = false;
+            _lootDiscard.Clear();
+            
+            foreach (var hand in _hands)
+            {
+                hand.Clear();
+            }
+
+            for (var i = 0; i < StartingLootCount; i++)
             {
                 foreach (var hand in _hands)
                 {

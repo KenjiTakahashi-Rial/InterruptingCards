@@ -40,12 +40,14 @@ namespace InterruptingCards.Behaviours
             }
         }
 
-        public HandBehaviour Hand { get; set; }
+        public CardBehaviour CharacterCard { get; set; }
 
-        public Dictionary<int, CardBehaviour> ActiveItems { get; set; }
+        public HandBehaviour Hand { get; set; }
 
         public uint Money { get => _money.Value; set => _money.Value = value; }
 
         public uint LootPlays { get => _lootPlays.Value; set => _lootPlays.Value = value; }
+
+        public Dictionary<int, CardBehaviour> ActivatedCards { get; } = new();
     }
 }

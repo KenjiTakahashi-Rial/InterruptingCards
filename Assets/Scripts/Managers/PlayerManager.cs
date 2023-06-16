@@ -23,6 +23,7 @@ namespace InterruptingCards.Managers
         public PlayerBehaviour ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex.Value];
 
         private GameManager Game => GameManager.Singleton;
+
         private StateMachineManager GameStateMachineManager => Game.StateMachineManager;
 
         public event Action<PlayerBehaviour> OnActivePlayerChanged
@@ -73,10 +74,19 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public ulong GetNextId(ulong id)
+        public void AssignCharacters(CardBehaviour[] characterCards)
         {
-            var i = _players.FindIndex(p => p.Id == id);
-            return _players[++i == _players.Count ? 0 : i].Id;
+            if (_players.Count > characterCards.Length)
+            {
+                throw new TooManyPlayersException();
+            }
+
+            for (var i = 0; i < _players.Count; i++)
+            {
+                var character = characterCards[i];
+                _players[i].CharacterCard = character;
+                _players[i].ActivatedCards[character.CardId] = character;
+            }
         }
 
         public void AssignHands(HandBehaviour[] hands)
@@ -93,6 +103,12 @@ namespace InterruptingCards.Managers
             {
                 player.Hand = hands[i++];
             }
+        }
+
+        public ulong GetNextId(ulong id)
+        {
+            var i = _players.FindIndex(p => p.Id == id);
+            return _players[++i == _players.Count ? 0 : i].Id;
         }
 
         public void ShiftTurn(int shifts = 1)

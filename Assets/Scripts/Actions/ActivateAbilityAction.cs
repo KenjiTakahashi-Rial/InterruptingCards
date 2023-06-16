@@ -24,6 +24,19 @@ namespace InterruptingCards.Actions
                 return false;
             }
 
+            var activatedCards = PlayerManager.ActivePlayer.ActivatedCards;
+            if (!activatedCards.ContainsKey(cardId))
+            {
+                Log.Warn($"Cannot activate ability that the palyer does not have");
+                return false;
+            }
+
+            if (activatedCards[cardId].IsActivated)
+            {
+                Log.Warn($"Cannot activate ability that has already been activated");
+                return false;
+            }
+
             return true;
         }
 

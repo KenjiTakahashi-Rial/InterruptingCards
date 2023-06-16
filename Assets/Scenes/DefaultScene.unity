@@ -2194,6 +2194,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 892074268}
   m_CullTransparentMesh: 1
+--- !u!114 &899597179 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6680991744396031862, guid: d2b310020f9a4f04bbe96f9dc454d713, type: 3}
+  m_PrefabInstance: {fileID: 728748295}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33801ebdb7266884283531abf5767cfc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &931070263
 GameObject:
   m_ObjectHideFlags: 0
@@ -2558,6 +2569,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7352211822102072789, guid: d2b310020f9a4f04bbe96f9dc454d713, type: 3}
   m_PrefabInstance: {fileID: 977093927}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &977093931 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6680991744396031862, guid: d2b310020f9a4f04bbe96f9dc454d713, type: 3}
+  m_PrefabInstance: {fileID: 977093927}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33801ebdb7266884283531abf5767cfc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &985677505
 GameObject:
   m_ObjectHideFlags: 0
@@ -3147,6 +3169,9 @@ MonoBehaviour:
   _stateMachineManager: {fileID: 1138538691}
   _theStackStateMachineManager: {fileID: 1458435635}
   _theStackManager: {fileID: 1458435631}
+  _character:
+  - {fileID: 899597179}
+  - {fileID: 977093931}
   _lootDeck: {fileID: 2058083998825954505}
   _lootDiscard: {fileID: 2058083998825954504}
   _hands:

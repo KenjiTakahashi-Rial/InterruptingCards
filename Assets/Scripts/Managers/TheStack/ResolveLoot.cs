@@ -33,6 +33,9 @@ namespace InterruptingCards.Managers.TheStack
                 case CardAbility.GainCents:
                     PlayerManager[element.PushedById].Money += (uint)card.Value;
                     break;
+                case CardAbility.AddLootPlay:
+                    PlayerManager[element.PushedById].LootPlays++;
+                    break;
                 default:
                     throw new NotImplementedException();
             }
