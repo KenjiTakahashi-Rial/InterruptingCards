@@ -94,16 +94,24 @@ namespace InterruptingCards.Managers
 
             if (_tempPlayerText != null)
             {
-                var playerInfo = _playerManager.TempPlayers.Select(
-                    p =>
-                    {
-                        var activeString = p == _playerManager.ActivePlayer ? " A" : " _";
-                        var priorityString = p == _priorityManager.PriorityPlayer ? " P" : " _";
-                        return $"{p.Name}{activeString}{priorityString}: {p.Money}¢";
-                    }
-                );
+                try
+                {
+                    var playerInfo = _playerManager.TempPlayers.Select(
+                        p =>
+                        {
+                            var activeString = p == _playerManager.ActivePlayer ? " A" : " _";
+                            var priorityString = p == _priorityManager.PriorityPlayer ? " P" : " _";
+                            return $"{p.Name}{activeString}{priorityString}: {p.Money}¢";
+                        }
+                    );
 
-                _tempPlayerText.SetText(string.Join("\n", playerInfo));
+                    _tempPlayerText.SetText(string.Join("\n", playerInfo));
+                }
+                catch (System.InvalidOperationException)
+                {
+                    // Sometimes players has two ID 0 at the beginning of the game.
+                    // It resolves itself within a frame or so, but it's fine because this is just a test log
+                }
             }
         }
 

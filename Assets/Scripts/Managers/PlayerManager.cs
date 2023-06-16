@@ -43,22 +43,7 @@ namespace InterruptingCards.Managers
 
         private LogManager Log => LogManager.Singleton;
 
-        public PlayerBehaviour this[ulong id]
-        {
-            get
-            {
-                try
-                {
-                    return _players.Single(p => p.Id == id);
-                }
-                catch (InvalidOperationException e)
-                {
-                    var playerIds = "[ " + string.Join(", ", _players.Select(p => p.Id)) + " ]";
-                    Log.Error($"Tried to get single {id} from {playerIds}");
-                    throw e;
-                }
-            }
-        }
+        public PlayerBehaviour this[ulong id] => _players.Single(p => p.Id == id);
 
         public override void OnNetworkSpawn()
         {
@@ -156,6 +141,7 @@ namespace InterruptingCards.Managers
             if (clients.Count > _maxPlayers)
             {
                 Log.Warn($"Found {clients.Count} clients, but max is {_maxPlayers}");
+                return;
             }
 
             if (clients.Count >= _maxPlayers)
