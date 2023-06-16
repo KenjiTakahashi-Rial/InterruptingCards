@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 using Unity.Collections;
@@ -30,7 +31,7 @@ namespace InterruptingCards.Behaviours
                 var byteCount = Encoding.UTF8.GetByteCount(value);
                 if (byteCount > NameByteLimit)
                 {
-                    var truncated = Utilities.Functions.Truncate(value, NameByteLimit);
+                    var truncated = Functions.Truncate(value, NameByteLimit);
                     Log.Warn(
                         $"String \"{value}\" ({byteCount}B) exceeds player name byte limit ({NameByteLimit}B). " +
                         $"Truncating to {truncated}"
@@ -42,12 +43,36 @@ namespace InterruptingCards.Behaviours
 
         public CardBehaviour CharacterCard { get; set; }
 
+        //public HandBehaviour Items { get; set; }
+
         public HandBehaviour Hand { get; set; }
 
         public uint Money { get => _money.Value; set => _money.Value = value; }
 
         public uint LootPlays { get => _lootPlays.Value; set => _lootPlays.Value = value; }
 
-        public Dictionary<int, CardBehaviour> ActivatedCards { get; } = new();
+        public IReadOnlyList<CardBehaviour> ActivatedCards
+        {
+            get
+            {
+                var activatedCards = new List<CardBehaviour>();
+
+                if (!CharacterCard.IsDeactivated)
+                {
+                    activatedCards.Add(CharacterCard);
+                }
+
+                //foreach (var card in Items)
+                //{
+                //    if (!card.IsDeactivated)
+                //    {
+                //        activatedCards.Add(card);
+                //    }
+                //}
+
+                return activatedCards;
+            }
+        }
+
     }
 }

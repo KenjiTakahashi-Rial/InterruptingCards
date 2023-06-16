@@ -1,3 +1,5 @@
+using System.Linq;
+
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
 
@@ -25,15 +27,16 @@ namespace InterruptingCards.Actions
             }
 
             var activatedCards = PlayerManager.ActivePlayer.ActivatedCards;
-            if (!activatedCards.ContainsKey(cardId))
+            if (!activatedCards.Any(c => c.CardId == cardId))
             {
                 Log.Warn($"Cannot activate ability that the palyer does not have");
                 return false;
             }
 
-            if (activatedCards[cardId].IsDeactivated)
+            var card = activatedCards.Single(c => c.CardId == cardId);
+            if (card.IsDeactivated)
             {
-                Log.Warn($"Cannot activate ability that has already been activated");
+                Log.Warn($"Cannot activate ability that is deactivated");
                 return false;
             }
 

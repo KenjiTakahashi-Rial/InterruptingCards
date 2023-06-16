@@ -14,6 +14,7 @@ namespace InterruptingCards.Managers.TheStack
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
         [SerializeField] private ResolveLoot _resolveLoot;
+        [SerializeField] private ResolveAbility _resolveAbility;
 
         private NetworkList<TheStackElement> _theStack;
 
@@ -66,6 +67,11 @@ namespace InterruptingCards.Managers.TheStack
 
         public void Pop()
         {
+            if (!IsServer)
+            {
+                return;
+            }
+
             if (StateMachineManager.CurrentState == StateMachine.TheStackPopping)
             {
                 Log.Info("Popping The Stack");
@@ -124,7 +130,7 @@ namespace InterruptingCards.Managers.TheStack
                     _resolveLoot.Resolve(element);
                     break;
                 case TheStackElementType.Ability:
-                    // TODO
+                    _resolveAbility.Resolve(element);
                     break;
                 case TheStackElementType.DiceRoll:
                     // TODO

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Unity.Netcode;
@@ -6,10 +7,11 @@ using UnityEngine;
 
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
+using System.Collections;
 
 namespace InterruptingCards.Behaviours
 {
-    public class HandBehaviour : NetworkBehaviour
+    public class HandBehaviour : NetworkBehaviour, IEnumerable<CardBehaviour>
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
@@ -23,6 +25,15 @@ namespace InterruptingCards.Behaviours
 
         public int this[int i] => _cardSlots[i].CardId;
 
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _cardSlots.GetEnumerator();
+        }
+
+        public IEnumerator<CardBehaviour> GetEnumerator()
+        {
+            return ((IEnumerable<CardBehaviour>)_cardSlots).GetEnumerator();
+        }
 
         public void Awake()
         {

@@ -1,3 +1,5 @@
+using System.Linq;
+
 using Unity.Netcode;
 
 using InterruptingCards.Behaviours;
@@ -20,8 +22,9 @@ namespace InterruptingCards.Managers
 
         public PlayerBehaviour PriorityPlayer => PlayerManager[_priorityPlayerId.Value];
 
-        // TODO: Add other factors (ability to purchase, activate abilities, etc.)
-        public bool PriorityPlayerHasActions => PriorityPlayer.LootPlays > 0;
+        // TODO: Add other factors (ability to purchase, etc.)
+        public bool PriorityPlayerHasActions =>
+            PriorityPlayer.LootPlays > 0 && !PriorityPlayer.ActivatedCards.Any(c => !c.IsDeactivated);
 
         private LogManager Log => LogManager.Singleton;
 

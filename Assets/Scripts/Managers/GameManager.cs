@@ -112,6 +112,7 @@ namespace InterruptingCards.Managers
             base.OnNetworkSpawn();
             Log.Info("Network spawned");
 
+            // TODO: Need to do this for all activated ability cards
             foreach (var card in _character)
             {
                 card.OnClicked += () => _activateAbility.TryExecute(card.CardId);
@@ -174,7 +175,9 @@ namespace InterruptingCards.Managers
         {
             if (IsServer)
             {
-                foreach (var card in _priorityManager.PriorityPlayer.ActivatedCards.Values)
+                Log.Info("Recharging activated cards");
+
+                foreach (var card in _playerManager.ActivePlayer.ActivatedCards)
                 {
                     card.IsDeactivated = false;
                 }
@@ -289,17 +292,11 @@ namespace InterruptingCards.Managers
             _theStackManager.PushLoot(_playerManager.ActivePlayer, cardId);
         }
 
-        public void TryActivateAbility()
-        {
-            // TODO: This should include which ability is trying to be activated
-            _activateAbility.TryExecute(CardConfig.InvalidId);
-        }
-
         public void ActivateAbility(int cardId)
         {
             if (IsServer)
             {
-                var cardBehaviour = _priorityManager.PriorityPlayer.ActivatedCards[cardId];
+                var cardBehaviour = _priorityManager.PriorityPlayer.ActivatedCards.Single(c => c.CardId == cardId);
                 cardBehaviour.IsDeactivated = true;
                 var card = _cardConfig[cardBehaviour.CardId];
                 _theStackManager.PushAbility(_playerManager.ActivePlayer, card.ActivatedAbility);
@@ -322,10 +319,10 @@ namespace InterruptingCards.Managers
 
         public void TriggerEndOfTurnAbilities()
         {
-            // TODO: Look up player's abilities
             if (IsServer)
             {
-                _theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
+                // TODO: Look up the abilities from the player and push them to the stack
+                _stateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
             }
         }
 

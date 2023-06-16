@@ -43,7 +43,22 @@ namespace InterruptingCards.Managers
 
         private LogManager Log => LogManager.Singleton;
 
-        public PlayerBehaviour this[ulong id] => _players.Single(p => p.Id == id);
+        public PlayerBehaviour this[ulong id]
+        {
+            get
+            {
+                try
+                {
+                    return _players.Single(p => p.Id == id);
+                }
+                catch (InvalidOperationException e)
+                {
+                    var playerIds = "[ " + string.Join(", ", _players.Select(p => p.Id)) + " ]";
+                    Log.Error($"Tried to get single {id} from {playerIds}");
+                    throw e;
+                }
+            }
+        }
 
         public override void OnNetworkSpawn()
         {
@@ -85,7 +100,6 @@ namespace InterruptingCards.Managers
             {
                 var character = characterCards[i];
                 _players[i].CharacterCard = character;
-                _players[i].ActivatedCards[character.CardId] = character;
             }
         }
 
