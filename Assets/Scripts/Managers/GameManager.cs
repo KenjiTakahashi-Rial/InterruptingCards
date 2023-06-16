@@ -185,10 +185,16 @@ namespace InterruptingCards.Managers
             {
                 Log.Info("Recharging activated cards");
 
-                foreach (var card in _playerManager.ActivePlayer.ActivatedCards)
-                {
-                    card.IsDeactivated = false;
-                }
+                var player = _playerManager.ActivePlayer;
+                player.CharacterCard.IsDeactivated = false;
+
+                //foreach (var card in player.Items)
+                //{
+                //    if (card.ActivatedAbility != CardAbility.Invalid)
+                //    {
+                //        card.IsDeactivated = false;
+                //    }
+                //}
 
                 _stateMachineManager.SetTrigger(StateMachine.RechargeComplete);
             }
