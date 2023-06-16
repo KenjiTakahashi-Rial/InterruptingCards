@@ -18,7 +18,6 @@ namespace InterruptingCards.Managers.TheStack
 
         private DeckBehaviour LootDiscard => Game.LootDiscard;
 
-
         public void Resolve(TheStackElement element)
         {
             if (element.Value == CardConfig.InvalidId)

@@ -31,7 +31,7 @@ namespace InterruptingCards.Actions
                 return false;
             }
 
-            if (activatedCards[cardId].IsActivated)
+            if (activatedCards[cardId].IsDeactivated)
             {
                 Log.Warn($"Cannot activate ability that has already been activated");
                 return false;

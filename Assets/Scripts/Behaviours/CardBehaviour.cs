@@ -17,10 +17,10 @@ namespace InterruptingCards.Behaviours
 
         private readonly NetworkVariable<int> _cardId = new(CardConfig.InvalidId);
         private readonly NetworkVariable<bool> _isFaceUp = new(s_defaultIsFaceUp);
-        private readonly NetworkVariable<bool> _isActivated = new(s_defaultIsActivated);
+        private readonly NetworkVariable<bool> _isDeactivated = new(s_defaultIsDectivated);
 
         [SerializeField] private static bool s_defaultIsFaceUp = true;
-        [SerializeField] private static bool s_defaultIsActivated = false;
+        [SerializeField] private static bool s_defaultIsDectivated = false;
 
         [SerializeField] private TextMeshPro _cardText;
         [SerializeField] private SpriteRenderer _cardSprite;
@@ -32,7 +32,7 @@ namespace InterruptingCards.Behaviours
 
         public Action OnClicked { get; set; }
 
-        public Action OnActivated { get; set; }
+        public Action OnDeactivated { get; set; }
 
         public int CardId
         {
@@ -46,10 +46,10 @@ namespace InterruptingCards.Behaviours
             set => _isFaceUp.Value = value;
         }
 
-        public bool IsActivated
+        public bool IsDeactivated
         {
-            get => _isActivated.Value;
-            set => _isActivated.Value = value;
+            get => _isDeactivated.Value;
+            set => _isDeactivated.Value = value;
         }
 
         private LogManager Log => LogManager.Singleton;
@@ -70,7 +70,7 @@ namespace InterruptingCards.Behaviours
         {
             _cardId.OnValueChanged += HandleCardIdChanged;
             _isFaceUp.OnValueChanged += HandleFaceUpChanged;
-            _isActivated.OnValueChanged += HandleActivatedChanged;
+            _isDeactivated.OnValueChanged += HandleActivatedChanged;
         }
 
         public void Update()
@@ -100,7 +100,7 @@ namespace InterruptingCards.Behaviours
         {
             _cardId.OnValueChanged -= HandleCardIdChanged;
             _isFaceUp.OnValueChanged -= HandleFaceUpChanged;
-            _isActivated.OnValueChanged -= HandleActivatedChanged;
+            _isDeactivated.OnValueChanged -= HandleActivatedChanged;
         }
 
         public void SetHidden(bool val)
@@ -146,14 +146,14 @@ namespace InterruptingCards.Behaviours
             var after = newValue ? "activated" : "not activated";
             Log.Info($"Active card changed ({before} -> {after})");
 
-            transform.rotation = IsActivated ? _activatedRotation : _originalRotation;
+            transform.rotation = IsDeactivated ? _activatedRotation : _originalRotation;
 
-            if (OnActivated == null)
+            if (OnDeactivated == null)
             {
                 Log.Info("OnActivated has no subscribers");
             }
 
-            OnActivated?.Invoke();
+            OnDeactivated?.Invoke();
         }
     }
 }

@@ -176,7 +176,7 @@ namespace InterruptingCards.Managers
             {
                 foreach (var card in _priorityManager.PriorityPlayer.ActivatedCards.Values)
                 {
-                    card.IsActivated = false;
+                    card.IsDeactivated = false;
                 }
 
                 _stateMachineManager.SetTrigger(StateMachine.RechargeComplete);
@@ -300,7 +300,7 @@ namespace InterruptingCards.Managers
             if (IsServer)
             {
                 var cardBehaviour = _priorityManager.PriorityPlayer.ActivatedCards[cardId];
-                cardBehaviour.IsActivated = true;
+                cardBehaviour.IsDeactivated = true;
                 var card = _cardConfig[cardBehaviour.CardId];
                 _theStackManager.PushAbility(_playerManager.ActivePlayer, card.ActivatedAbility);
             }
