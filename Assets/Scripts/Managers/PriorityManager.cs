@@ -25,16 +25,22 @@ namespace InterruptingCards.Managers
 
         private LogManager Log => LogManager.Singleton;
 
-        public void Start()
+        public void OnNeworkSpawned()
         {
-            PlayerManager.OnActivePlayerChanged += SetPlayerPriority;
-            TheStackManager.OnResolve += SetPlayerPriority;
+            if (IsServer)
+            {
+                PlayerManager.OnActivePlayerChanged += SetPlayerPriority;
+                TheStackManager.OnResolve += SetPlayerPriority;
+            }
         }
 
-        public void OnApplicationQuit()
+        public void OnNetworkDespawned()
         {
-            PlayerManager.OnActivePlayerChanged -= SetPlayerPriority;
-            TheStackManager.OnResolve -= SetPlayerPriority;
+            if (IsServer)
+            {
+                PlayerManager.OnActivePlayerChanged -= SetPlayerPriority;
+                TheStackManager.OnResolve -= SetPlayerPriority;
+            }
         }
 
         public void PassPriority()
