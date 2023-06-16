@@ -30,7 +30,7 @@ namespace InterruptingCards.Behaviours
                 var byteCount = Encoding.UTF8.GetByteCount(value);
                 if (byteCount > NameByteLimit)
                 {
-                    var truncated = Helpers.Truncate(value, NameByteLimit);
+                    var truncated = Utilities.Functions.Truncate(value, NameByteLimit);
                     Log.Warn(
                         $"String \"{value}\" ({byteCount}B) exceeds player name byte limit ({NameByteLimit}B). " +
                         $"Truncating to {truncated}"

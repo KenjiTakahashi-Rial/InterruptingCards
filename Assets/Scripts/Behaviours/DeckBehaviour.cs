@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using Unity.Netcode;
 using UnityEngine;
@@ -8,6 +7,7 @@ using UnityEngine;
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
 using InterruptingCards.Models;
+using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Behaviours
 {
@@ -49,7 +49,7 @@ namespace InterruptingCards.Behaviours
         public void Shuffle()
         {
             CheckEmpty();
-            _cardIds = _cardIds.OrderBy(x => Guid.NewGuid()).ToList();
+            Utilities.Functions.Shuffle(_cardIds);
             SetTop();
         }
 

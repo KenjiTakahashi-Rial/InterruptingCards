@@ -5,9 +5,10 @@ using System.Text;
 
 namespace InterruptingCards.Utilities
 {
-    public static class Helpers
+    public static class Functions
     {
-        public static void ForEachFile(
+        public static void ForEachFile
+        (
             string directory,
             Action<string> action,
             bool recursive = false,
@@ -53,6 +54,17 @@ namespace InterruptingCards.Utilities
                 s = s[..^1];
             }
             return s;
+        }
+
+        public static void Shuffle<T>(IList<T> values)
+        {
+            var random = new Random();
+
+            for (int i = values.Count - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                (values[i], values[j]) = (values[j], values[i]);
+            }
         }
     }
 }

@@ -58,7 +58,7 @@ namespace InterruptingCards.Config
                 }
             }
 
-            Helpers.ForEachFile(packPath, LoadCard, recursive: true, fileSearchPattern: searchPattern);
+            Functions.ForEachFile(packPath, LoadCard, recursive: true, fileSearchPattern: searchPattern);
         }
 
         public List<int> GenerateIdDeck(Func<Card, bool> predicate = null)
