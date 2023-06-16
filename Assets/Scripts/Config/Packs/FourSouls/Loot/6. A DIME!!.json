@@ -4,5 +4,5 @@
     "_name": "A DIME!",
     "_count": 5,
     "_value": 10,
-    "_playedEffectName": "GainCents"
+    "_lootAbilityName": "GainCents"
 }

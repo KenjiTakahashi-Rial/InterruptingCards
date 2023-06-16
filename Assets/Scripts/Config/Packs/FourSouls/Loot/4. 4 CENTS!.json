@@ -4,5 +4,5 @@
     "_name": "4 CENTS!",
     "_count": 5,
     "_value": 4,
-    "_playedEffectName": "GainCents"
+    "_lootAbilityName": "GainCents"
 }
