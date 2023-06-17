@@ -46,7 +46,7 @@ namespace InterruptingCards.Managers
         private void SetTriggerImpl(StateMachine trigger)
         {
             var id = _stateMachineConfig.GetId(trigger);
-            Log.Info($"Triggering {_stateMachineConfig.GetName(id)}");
+            Log.Info($"Triggering {_stateMachineConfig.GetName(id)} from {CurrentState}");
             _stateMachine.SetTrigger(id);
         }
 
@@ -75,7 +75,7 @@ namespace InterruptingCards.Managers
         private void SetBoolImpl(StateMachine param, bool val)
         {
             var id = _stateMachineConfig.GetId(param);
-            Log.Info($"Setting bool {_stateMachineConfig.GetName(id)} {val}");
+            Log.Info($"Setting bool {_stateMachineConfig.GetName(id)} {val} from {CurrentState}");
             _stateMachine.SetBool(id, val);
         }
     }

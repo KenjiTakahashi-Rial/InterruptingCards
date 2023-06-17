@@ -18,6 +18,7 @@ namespace InterruptingCards.Managers.TheStack
 
         private NetworkList<TheStackElement> _theStack;
 
+        public event Action OnEnd;
         public event Action<TheStackElement> OnResolve;
 
         public PlayerBehaviour LastPushBy { get; private set; }
@@ -25,7 +26,6 @@ namespace InterruptingCards.Managers.TheStack
         private GameManager Game => GameManager.Singleton;
         private LogManager Log => LogManager.Singleton;
         private StateMachineManager StateMachineManager => Game.TheStackStateMachineManager;
-        private StateMachineManager GameStateMachineManager => Game.StateMachineManager;
 
         // Unity Methods
 
@@ -105,8 +105,8 @@ namespace InterruptingCards.Managers.TheStack
             if (StateMachineManager.CurrentState == StateMachine.TheStackEnding)
             {
                 LastPushBy = null;
-                GameStateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
                 StateMachineManager.SetTrigger(StateMachine.TheStackEnded);
+                OnEnd?.Invoke();
             }
             else
             {
