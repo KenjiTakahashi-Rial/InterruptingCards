@@ -51,6 +51,20 @@ namespace InterruptingCards.Models
         // Four Souls Characters
         Isaac,
         Maggie,
+        Cain,
+        Judas,
+        BlueBaby,
+        Eve,
+        Samson,
+        Lazarus,
+        Lilith,
+        TheForgotten,
+        Eden,
+        Azazel,
+        TheLost,
+        TheKeeper,
+        Apollyon,
+        BumBo,
 
         // Four Souls Loot
         APenny,
