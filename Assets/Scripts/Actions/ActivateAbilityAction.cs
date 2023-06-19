@@ -9,20 +9,18 @@ namespace InterruptingCards.Actions
     {
         protected override bool CanExecute(ulong playerId, int cardId)
         {
-            // TODO: Integrate stack and priority ability activation
-
-            if (playerId != PlayerManager.ActivePlayer.Id)
+            var priorityPlayer = PriorityManager.PriorityPlayer;
+            if (playerId != priorityPlayer.Id)
             {
-                Log.Warn(
-                    $"Cannot activate ability if not active player (active player: {PlayerManager.ActivePlayer.Name})"
-                );
+                Log.Warn($"Cannot activate ability if not priority player (priority player: {priorityPlayer.Name})");
                 return false;
             }
 
             var gameState = GameStateMachineManager.CurrentState;
-            if (gameState != StateMachine.ActionPhaseIdling)
+            var theStackState = TheStackStateMachineManager.CurrentState;
+            if (gameState != StateMachine.ActionPhaseIdling && theStackState != StateMachine.TheStackPriorityPassing)
             {
-                Log.Warn($"Cannot activate ability from {gameState}");
+                Log.Warn($"Cannot activate ability from {gameState} or {theStackState}");
                 return false;
             }
 
@@ -45,8 +43,11 @@ namespace InterruptingCards.Actions
 
         protected override void Execute(int cardId)
         {
-            // TODO
-            GameStateMachineManager.SetTrigger(StateMachine.ActivateAbility);
+            if (GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling)
+            {
+                GameStateMachineManager.SetTrigger(StateMachine.ActivateAbility);
+            }
+
             GameManager.Singleton.ActivateAbility(cardId);
         }
     }

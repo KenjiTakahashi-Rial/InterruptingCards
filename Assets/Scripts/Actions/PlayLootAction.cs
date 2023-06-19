@@ -10,7 +10,6 @@ namespace InterruptingCards.Actions
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
         private PriorityManager PriorityManager => Game.PriorityManager;
-        private StateMachineManager TheStackStateMachineManager => Game.TheStackStateMachineManager;
 
         protected override bool CanExecute(ulong playerId, int cardId)
         {
@@ -50,7 +49,11 @@ namespace InterruptingCards.Actions
         }
         protected override void Execute(int cardId)
         {
-            GameStateMachineManager.SetTrigger(StateMachine.PlayLoot);
+            if (GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling)
+            {
+                GameStateMachineManager.SetTrigger(StateMachine.PlayLoot);
+            }
+
             GameManager.Singleton.PlayLoot(cardId);
         }
     }

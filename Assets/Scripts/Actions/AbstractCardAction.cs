@@ -1,5 +1,4 @@
 using Unity.Netcode;
-using UnityEngine;
 
 using InterruptingCards.Managers;
 
@@ -10,7 +9,9 @@ namespace InterruptingCards.Actions
         protected GameManager Game => GameManager.Singleton;
         protected LogManager Log => LogManager.Singleton;
         protected PlayerManager PlayerManager => Game.PlayerManager;
+        protected PriorityManager PriorityManager => Game.PriorityManager;
         protected StateMachineManager GameStateMachineManager => Game.StateMachineManager;
+        protected StateMachineManager TheStackStateMachineManager => Game.TheStackStateMachineManager;
 
         public void TryExecute(int cardId)
         {
