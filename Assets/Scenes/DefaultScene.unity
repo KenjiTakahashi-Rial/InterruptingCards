@@ -3077,7 +3077,7 @@ MonoBehaviour:
   _stateMachineManager: {fileID: 1138538691}
   _theStackStateMachineManager: {fileID: 1458435635}
   _theStackManager: {fileID: 1458435631}
-  _character:
+  _characters:
   - {fileID: 899597179}
   - {fileID: 977093931}
   _lootDeck: {fileID: 2058083998825954505}

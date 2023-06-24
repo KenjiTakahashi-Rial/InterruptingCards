@@ -31,7 +31,7 @@ namespace InterruptingCards.Managers
         [SerializeField] private TheStackManager _theStackManager;
 
         [Header("Behaviours")]
-        [SerializeField] private CardBehaviour[] _character;
+        [SerializeField] private CardBehaviour[] _characters;
         [SerializeField] private DeckBehaviour _lootDeck;
         [SerializeField] private DeckBehaviour _lootDiscard;
         [SerializeField] private HandBehaviour[] _hands;
@@ -122,7 +122,7 @@ namespace InterruptingCards.Managers
             Log.Info("Network spawned");
 
             // TODO: Need to do this for all activated ability cards
-            foreach (var card in _character)
+            foreach (var card in _characters)
             {
                 card.OnClicked += () => _activateAbility.TryExecute(card.CardId);
             }
@@ -137,7 +137,7 @@ namespace InterruptingCards.Managers
         {
             Log.Info("Network despawned");
 
-            foreach (var card in _character)
+            foreach (var card in _characters)
             {
                 card.OnClicked = null;
             }
@@ -174,9 +174,14 @@ namespace InterruptingCards.Managers
                 InitializeLoot();
                 _playerManager.Initialize(StartingMoney);
                 _stateMachineManager.SetTrigger(StateMachine.StartGame);
+
+                foreach (var character in _characters)
+                {
+                    character.IsDeactivated = true;
+                }
             }
 
-            _playerManager.AssignCharacters(_character);
+            _playerManager.AssignCharacters(_characters);
             _playerManager.AssignHands(_hands);
             SetCardsHidden(false);
         }
@@ -386,7 +391,7 @@ namespace InterruptingCards.Managers
             _lootDeck.SetHidden(val);
             _lootDiscard.SetHidden(val);
 
-            foreach (var card in _character)
+            foreach (var card in _characters)
             {
                 card.SetHidden(val);
             }
@@ -410,9 +415,9 @@ namespace InterruptingCards.Managers
             var characterDeck = _cardConfig.GenerateIdDeck(c => c.Suit == CardSuit.Characters);
             Functions.Shuffle(characterDeck);
 
-            for (var i = 0; i < _character.Length; i++)
+            for (var i = 0; i < _characters.Length; i++)
             {
-                _character[i].CardId = characterDeck[i];
+                _characters[i].CardId = characterDeck[i];
             }
         }
 

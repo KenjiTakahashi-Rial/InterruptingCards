@@ -11,16 +11,17 @@ namespace InterruptingCards.Behaviours
 {
     public class CardBehaviour : NetworkBehaviour
     {
+        private const int DefaultCardId = CardConfig.InvalidId;
+        private const bool DefaultIsFaceUp = true;
+        private const bool DefaultIsDeactivated = false;
+
         private const float ActivatedAngle = -90;
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
-        private readonly NetworkVariable<int> _cardId = new(CardConfig.InvalidId);
-        private readonly NetworkVariable<bool> _isFaceUp = new(s_defaultIsFaceUp);
-        private readonly NetworkVariable<bool> _isDeactivated = new(s_defaultIsDectivated);
-
-        [SerializeField] private static bool s_defaultIsFaceUp = true;
-        [SerializeField] private static bool s_defaultIsDectivated = false;
+        private readonly NetworkVariable<int> _cardId = new(DefaultCardId);
+        private readonly NetworkVariable<bool> _isFaceUp = new(DefaultIsFaceUp);
+        private readonly NetworkVariable<bool> _isDeactivated = new(DefaultIsDeactivated);
 
         [SerializeField] private TextMeshPro _cardText;
         [SerializeField] private SpriteRenderer _cardSprite;
