@@ -15,12 +15,12 @@ namespace InterruptingCards.Managers
 
         private readonly NetworkVariable<ulong> _priorityPlayerId = new();
 
+        public PlayerBehaviour PriorityPlayer => PlayerManager[_priorityPlayerId.Value];
+
         private GameManager Game => GameManager.Singleton;
         private PlayerManager PlayerManager => Game.PlayerManager;
         private StateMachineManager TheStackStateMachineManager => Game.TheStackStateMachineManager;
         private TheStackManager TheStackManager => Game.TheStackManager;
-
-        public PlayerBehaviour PriorityPlayer => PlayerManager[_priorityPlayerId.Value];
 
         // TODO: Add other factors (ability to purchase, etc.)
         public bool PriorityPlayerHasActions =>
@@ -28,8 +28,9 @@ namespace InterruptingCards.Managers
 
         private LogManager Log => LogManager.Singleton;
 
-        public void OnNeworkSpawned()
+        public override void OnNetworkSpawn()
         {
+            base.OnNetworkSpawn();
             if (IsServer)
             {
                 PlayerManager.OnActivePlayerChanged += SetPlayerPriority;
@@ -37,13 +38,14 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public void OnNetworkDespawned()
+        public override void OnNetworkDespawn()
         {
             if (IsServer)
             {
                 PlayerManager.OnActivePlayerChanged -= SetPlayerPriority;
                 TheStackManager.OnResolve -= SetPlayerPriority;
             }
+            base.OnNetworkDespawn();
         }
 
         public void PassPriority()
