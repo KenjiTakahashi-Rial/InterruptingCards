@@ -129,7 +129,7 @@ namespace InterruptingCards.Managers
 
             foreach (var hand in _hands)
             {
-                hand.OnCardClicked += (int cardId) => TryPlayLoot(cardId);
+                hand.OnCardClicked += _playLoot.TryExecute;
             }
         }
 
@@ -300,30 +300,6 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public void TryPlayLoot(int cardId)
-        {
-            _playLoot.TryExecute(cardId);
-        }
-
-        public void PlayLoot(int cardId)
-        {
-            var player = _priorityManager.PriorityPlayer;
-            player.LootPlays--;
-            player.Hand.Remove(cardId);
-            _theStackManager.PushLoot(_playerManager.ActivePlayer, cardId);
-        }
-
-        public void ActivateAbility(int cardId)
-        {
-            if (IsServer)
-            {
-                var cardBehaviour = _priorityManager.PriorityPlayer.ActivatedCards.Single(c => c.CardId == cardId);
-                cardBehaviour.IsDeactivated = true;
-                var card = _cardConfig[cardBehaviour.CardId];
-                _theStackManager.PushAbility(_playerManager.ActivePlayer, card.ActivatedAbility);
-            }
-        }
-
         public void TryDeclareEndTurn()
         {
             _declareEndTurn.TryExecute();
@@ -367,7 +343,6 @@ namespace InterruptingCards.Managers
 
         public void EndTurn()
         {
-            // TODO
             if (IsServer)
             {
                 _playerManager.ActivePlayer.LootPlays = 0;
@@ -452,39 +427,36 @@ namespace InterruptingCards.Managers
 
         private void TriggerPriorityPassComplete()
         {
-            while (true)
+            var currentState = StateMachineManager.CurrentState;
+            switch (currentState)
             {
-                var currentState = StateMachineManager.CurrentState;
-                switch (currentState)
-                {
-                    case StateMachine.StartPhaseTriggeringAbilities:
-                        StateMachineManager.SetTrigger(StateMachine.StartPhaseTriggerAbilitiesComplete);
-                        return;
-                    case StateMachine.GamePriorityPassing:
-                        StateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
-                        return;
-                    case StateMachine.PlayingLoot:
-                        StateMachineManager.SetTrigger(StateMachine.PlayLootComplete);
-                        return;
-                    case StateMachine.ActivatingAbility:
-                        StateMachineManager.SetTrigger(StateMachine.ActivateAbilityComplete);
-                        return;
-                    case StateMachine.DeclaringAttack:
-                        StateMachineManager.SetTrigger(StateMachine.DeclareAttackComplete);
-                        return;
-                    case StateMachine.DeclaringPurchase:
-                        StateMachineManager.SetTrigger(StateMachine.DeclarePurchaseComplete);
-                        return;
-                    case StateMachine.DeclaringEndTurn:
-                        StateMachineManager.SetTrigger(StateMachine.DeclareEndTurnComplete);
-                        return;
-                    case StateMachine.EndPhaseTriggeringAbilities:
-                        StateMachineManager.SetTrigger(StateMachine.EndPhaseTriggerAbilitiesComplete);
-                        return;
-                    default:
-                        Log.Info($"Priority pass completed, but state machine is in {currentState}");
-                        break;
-                }
+                case StateMachine.StartPhaseTriggeringAbilities:
+                    StateMachineManager.SetTrigger(StateMachine.StartPhaseTriggerAbilitiesComplete);
+                    return;
+                case StateMachine.GamePriorityPassing:
+                    StateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
+                    return;
+                case StateMachine.PlayingLoot:
+                    StateMachineManager.SetTrigger(StateMachine.PlayLootComplete);
+                    return;
+                case StateMachine.ActivatingAbility:
+                    StateMachineManager.SetTrigger(StateMachine.ActivateAbilityComplete);
+                    return;
+                case StateMachine.DeclaringAttack:
+                    StateMachineManager.SetTrigger(StateMachine.DeclareAttackComplete);
+                    return;
+                case StateMachine.DeclaringPurchase:
+                    StateMachineManager.SetTrigger(StateMachine.DeclarePurchaseComplete);
+                    return;
+                case StateMachine.DeclaringEndTurn:
+                    StateMachineManager.SetTrigger(StateMachine.DeclareEndTurnComplete);
+                    return;
+                case StateMachine.EndPhaseTriggeringAbilities:
+                    StateMachineManager.SetTrigger(StateMachine.EndPhaseTriggerAbilitiesComplete);
+                    return;
+                default:
+                    Log.Warn($"Priority pass completed, but state machine is in {currentState}");
+                    break;
             }
         }
     }

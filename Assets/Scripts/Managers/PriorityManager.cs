@@ -21,11 +21,6 @@ namespace InterruptingCards.Managers
         private PlayerManager PlayerManager => Game.PlayerManager;
         private StateMachineManager TheStackStateMachineManager => Game.TheStackStateMachineManager;
         private TheStackManager TheStackManager => Game.TheStackManager;
-
-        // TODO: Add other factors (ability to purchase, etc.)
-        public bool PriorityPlayerHasActions =>
-            PriorityPlayer.LootPlays > 0 && !PriorityPlayer.ActivatedCards.Any(c => !c.IsDeactivated);
-
         private LogManager Log => LogManager.Singleton;
 
         public override void OnNetworkSpawn()
@@ -79,7 +74,11 @@ namespace InterruptingCards.Managers
 
         public void TryAutoPass()
         {
-            if (AutoPass && !PriorityPlayerHasActions)
+            var hasLootPlay = PriorityPlayer.LootPlays > 0;
+            var hasActivatedCard = PriorityPlayer.ActivatedCards.Any(c => !c.IsDeactivated);
+            var canPurchase = false; // TOOD
+
+            if (AutoPass && !hasLootPlay && !hasActivatedCard && !canPurchase)
             {
                 Log.Info($"Automatically passing priority from {PriorityPlayer.Name}");
                 PassPriority();

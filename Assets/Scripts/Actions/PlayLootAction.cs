@@ -1,25 +1,17 @@
-using UnityEngine;
-
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
+using InterruptingCards.Managers.TheStack;
 
 namespace InterruptingCards.Actions
 {
     public class PlayLootAction : AbstractCardAction
     {
-        private readonly CardConfig _cardConfig = CardConfig.Singleton;
-
-        private PriorityManager PriorityManager => Game.PriorityManager;
-
         protected override bool CanExecute(ulong playerId, int cardId)
         {
             var priorityPlayer = PriorityManager.PriorityPlayer;
-
             if (playerId != priorityPlayer.Id)
             {
-                Log.Warn(
-                    $"Cannot play loot if not priority player (priority player: " +
-                    $"{PriorityManager.PriorityPlayer.Name})");
+                Log.Warn($"Cannot play loot without priority (priority player: {priorityPlayer.Name})");
                 return false;
             }
 
@@ -49,12 +41,17 @@ namespace InterruptingCards.Actions
         }
         protected override void Execute(int cardId)
         {
-            if (GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling)
+            var player = PriorityManager.PriorityPlayer;
+            player.LootPlays--;
+            player.Hand.Remove(cardId);
+            TheStackManager.PushLoot(PlayerManager.ActivePlayer, cardId);
+
+            var isActive = player == PlayerManager.ActivePlayer;
+            var isActionPhaseIdling = GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling;
+            if (isActive && isActionPhaseIdling)
             {
                 GameStateMachineManager.SetTrigger(StateMachine.PlayLoot);
             }
-
-            GameManager.Singleton.PlayLoot(cardId);
         }
     }
 }

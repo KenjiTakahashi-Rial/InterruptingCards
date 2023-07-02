@@ -2,6 +2,7 @@ using System.Linq;
 
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
+using InterruptingCards.Managers.TheStack;
 
 namespace InterruptingCards.Actions
 {
@@ -12,7 +13,7 @@ namespace InterruptingCards.Actions
             var priorityPlayer = PriorityManager.PriorityPlayer;
             if (playerId != priorityPlayer.Id)
             {
-                Log.Warn($"Cannot activate ability if not priority player (priority player: {priorityPlayer.Name})");
+                Log.Warn($"Cannot activate ability without priority (priority player: {priorityPlayer.Name})");
                 return false;
             }
 
@@ -24,10 +25,10 @@ namespace InterruptingCards.Actions
                 return false;
             }
 
-            var activatedCards = PlayerManager.ActivePlayer.ActivatedCards;
+            var activatedCards = priorityPlayer.ActivatedCards;
             if (!activatedCards.Any(c => c.CardId == cardId))
             {
-                Log.Warn($"Cannot activate ability that the palyer does not have");
+                Log.Warn($"Cannot activate ability that the player does not have");
                 return false;
             }
 
@@ -43,12 +44,18 @@ namespace InterruptingCards.Actions
 
         protected override void Execute(int cardId)
         {
-            if (GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling)
+            var player = PriorityManager.PriorityPlayer;
+            var cardBehaviour = player.ActivatedCards.Single(c => c.CardId == cardId);
+            cardBehaviour.IsDeactivated = true;
+            var card = _cardConfig[cardBehaviour.CardId];
+            TheStackManager.PushAbility(PlayerManager.ActivePlayer, card.ActivatedAbility);
+
+            var isActive = player == PlayerManager.ActivePlayer;
+            var isActionPhaseIdling = GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling;
+            if (isActive && isActionPhaseIdling)
             {
                 GameStateMachineManager.SetTrigger(StateMachine.ActivateAbility);
             }
-
-            GameManager.Singleton.ActivateAbility(cardId);
         }
     }
 }
