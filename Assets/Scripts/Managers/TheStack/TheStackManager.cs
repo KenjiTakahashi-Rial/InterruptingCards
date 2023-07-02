@@ -116,6 +116,17 @@ namespace InterruptingCards.Managers.TheStack
 
         // Helper Methods
 
+        public TheStackElement[] DebugTopN(int n)
+        {
+            var length = _theStack.Count < n ? _theStack.Count : n;
+            var topN = new TheStackElement[length];
+            for (var i = 0; i < length; i++)
+            {
+                topN[i] = _theStack[_theStack.Count - i - 1];
+            }
+            return topN;
+        }
+
         private void Push(PlayerBehaviour player)
         {
             LastPushBy = player;

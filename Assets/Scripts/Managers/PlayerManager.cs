@@ -39,7 +39,7 @@ namespace InterruptingCards.Managers
         }
 
         // TODO: This is temporary
-        public List<PlayerBehaviour> TempPlayers => _players;
+        public List<PlayerBehaviour> DebugPlayers => _players;
 
         private LogManager Log => LogManager.Singleton;
 

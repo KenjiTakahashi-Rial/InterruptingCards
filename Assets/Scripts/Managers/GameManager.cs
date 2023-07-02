@@ -46,9 +46,11 @@ namespace InterruptingCards.Managers
         [SerializeField] private DeclareEndTurnAction _declareEndTurn;
         [SerializeField] private PassPriorityAction _passPriority;
 
-        [Header("Temp")]
-        [SerializeField] private TextMeshPro _tempStateText;
-        [SerializeField] private TextMeshPro _tempPlayerText;
+        [Header("Debug")]
+        [SerializeField] private TextMeshPro _debugStateText;
+        [SerializeField] private TextMeshPro _debugPlayerText;
+        [SerializeField] private TextMeshPro _debugTheStackText;
+        [SerializeField] private int _debugTheStackTextCount;
 
         public static GameManager Singleton { get; private set; }
 
@@ -86,18 +88,18 @@ namespace InterruptingCards.Managers
         {
             // TODO: This is temporary
 
-            if (_tempStateText != null)
+            if (_debugStateText != null)
             {
-                _tempStateText.SetText(
+                _debugStateText.SetText(
                     $"{_stateMachineManager.CurrentStateName}\n{_theStackStateMachineManager.CurrentStateName}"
                 );
             }
 
-            if (_tempPlayerText != null)
+            if (_debugPlayerText != null)
             {
                 try
                 {
-                    var playerInfo = _playerManager.TempPlayers.Select(
+                    var playerInfo = _playerManager.DebugPlayers.Select(
                         p =>
                         {
                             var activeString = p == _playerManager.ActivePlayer ? " A" : " _";
@@ -106,13 +108,29 @@ namespace InterruptingCards.Managers
                         }
                     );
 
-                    _tempPlayerText.SetText(string.Join("\n", playerInfo));
+                    _debugPlayerText.SetText(string.Join("\n", playerInfo));
                 }
                 catch (System.InvalidOperationException)
                 {
-                    // Sometimes players has two ID 0 at the beginning of the game.
-                    // It resolves itself within a frame or so, but it's fine because this is just a test log
+                    // Sometimes players has two ID 0 at the beginning of the game
+                    // It resolves itself within about a frame, so it's fine because this is just a test log
                 }
+            }
+
+            if(_debugTheStackText != null)
+            {
+                var topN = TheStackManager.DebugTopN(_debugTheStackTextCount);
+                var elementStrings = new string[_debugTheStackTextCount];
+
+                for (var i = 0; i < topN.Length; i++)
+                {
+                    var e = topN[i];
+                    var s = $"{e.Type} {e.PushedById} {e.Value}";
+                    elementStrings[i] = i == 0 ? "TOP -> " + s : s;
+                }
+
+                var topNString = string.Join("\n", elementStrings);
+                _debugTheStackText.SetText(topN.Length == 0 ? "The Stack is empty" : topNString);
             }
         }
 
