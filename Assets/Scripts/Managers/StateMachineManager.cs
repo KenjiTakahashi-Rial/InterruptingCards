@@ -46,7 +46,24 @@ namespace InterruptingCards.Managers
         private void SetTriggerImpl(StateMachine trigger)
         {
             var id = _stateMachineConfig.GetId(trigger);
-            Log.Info($"Triggering {_stateMachineConfig.GetName(id)} from {CurrentState}");
+            var triggerNotConsumed = _stateMachine.GetBool(id);
+
+            if (triggerNotConsumed)
+            {
+                Log.Warn($"Waiting for trigger {trigger} to be consumed");
+            }
+
+// Waiting for the trigger to be consumed
+#pragma warning disable S1116 // Empty statements should be removed
+            while (_stateMachine.GetBool(id));
+#pragma warning restore S1116 // Empty statements should be removed
+
+            if (triggerNotConsumed)
+            {
+                Log.Info($"Trigger {trigger} was consumed");
+            }
+
+            Log.Info($"Setting trigger {_stateMachineConfig.GetName(id)} from {CurrentState}");
             _stateMachine.SetTrigger(id);
         }
 
