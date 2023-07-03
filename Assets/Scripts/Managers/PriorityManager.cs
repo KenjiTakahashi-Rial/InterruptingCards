@@ -65,7 +65,9 @@ namespace InterruptingCards.Managers
             var lastPushBy = TheStackManager.LastPushBy;
             if (PriorityPlayer == lastPushBy || lastPushBy == null && PriorityPlayer == PlayerManager.ActivePlayer)
             {
-                TheStackStateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
+                TheStackStateMachineManager.SetTrigger(
+                    TheStackManager.IsEmpty ? StateMachine.TheStackEnd : StateMachine.TheStackPop
+                );
                 return;
             }
 
@@ -76,7 +78,7 @@ namespace InterruptingCards.Managers
         {
             var hasLootPlay = PriorityPlayer.LootPlays > 0;
             var hasActivatedCard = PriorityPlayer.ActivatedCards.Any(c => !c.IsDeactivated);
-            var canPurchase = false; // TOOD
+            var canPurchase = false; // TODO: Allow purchasing during The Stack
 
             if (AutoPass && !hasLootPlay && !hasActivatedCard && !canPurchase)
             {

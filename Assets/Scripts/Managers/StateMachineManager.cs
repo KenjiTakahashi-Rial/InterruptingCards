@@ -1,3 +1,6 @@
+using System.Collections;
+using System.Collections.Generic;
+
 using Unity.Netcode;
 using UnityEngine;
 
@@ -10,6 +13,7 @@ namespace InterruptingCards.Managers
         private const int GameStateMachineLayer = 0;
 
         private readonly StateMachineConfig _stateMachineConfig = StateMachineConfig.Singleton;
+        private readonly Dictionary<int, int> _triggerCounts = new();
 
         [SerializeField] private Animator _stateMachine;
 
@@ -45,26 +49,42 @@ namespace InterruptingCards.Managers
 
         private void SetTriggerImpl(StateMachine trigger)
         {
-            var id = _stateMachineConfig.GetId(trigger);
-            var triggerNotConsumed = _stateMachine.GetBool(id);
+            SetTriggerImpl(_stateMachineConfig.GetId(trigger));
+        }
 
-            if (triggerNotConsumed)
+        private void SetTriggerImpl(int id)
+        {
+            var name = _stateMachineConfig.GetName(id);
+
+            if (_stateMachine.GetBool(id))
             {
-                Log.Warn($"Waiting for trigger {trigger} to be consumed");
+                var count = _triggerCounts[id];
+                Log.Info($"{name} has not been consumed. Incrementing trigger count to {count + 1}");
+                _triggerCounts[id]++;
+                StartCoroutine(AutoResetTrigger(id));
             }
 
-// Waiting for the trigger to be consumed
-#pragma warning disable S1116 // Empty statements should be removed
-            while (_stateMachine.GetBool(id));
-#pragma warning restore S1116 // Empty statements should be removed
-
-            if (triggerNotConsumed)
-            {
-                Log.Info($"Trigger {trigger} was consumed");
-            }
-
-            Log.Info($"Setting trigger {_stateMachineConfig.GetName(id)} from {CurrentState}");
+            Log.Info($"Setting trigger {name} from {CurrentState}");
             _stateMachine.SetTrigger(id);
+        }
+
+        private IEnumerator AutoResetTrigger(int id)
+        {
+            while (_stateMachine.GetBool(id))
+            {
+                yield return null;
+            }
+
+            _stateMachine.SetTrigger(id);
+            
+            if (_triggerCounts[id] == 1)
+            {
+                _triggerCounts.Remove(id);
+            }
+            else
+            {
+                _triggerCounts[id]--;
+            }
         }
 
         public void SetBool(StateMachine param, bool val)

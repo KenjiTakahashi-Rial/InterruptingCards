@@ -48,7 +48,7 @@ namespace InterruptingCards.Actions
             var cardBehaviour = player.ActivatedCards.Single(c => c.CardId == cardId);
             cardBehaviour.IsDeactivated = true;
             var card = _cardConfig[cardBehaviour.CardId];
-            TheStackManager.PushAbility(PlayerManager.ActivePlayer, card.ActivatedAbility);
+            TheStackManager.PushAbility(player, card.ActivatedAbility);
 
             var isActive = player == PlayerManager.ActivePlayer;
             var isActionPhaseIdling = GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling;

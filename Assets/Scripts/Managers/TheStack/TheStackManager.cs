@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Unity.Netcode;
 using UnityEngine;
@@ -21,6 +23,7 @@ namespace InterruptingCards.Managers.TheStack
         public event Action OnEnd;
         public event Action<TheStackElement> OnResolve;
 
+        public bool IsEmpty => _theStack.Count == 0;
         public PlayerBehaviour LastPushBy { get; private set; }
 
         private GameManager Game => GameManager.Singleton;
@@ -47,22 +50,22 @@ namespace InterruptingCards.Managers.TheStack
         public void PushLoot(PlayerBehaviour player, int cardId)
         {
             Log.Info($"Player {player.Name} pushing {_cardConfig.GetName(cardId)} to The Stack");
-            _theStack.Add(new TheStackElement(TheStackElementType.Loot, player.Id, cardId));
-            Push(player);
+            var element = new TheStackElement(TheStackElementType.Loot, player.Id, cardId);
+            Push(player, element);
         }
 
         public void PushAbility(PlayerBehaviour player, CardAbility ability)
         {
             Log.Info($"Player {player.Name} pushing {ability} to The Stack");
-            _theStack.Add(new TheStackElement(TheStackElementType.Ability, player.Id, (int)ability));
-            Push(player);
+            var element = new TheStackElement(TheStackElementType.Ability, player.Id, (int)ability);
+            Push(player, element);
         }
 
         public void PushDiceRoll(PlayerBehaviour player, int diceRoll)
         {
             Log.Info($"Player {player.Name} pushing dice roll {diceRoll} to The Stack");
-            _theStack.Add(new TheStackElement(TheStackElementType.DiceRoll, player.Id, diceRoll));
-            Push(player);
+            var element = new TheStackElement(TheStackElementType.DiceRoll, player.Id, diceRoll);
+            Push(player, element);
         }
 
         public void Pop()
@@ -79,12 +82,11 @@ namespace InterruptingCards.Managers.TheStack
                 var element = _theStack[last];
                 _theStack.RemoveAt(last);
                 Resolve(element);
-                StateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
                 StateMachineManager.SetTrigger(StateMachine.TheStackPopped);
             }
             else
             {
-                Log.Warn($"Cannot pop The Stack in state {StateMachineManager.CurrentStateName}");
+                Log.Warn($"Cannot pop The Stack from {StateMachineManager.CurrentStateName}");
             }
         }
 
@@ -127,10 +129,16 @@ namespace InterruptingCards.Managers.TheStack
             return topN;
         }
 
-        private void Push(PlayerBehaviour player)
+        private void Push(PlayerBehaviour player, TheStackElement element)
         {
             LastPushBy = player;
-            StateMachineManager.SetBool(StateMachine.TheStackIsEmpty, _theStack.Count == 0);
+            
+            if (IsEmpty && StateMachineManager.CurrentState == StateMachine.TheStackIdling)
+            {
+                StateMachineManager.SetTrigger(StateMachine.TheStackBegin);
+            }
+
+            _theStack.Add(element);
         }
 
         private void Resolve(TheStackElement element)

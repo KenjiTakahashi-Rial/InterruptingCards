@@ -82,11 +82,11 @@ namespace InterruptingCards.Config
         TheStackEnding,
 
         // The Stack Triggers
+        TheStackEnd,
         TheStackEnded,
-        TheStackIsEmpty,
+        TheStackPop,
         TheStackPopped,
         TheStackBegin,
-        TheStackPriorityPassComplete,
     }
 
     public class StateMachineConfig
@@ -165,10 +165,10 @@ namespace InterruptingCards.Config
 
             // The Stack Triggers
             { StateMachine.TheStackBegin, "begin" },
+            { StateMachine.TheStackEnd, "end" },
             { StateMachine.TheStackEnded, "ended" },
-            { StateMachine.TheStackIsEmpty, "isEmpty" },
+            { StateMachine.TheStackPop, "pop" },
             { StateMachine.TheStackPopped, "popped" },
-            { StateMachine.TheStackPriorityPassComplete, "theStackPriorityPassComplete" },
         };
 
         private static readonly ImmutableDictionary<StateMachine, int> Ids = 

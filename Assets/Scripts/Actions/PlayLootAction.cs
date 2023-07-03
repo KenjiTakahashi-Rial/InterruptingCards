@@ -30,7 +30,7 @@ namespace InterruptingCards.Actions
                 return false;
             }
 
-            var hand = PlayerManager.ActivePlayer.Hand;
+            var hand = priorityPlayer.Hand;
             if (!hand.Contains(cardId))
             {
                 Log.Warn($"Cannot play loot {_cardConfig.GetName(cardId)} if hand does not contain it");
@@ -44,7 +44,7 @@ namespace InterruptingCards.Actions
             var player = PriorityManager.PriorityPlayer;
             player.LootPlays--;
             player.Hand.Remove(cardId);
-            TheStackManager.PushLoot(PlayerManager.ActivePlayer, cardId);
+            TheStackManager.PushLoot(player, cardId);
 
             var isActive = player == PlayerManager.ActivePlayer;
             var isActionPhaseIdling = GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling;
