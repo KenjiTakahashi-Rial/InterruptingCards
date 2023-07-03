@@ -58,9 +58,8 @@ namespace InterruptingCards.Managers
 
             if (_stateMachine.GetBool(id))
             {
-                var count = _triggerCounts[id];
-                Log.Info($"{name} has not been consumed. Incrementing trigger count to {count + 1}");
-                _triggerCounts[id]++;
+                var newCount = _triggerCounts.ContainsKey(id) ? ++_triggerCounts[id] : 1;
+                Log.Info($"{name} has not been consumed. Incrementing trigger count to {newCount}");
                 StartCoroutine(AutoResetTrigger(id));
             }
 

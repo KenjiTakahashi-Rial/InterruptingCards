@@ -61,3 +61,6 @@ crashlytics-build.properties
 
 # Unity Test Framework
 InitTestScene*.unity*
+
+# Links to Unity logs
+*.log.lnk
