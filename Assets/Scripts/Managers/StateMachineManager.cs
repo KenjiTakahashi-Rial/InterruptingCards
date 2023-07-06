@@ -12,6 +12,7 @@ namespace InterruptingCards.Managers
     {
         private const int GameStateMachineLayer = 0;
 
+        private readonly CardConfig _cardConfig = CardConfig.Singleton;
         private readonly StateMachineConfig _stateMachineConfig = StateMachineConfig.Singleton;
         private readonly Dictionary<int, int> _triggerCounts = new();
 
@@ -58,7 +59,12 @@ namespace InterruptingCards.Managers
 
             if (_stateMachine.GetBool(id))
             {
-                var newCount = _triggerCounts.ContainsKey(id) ? ++_triggerCounts[id] : 1;
+                if (!_triggerCounts.ContainsKey(id))
+                {
+                    _triggerCounts[id] = 0;
+                }
+
+                var newCount = ++_triggerCounts[id];
                 Log.Info($"{name} has not been consumed. Incrementing trigger count to {newCount}");
                 StartCoroutine(AutoResetTrigger(id));
             }
@@ -75,14 +81,22 @@ namespace InterruptingCards.Managers
             }
 
             _stateMachine.SetTrigger(id);
-            
-            if (_triggerCounts[id] == 1)
+
+            if (!_triggerCounts.ContainsKey(id))
             {
-                _triggerCounts.Remove(id);
+                var name = _cardConfig.GetName(id);
+                Log.Warn($"Cannot automatically reset {name} when it has no trigger count");
             }
             else
             {
-                _triggerCounts[id]--;
+                if (_triggerCounts[id] == 1)
+                {
+                    _triggerCounts.Remove(id);
+                }
+                else
+                {
+                    _triggerCounts[id]--;
+                }
             }
         }
 
