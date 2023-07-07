@@ -47,7 +47,7 @@ namespace InterruptingCards.Managers
         {
             if (!IsServer)
             {
-                Log.Warn($"Cannot pass priority if not host");
+                Log.Warn("Cannot pass priority if not host");
                 return;
             }
 
@@ -63,7 +63,7 @@ namespace InterruptingCards.Managers
             Log.Info($"Passed priority from {prevPriorityPlayer.Name} to {PriorityPlayer.Name}");
 
             var lastPushBy = TheStackManager.LastPushBy;
-            if (PriorityPlayer == lastPushBy || lastPushBy == null && PriorityPlayer == PlayerManager.ActivePlayer)
+            if (PriorityPlayer == lastPushBy || (lastPushBy == null && PriorityPlayer == PlayerManager.ActivePlayer))
             {
                 TheStackStateMachineManager.SetTrigger(
                     TheStackManager.IsEmpty ? StateMachine.TheStackEnd : StateMachine.TheStackPop

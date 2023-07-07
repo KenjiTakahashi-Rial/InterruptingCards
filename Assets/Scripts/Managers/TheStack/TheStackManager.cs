@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 using Unity.Netcode;
 using UnityEngine;
@@ -15,8 +13,10 @@ namespace InterruptingCards.Managers.TheStack
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
+#pragma warning disable RCS1169 // Make field read-only.
         [SerializeField] private ResolveLoot _resolveLoot;
         [SerializeField] private ResolveAbility _resolveAbility;
+#pragma warning restore RCS1169 // Make field read-only.
 
         private NetworkList<TheStackElement> _theStack;
 
@@ -132,7 +132,7 @@ namespace InterruptingCards.Managers.TheStack
         private void Push(PlayerBehaviour player, TheStackElement element)
         {
             LastPushBy = player;
-            
+
             if (IsEmpty && StateMachineManager.CurrentState == StateMachine.TheStackIdling)
             {
                 StateMachineManager.SetTrigger(StateMachine.TheStackBegin);

@@ -7,7 +7,6 @@ using UnityEngine;
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
 using InterruptingCards.Models;
-using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Behaviours
 {
@@ -16,10 +15,12 @@ namespace InterruptingCards.Behaviours
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
         private List<int> _cardIds = new();
 
+#pragma warning disable RCS1169 // Make field read-only.
         [SerializeField] private CardBehaviour _topCard;
+#pragma warning restore RCS1169 // Make field read-only.
 
         public event Action OnClicked;
-        
+
         public bool IsFaceUp
         {
             get => _topCard.IsFaceUp;

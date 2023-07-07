@@ -9,6 +9,7 @@ namespace InterruptingCards.Models
     {
         // JSON Keys
 
+#pragma warning disable RCS1169 // Make field read-only.
         [SerializeField] private string _suitName;
 
         [SerializeField] private string _rankName;
@@ -22,6 +23,7 @@ namespace InterruptingCards.Models
         [SerializeField] private string _lootAbilityName;
 
         [SerializeField] private string _activatedAbilityName;
+#pragma warning restore RCS1169 // Make field read-only.
 
         // Lazy Backing Fields
 
@@ -81,7 +83,7 @@ namespace InterruptingCards.Models
 
         private Func<E> EnumValueFactory<E>(string name) where E : struct
         {
-            return () => 
+            return () =>
             {
                 Enum.TryParse(name, out E outValue);
                 return outValue;

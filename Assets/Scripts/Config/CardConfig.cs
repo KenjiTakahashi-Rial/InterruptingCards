@@ -11,7 +11,7 @@ using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Config
 {
-    public class CardConfig
+    public sealed class CardConfig
     {
         public const int InvalidId = 0;
 
@@ -63,7 +63,7 @@ namespace InterruptingCards.Config
 
         public List<int> GenerateIdDeck(Func<Card, bool> predicate = null)
         {
-            predicate ??= c => true;
+            predicate ??= _ => true;
 
             return _cards
                 .Where(pair => predicate(pair.Value))

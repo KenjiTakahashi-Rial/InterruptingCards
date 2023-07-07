@@ -16,7 +16,9 @@ namespace InterruptingCards.Managers
         private readonly StateMachineConfig _stateMachineConfig = StateMachineConfig.Singleton;
         private readonly Dictionary<int, int> _triggerCounts = new();
 
+#pragma warning disable RCS1169 // Make field read-only
         [SerializeField] private Animator _stateMachine;
+#pragma warning restore RCS1169 // Make field read-only
 
         public StateMachine CurrentState => _stateMachineConfig.GetEnum(
             _stateMachine.GetCurrentAnimatorStateInfo(GameStateMachineLayer).fullPathHash

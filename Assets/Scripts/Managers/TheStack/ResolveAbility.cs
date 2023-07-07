@@ -2,21 +2,15 @@ using System;
 
 using UnityEngine;
 
-using InterruptingCards.Behaviours;
-using InterruptingCards.Config;
 using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers.TheStack
 {
     public class ResolveAbility : MonoBehaviour
     {
-        private readonly CardConfig _cardConfig = CardConfig.Singleton;
-
         private GameManager Game => GameManager.Singleton;
         private LogManager Log => LogManager.Singleton;
         private PlayerManager PlayerManager => Game.PlayerManager;
-
-        private DeckBehaviour LootDiscard => Game.LootDiscard;
 
         public void Resolve(TheStackElement element)
         {
@@ -24,7 +18,7 @@ namespace InterruptingCards.Managers.TheStack
 
             if (ability == CardAbility.Invalid)
             {
-                Log.Warn($"The Stack resolved an invalid ability");
+                Log.Warn("The Stack resolved an invalid ability");
             }
 
             switch (ability)

@@ -13,7 +13,7 @@ namespace InterruptingCards.Actions
             if (playerId != PriorityManager.PriorityPlayer.Id)
             {
                 Log.Warn(
-                    $"Cannot pass priority if not priority player (priority player: " +
+                    "Cannot pass priority if not priority player (priority player: " +
                     $"{PriorityManager.PriorityPlayer.Name})"
                 );
                 return false;

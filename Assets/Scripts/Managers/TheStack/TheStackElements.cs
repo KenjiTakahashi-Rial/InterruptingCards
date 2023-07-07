@@ -36,10 +36,9 @@ namespace InterruptingCards.Managers.TheStack
             serializer.SerializeValue(ref _type);
             serializer.SerializeValue(ref _pushedById);
             serializer.SerializeValue(ref _value);
-
         }
 
-        public bool Equals(TheStackElement other)
+        public readonly bool Equals(TheStackElement other)
         {
             return Type == other.Type
                 && PushedById == other.PushedById

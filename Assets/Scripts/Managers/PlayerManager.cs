@@ -13,12 +13,16 @@ namespace InterruptingCards.Managers
     public class PlayerManager : NetworkBehaviour
     {
         private readonly HashSet<ulong> _notReadyPlayers = new();
+// Caused by DebugPlayers
+#pragma warning disable IDE0032 // Use auto-property
         private readonly List<PlayerBehaviour> _players = new();
+#pragma warning restore IDE0032 // Use auto-property
         private readonly NetworkVariable<int> _activePlayerIndex = new();
         private readonly Dictionary<int, NetworkVariable<int>.OnValueChangedDelegate> _onActivePlayerChangedHandlers = new();
 
-        [SerializeField] private int _minPlayers;
+#pragma warning disable RCS1169 // Make field read-only.
         [SerializeField] private int _maxPlayers;
+#pragma warning restore RCS1169 // Make field read-only.
 
         public PlayerBehaviour ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex.Value];
 
@@ -38,8 +42,10 @@ namespace InterruptingCards.Managers
             remove => _activePlayerIndex.OnValueChanged -= _onActivePlayerChangedHandlers[value.GetHashCode()];
         }
 
-        // TODO: This is temporary
+// This is temporary for debug purposes only
+#pragma warning disable RCS1085 // Use auto-implemented property.
         public List<PlayerBehaviour> DebugPlayers => _players;
+#pragma warning restore RCS1085 // Use auto-implemented property.
 
         private LogManager Log => LogManager.Singleton;
 
@@ -199,7 +205,7 @@ namespace InterruptingCards.Managers
         private void PlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
         {
             _notReadyPlayers.Remove(serverRpcParams.Receive.SenderClientId);
-            
+
             if (_notReadyPlayers.Count == 0)
             {
                 GameStateMachineManager.SetTrigger(StateMachine.AllReady);

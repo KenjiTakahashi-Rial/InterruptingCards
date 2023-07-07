@@ -20,6 +20,7 @@ namespace InterruptingCards.Managers
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
+#pragma warning disable RCS1169 // Make field read-only.
         [Header("Config")]
         [SerializeField] private CardPack _cardPack;
 
@@ -51,6 +52,7 @@ namespace InterruptingCards.Managers
         [SerializeField] private TextMeshPro _debugPlayerText;
         [SerializeField] private TextMeshPro _debugTheStackText;
         [SerializeField] private int _debugTheStackTextCount;
+#pragma warning restore RCS1169 // Make field read-only.
 
         public static GameManager Singleton { get; private set; }
 
@@ -79,7 +81,7 @@ namespace InterruptingCards.Managers
 
             // TODO: Workaround for "network prefabs list not empty" warning. Remove after upgrading to Netcode 1.4.1
             NetworkManager.NetworkConfig.Prefabs.NetworkPrefabsLists.Clear();
-            
+
             _cardConfig.Load(_cardPack);
             SetCardsHidden(true);
         }
@@ -87,8 +89,10 @@ namespace InterruptingCards.Managers
         public void Update()
         {
             // TODO: This is temporary
-
+// UNT0008
+#pragma warning disable RCS1146 // Use conditional access.
             if (_debugStateText != null)
+#pragma warning restore RCS1146 // Use conditional access.
             {
                 _debugStateText.SetText(
                     $"{_stateMachineManager.CurrentStateName}\n{_theStackStateMachineManager.CurrentStateName}"
@@ -428,7 +432,7 @@ namespace InterruptingCards.Managers
             _lootDeck.Shuffle();
             _lootDeck.IsFaceUp = false;
             _lootDiscard.Clear();
-            
+
             foreach (var hand in _hands)
             {
                 hand.Clear();

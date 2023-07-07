@@ -23,8 +23,10 @@ namespace InterruptingCards.Behaviours
         private readonly NetworkVariable<bool> _isFaceUp = new(DefaultIsFaceUp);
         private readonly NetworkVariable<bool> _isDeactivated = new(DefaultIsDeactivated);
 
+#pragma warning disable RCS1169 // Make field read-only.
         [SerializeField] private TextMeshPro _cardText;
         [SerializeField] private SpriteRenderer _cardSprite;
+#pragma warning restore RCS1169 // Make field read-only.
 
         private Vector3 _originalScale;
         private Quaternion _originalRotation;

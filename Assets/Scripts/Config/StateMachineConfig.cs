@@ -89,7 +89,7 @@ namespace InterruptingCards.Config
         TheStackBegin,
     }
 
-    public class StateMachineConfig
+    public sealed class StateMachineConfig
     {
         private static readonly Dictionary<StateMachine, string> Strings = new()
         {
@@ -171,7 +171,7 @@ namespace InterruptingCards.Config
             { StateMachine.TheStackPopped, "popped" },
         };
 
-        private static readonly ImmutableDictionary<StateMachine, int> Ids = 
+        private static readonly ImmutableDictionary<StateMachine, int> Ids =
             new(Strings.ToDictionary(pair => pair.Key, pair => Animator.StringToHash(pair.Value)));
 
         private static readonly ImmutableDictionary<int, StateMachine> ReverseLookup =

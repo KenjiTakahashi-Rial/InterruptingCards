@@ -22,11 +22,13 @@ namespace InterruptingCards.Managers.TheStack
         {
             if (element.Value == CardConfig.InvalidId)
             {
-                Log.Warn($"The Stack resolved an invalid loot");
+                Log.Warn("The Stack resolved an invalid loot");
             }
 
             var card = _cardConfig[element.Value];
 
+// Temporary suppression until more cases are added
+#pragma warning disable IDE0066 // Convert switch statement to expression
             switch (card.LootAbility)
             {
                 case CardAbility.GainCents:
@@ -35,6 +37,7 @@ namespace InterruptingCards.Managers.TheStack
                 default:
                     throw new NotImplementedException($"Resolution for {card.LootAbility} not implemented");
             }
+#pragma warning restore IDE0066 // Convert switch statement to expression
 
             LootDiscard.PlaceTop(card.Id);
         }

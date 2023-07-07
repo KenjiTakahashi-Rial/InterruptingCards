@@ -28,14 +28,14 @@ namespace InterruptingCards.Actions
             var activatedCards = priorityPlayer.ActivatedCards;
             if (!activatedCards.Any(c => c.CardId == cardId))
             {
-                Log.Warn($"Cannot activate ability that the player does not have");
+                Log.Warn("Cannot activate ability that the player does not have");
                 return false;
             }
 
             var card = activatedCards.Single(c => c.CardId == cardId);
             if (card.IsDeactivated)
             {
-                Log.Warn($"Cannot activate ability that is deactivated");
+                Log.Warn("Cannot activate ability that is deactivated");
                 return false;
             }
 

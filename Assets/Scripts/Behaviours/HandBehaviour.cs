@@ -15,7 +15,9 @@ namespace InterruptingCards.Behaviours
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
+#pragma warning disable RCS1169 // Make field read-only.
         [SerializeField] private CardBehaviour[] _cardSlots;
+#pragma warning restore RCS1169 // Make field read-only.
 
         public int Count => _cardSlots.Count(c => c.CardId != CardConfig.InvalidId);
 

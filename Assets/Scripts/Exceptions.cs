@@ -14,7 +14,7 @@ namespace InterruptingCards
 
         protected NetworkManagerException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
-    
+
     [Serializable]
     public class CardNotFoundException : Exception
     {

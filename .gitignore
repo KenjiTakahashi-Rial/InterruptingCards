@@ -64,3 +64,6 @@ InitTestScene*.unity*
 
 # Links to Unity logs
 *.log.lnk
+
+# Packages
+Packages/
