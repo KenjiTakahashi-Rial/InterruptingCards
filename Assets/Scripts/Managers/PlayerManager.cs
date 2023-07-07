@@ -5,26 +5,32 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
+using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
-using InterruptingCards.Models;
 
 namespace InterruptingCards.Managers
 {
     public class PlayerManager : NetworkBehaviour
     {
-        private readonly List<ulong> _lobby = new();
         private readonly HashSet<ulong> _notReadyPlayers = new();
-        private readonly List<Player> _players = new();
+// Caused by DebugPlayers
+#pragma warning disable IDE0032 // Use auto-property
+        private readonly List<PlayerBehaviour> _players = new();
+#pragma warning restore IDE0032 // Use auto-property
         private readonly NetworkVariable<int> _activePlayerIndex = new();
         private readonly Dictionary<int, NetworkVariable<int>.OnValueChangedDelegate> _onActivePlayerChangedHandlers = new();
 
-        [SerializeField] private StateMachineManager _gameStateMachineManager;
-        [SerializeField] private int _minPlayers;
+#pragma warning disable RCS1169 // Make field read-only.
         [SerializeField] private int _maxPlayers;
+#pragma warning restore RCS1169 // Make field read-only.
 
-        public Player ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex.Value];
+        public PlayerBehaviour ActivePlayer => _players.Count == 0 ? null : _players[_activePlayerIndex.Value];
 
-        public event Action<Player> OnActivePlayerChanged
+        private GameManager Game => GameManager.Singleton;
+
+        private StateMachineManager GameStateMachineManager => Game.StateMachineManager;
+
+        public event Action<PlayerBehaviour> OnActivePlayerChanged
         {
             add
             {
@@ -33,22 +39,20 @@ namespace InterruptingCards.Managers
                 _activePlayerIndex.OnValueChanged += IndexToPlayer;
             }
 
-// Needs to be a delegate. Action<int, int> gives an error
-#pragma warning disable S3172 // Delegates should not be subtracted
             remove => _activePlayerIndex.OnValueChanged -= _onActivePlayerChangedHandlers[value.GetHashCode()];
-#pragma warning restore S3172 // Delegates should not be subtracted
         }
 
-        public ulong SelfId { get; private set; }
+// This is temporary for debug purposes only
+#pragma warning disable RCS1085 // Use auto-implemented property.
+        public List<PlayerBehaviour> DebugPlayers => _players;
+#pragma warning restore RCS1085 // Use auto-implemented property.
 
         private LogManager Log => LogManager.Singleton;
 
-        public Player this[ulong id] => _players.Single(p => p.Id == id);
+        public PlayerBehaviour this[ulong id] => _players.Single(p => p.Id == id);
 
         public override void OnNetworkSpawn()
         {
-            GetSelfServerRpc();
-
             if (IsServer)
             {
                 NetworkManager.OnClientConnectedCallback += AddPlayerServerRpc;
@@ -66,15 +70,28 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public void Initialize()
+        public void Initialize(uint startingMoney)
         {
             _activePlayerIndex.Value = 0;
+
+            foreach (var player in _players)
+            {
+                player.Money = startingMoney;
+            }
         }
 
-        public ulong GetNextId(ulong id)
+        public void AssignCharacters(CardBehaviour[] characterCards)
         {
-            var i = _players.FindIndex(p => p.Id == id);
-            return _players[++i == _players.Count ? 0 : i].Id;
+            if (_players.Count > characterCards.Length)
+            {
+                throw new TooManyPlayersException();
+            }
+
+            for (var i = 0; i < _players.Count; i++)
+            {
+                var character = characterCards[i];
+                _players[i].CharacterCard = character;
+            }
         }
 
         public void AssignHands(HandBehaviour[] hands)
@@ -93,6 +110,12 @@ namespace InterruptingCards.Managers
             }
         }
 
+        public ulong GetNextId(ulong id)
+        {
+            var i = _players.FindIndex(p => p.Id == id);
+            return _players[++i == _players.Count ? 0 : i].Id;
+        }
+
         public void ShiftTurn(int shifts = 1)
         {
             Log.Info($"Shifting turn {shifts} times");
@@ -108,55 +131,40 @@ namespace InterruptingCards.Managers
             _players.Clear();
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        private void GetSelfServerRpc(ServerRpcParams serverRpcParams = default)
-        {
-            var clientId = serverRpcParams.Receive.SenderClientId;
-
-            Log.Info($"Getting self {clientId}");
-
-            var clientRpcParams = new ClientRpcParams
-            {
-                Send = new ClientRpcSendParams
-                {
-                    TargetClientIds = new ulong[] { clientId }
-                }
-            };
-
-            AssignSelfClientRpc(clientId, clientRpcParams);
-        }
-
-        [ClientRpc]
-        private void AssignSelfClientRpc(ulong selfId, ClientRpcParams _)
-        {
-            Log.Info($"Assigning self {selfId}");
-            SelfId = selfId;
-        }
-
         [ServerRpc]
         private void AddPlayerServerRpc(ulong clientId)
         {
+            // TODO: Look into using Unity Network Lobby Manager instead of managing it myself
             Log.Info($"Adding player {clientId}");
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.WaitingForClients)
+            if (GameStateMachineManager.CurrentState != StateMachine.WaitingForClients)
             {
                 Log.Warn($"Cannnot add player {clientId} when game already started");
                 return;
             }
 
-            if (_lobby.Count >= _maxPlayers)
+            var clients = NetworkManager.ConnectedClientsList;
+            if (clients.Count > _maxPlayers)
             {
-                Log.Warn($"Cannnot add player {clientId} when lobby is full");
+                Log.Warn($"Found {clients.Count} clients, but max is {_maxPlayers}");
                 return;
             }
 
-            _lobby.Add(clientId);
-
-            if (_lobby.Count == _maxPlayers)
+            if (clients.Count >= _maxPlayers)
             {
-                _notReadyPlayers.UnionWith(_lobby);
-                _gameStateMachineManager.SetTrigger(StateMachine.WaitForReady);
-                SetPlayersClientRpc(_lobby.ToArray());
+                var networkObjIds = new ulong[_maxPlayers];
+                for (var i = 0; i < _maxPlayers; i++)
+                {
+                    var client = clients[i];
+                    var player = client.PlayerObject.gameObject.GetComponent<PlayerBehaviour>();
+                    player.Id = client.ClientId;
+                    player.Name = player.Id.ToString();
+                    networkObjIds[i] = client.PlayerObject.NetworkObjectId;
+                }
+
+                _notReadyPlayers.UnionWith(NetworkManager.ConnectedClientsIds);
+                GameStateMachineManager.SetTrigger(StateMachine.WaitForReady);
+                SetPlayersClientRpc(networkObjIds);
             }
         }
 
@@ -165,27 +173,29 @@ namespace InterruptingCards.Managers
         {
             Log.Info($"Removing player {clientId}");
 
-            if (_gameStateMachineManager.CurrentState != StateMachine.WaitingForClients)
+            if (GameStateMachineManager.CurrentState != StateMachine.WaitingForClients)
             {
                 if (clientId == ActivePlayer.Id)
                 {
-                    _gameStateMachineManager.SetTrigger(StateMachine.ForceEndTurn);
+                    GameStateMachineManager.SetTrigger(StateMachine.ForceEndTurn);
                 }
 
                 Log.Warn($"Player {clientId} removed while game is playing");
             }
 
             // TODO: Continue game if enough players left
-            _gameStateMachineManager.SetTrigger(StateMachine.ForceEndGame);
-            _lobby.Remove(clientId);
+            GameStateMachineManager.SetTrigger(StateMachine.ForceEndGame);
+            _players.RemoveAll(p => p.Id == clientId);
         }
 
         [ClientRpc]
-        private void SetPlayersClientRpc(ulong[] playerIds)
+        private void SetPlayersClientRpc(ulong[] playerNetworkObjIds)
         {
-            foreach (var playerId in playerIds)
+            foreach (var networkObjId in playerNetworkObjIds)
             {
-               _players.Add(new Player(playerId, playerId.ToString()));
+                var playerNetworkObj = NetworkManager.SpawnManager.SpawnedObjects[networkObjId];
+                var player = playerNetworkObj.gameObject.GetComponent<PlayerBehaviour>();
+                _players.Add(player);
             }
 
             PlayerReadyServerRpc();
@@ -195,10 +205,10 @@ namespace InterruptingCards.Managers
         private void PlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
         {
             _notReadyPlayers.Remove(serverRpcParams.Receive.SenderClientId);
-            
+
             if (_notReadyPlayers.Count == 0)
             {
-                _gameStateMachineManager.SetTrigger(StateMachine.AllReady);
+                GameStateMachineManager.SetTrigger(StateMachine.AllReady);
             }
         }
     }

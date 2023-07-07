@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,10 +7,11 @@ using UnityEngine;
 
 using InterruptingCards.Managers;
 using InterruptingCards.Models;
+using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Config
 {
-    public class CardConfig
+    public sealed class CardConfig
     {
         public const int InvalidId = 0;
 
@@ -30,12 +32,7 @@ namespace InterruptingCards.Config
 
         public string GetName(int id)
         {
-            if (id == InvalidId)
-            {
-                return InvalidName;
-            }
-
-            return _cards[id].ToString();
+            return id == InvalidId ? InvalidName : _cards[id].ToString();
         }
 
         public void Load(CardPack cardPack)
@@ -46,25 +43,32 @@ namespace InterruptingCards.Config
 
             var packName = cardPack.ToString();
             var packPath = Path.Combine(_packDirectory, packName);
-            var cardPaths = Directory.GetFiles(packPath, "*." + PackFileExtension);
+            var searchPattern = "*." + PackFileExtension;
 
             var id = 1;
 
-            for (var i = 0; i < cardPaths.Length; i++)
+            void LoadCard(string fileName)
             {
-                var json = File.ReadAllText(cardPaths[i]);
-                var card = JsonUtility.FromJson<ParserCard>(json);
+                var json = File.ReadAllText(fileName);
+                var card = JsonUtility.FromJson<MetadataCard>(json);
 
                 for (var j = 0; j < card.Count; j++)
                 {
                     _cards[id] = new Card(id++, card);
                 }
             }
+
+            Functions.ForEachFile(packPath, LoadCard, recursive: true, fileSearchPattern: searchPattern);
         }
 
-        public List<int> GenerateIdDeck()
+        public List<int> GenerateIdDeck(Func<Card, bool> predicate = null)
         {
-            return _cards.Keys.ToList();
+            predicate ??= _ => true;
+
+            return _cards
+                .Where(pair => predicate(pair.Value))
+                .Select(pair => pair.Key)
+                .ToList();
         }
     }
 }

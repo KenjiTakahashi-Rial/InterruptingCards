@@ -1,19 +1,23 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Unity.Netcode;
 using UnityEngine;
 
-using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
+using InterruptingCards.Managers;
+using System.Collections;
 
-namespace InterruptingCards.Managers
+namespace InterruptingCards.Behaviours
 {
-    public class HandBehaviour : NetworkBehaviour
+    public class HandBehaviour : NetworkBehaviour, IEnumerable<CardBehaviour>
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
+#pragma warning disable RCS1169 // Make field read-only.
         [SerializeField] private CardBehaviour[] _cardSlots;
+#pragma warning restore RCS1169 // Make field read-only.
 
         public int Count => _cardSlots.Count(c => c.CardId != CardConfig.InvalidId);
 
@@ -23,6 +27,15 @@ namespace InterruptingCards.Managers
 
         public int this[int i] => _cardSlots[i].CardId;
 
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _cardSlots.GetEnumerator();
+        }
+
+        public IEnumerator<CardBehaviour> GetEnumerator()
+        {
+            return ((IEnumerable<CardBehaviour>)_cardSlots).GetEnumerator();
+        }
 
         public void Awake()
         {

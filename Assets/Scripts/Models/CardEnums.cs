@@ -5,7 +5,7 @@ namespace InterruptingCards.Models
     {
         Invalid,
         PlayingCards,
-        InterruptingCards,
+        FourSouls,
     }
 
     public enum CardSuit
@@ -18,8 +18,15 @@ namespace InterruptingCards.Models
         Hearts,
         Spades,
 
-        // Interrupting cards
-        InterruptingSuit,
+        // Four Souls
+        Characters,
+        StartingItems,
+        Treasure,
+        Loot,
+        Monsters,
+        BonusSouls,
+        Rooms,
+        OutsideCards,
     }
 
     public enum CardRank
@@ -41,18 +48,37 @@ namespace InterruptingCards.Models
         Queen,
         King,
 
-        // Interrupting cards
-        InterruptingRank,
-    }
+        // Four Souls Characters
+        Isaac,
+        Maggie,
+        Cain,
+        Judas,
+        BlueBaby,
+        Eve,
+        Samson,
+        Lazarus,
+        Lilith,
+        TheForgotten,
+        Eden,
+        Azazel,
+        TheLost,
+        TheKeeper,
+        Apollyon,
+        BumBo,
 
-    public enum CardActiveEffect
-    {
-        Invalid,
-        PlayCard,
+        // Four Souls Loot
+        APenny,
+        TwoCents,
+        ThreeCents,
+        FourCents,
+        ANickel,
+        ADime,
     }
 
     public enum CardAbility
     {
         Invalid,
+        GainCents,
+        AddLootPlay,
     }
 }

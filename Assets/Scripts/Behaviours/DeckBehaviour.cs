@@ -1,24 +1,26 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using Unity.Netcode;
 using UnityEngine;
 
-using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
+using InterruptingCards.Managers;
+using InterruptingCards.Models;
 
-namespace InterruptingCards.Managers
+namespace InterruptingCards.Behaviours
 {
     public class DeckBehaviour : NetworkBehaviour
     {
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
         private List<int> _cardIds = new();
 
+#pragma warning disable RCS1169 // Make field read-only.
         [SerializeField] private CardBehaviour _topCard;
+#pragma warning restore RCS1169 // Make field read-only.
 
         public event Action OnClicked;
-        
+
         public bool IsFaceUp
         {
             get => _topCard.IsFaceUp;
@@ -48,7 +50,7 @@ namespace InterruptingCards.Managers
         public void Shuffle()
         {
             CheckEmpty();
-            _cardIds = _cardIds.OrderBy(x => Guid.NewGuid()).ToList();
+            Utilities.Functions.Shuffle(_cardIds);
             SetTop();
         }
 
@@ -66,9 +68,9 @@ namespace InterruptingCards.Managers
             return cardId;
         }
 
-        public void Initialize()
+        public void Initialize(Func<Card, bool> predicate = null)
         {
-            _cardIds = _cardConfig.GenerateIdDeck();
+            _cardIds = _cardConfig.GenerateIdDeck(predicate);
             SetTop();
         }
 

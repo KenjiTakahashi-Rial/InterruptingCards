@@ -6,13 +6,13 @@ namespace InterruptingCards.Actions
     {
         protected override bool CanExecute(ulong playerId)
         {
-            if (playerId != _playerManager.ActivePlayer.Id)
+            if (playerId != PlayerManager.ActivePlayer.Id)
             {
-                Log.Warn($"Cannot end turn if not active player (active player: {_playerManager.ActivePlayer.Name})");
+                Log.Warn($"Cannot end turn if not active player (active player: {PlayerManager.ActivePlayer.Name})");
                 return false;
             }
 
-            var gameState = _gameStateMachineManager.CurrentState;
+            var gameState = GameStateMachineManager.CurrentState;
             if (gameState!= StateMachine.ActionPhaseIdling)
             {
                 Log.Warn($"Cannot end turn from {gameState}");
@@ -25,7 +25,7 @@ namespace InterruptingCards.Actions
         protected override void Execute()
         {
             // TODO
-            _gameStateMachineManager.SetTrigger(StateMachine.DeclareEndTurn);
+            GameStateMachineManager.SetTrigger(StateMachine.DeclareEndTurn);
         }
     }
 }

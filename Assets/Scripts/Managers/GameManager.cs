@@ -1,30 +1,41 @@
+using System.Linq;
+
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
-using InterruptingCards.Config;
-using InterruptingCards.Models;
 using InterruptingCards.Actions;
+using InterruptingCards.Behaviours;
+using InterruptingCards.Config;
+using InterruptingCards.Managers.TheStack;
+using InterruptingCards.Models;
+using InterruptingCards.Utilities;
 
 namespace InterruptingCards.Managers
 {
     public class GameManager : NetworkBehaviour
     {
+        private const uint StartingLootCount = 3;
+        private const uint StartingMoney = 3;
+
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
+#pragma warning disable RCS1169 // Make field read-only.
         [Header("Config")]
         [SerializeField] private CardPack _cardPack;
 
-        [Header("Behaviours")]
-        [SerializeField] private DeckBehaviour _lootDeck;
-        [SerializeField] private DeckBehaviour _lootDiscard;
-        [SerializeField] private HandBehaviour[] _hands;
-
         [Header("Managers")]
         [SerializeField] private PlayerManager _playerManager;
+        [SerializeField] private PriorityManager _priorityManager;
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _theStackStateMachineManager;
         [SerializeField] private TheStackManager _theStackManager;
+
+        [Header("Behaviours")]
+        [SerializeField] private CardBehaviour[] _characters;
+        [SerializeField] private DeckBehaviour _lootDeck;
+        [SerializeField] private DeckBehaviour _lootDiscard;
+        [SerializeField] private HandBehaviour[] _hands;
 
         [Header("Actions")]
         [SerializeField] private DeclareAttackAction _declareAttack;
@@ -36,20 +47,32 @@ namespace InterruptingCards.Managers
         [SerializeField] private DeclareEndTurnAction _declareEndTurn;
         [SerializeField] private PassPriorityAction _passPriority;
 
-        [Header("Temp")]
-        [SerializeField] private TextMeshPro _tempInfoText;
+        [Header("Debug")]
+        [SerializeField] private TextMeshPro _debugStateText;
+        [SerializeField] private TextMeshPro _debugPlayerText;
+        [SerializeField] private TextMeshPro _debugTheStackText;
+        [SerializeField] private int _debugTheStackTextCount;
+#pragma warning restore RCS1169 // Make field read-only.
 
         public static GameManager Singleton { get; private set; }
 
-        private LogManager Log => LogManager.Singleton;
+        public PlayerManager PlayerManager => _playerManager;
+        public PriorityManager PriorityManager => _priorityManager;
+        public StateMachineManager StateMachineManager => _stateMachineManager;
+        public StateMachineManager TheStackStateMachineManager => _theStackStateMachineManager;
+        public TheStackManager TheStackManager => _theStackManager;
 
-        private int StartingHandCardCount => 4;
+        public DeckBehaviour LootDeck => _lootDeck;
+        public DeckBehaviour LootDiscard => _lootDiscard;
+
+        private LogManager Log => LogManager.Singleton;
 
         // Unity Methods
 
         public void Awake()
         {
             Singleton = this;
+            _theStackManager.OnEnd += TriggerPriorityPassComplete;
         }
 
         public void Start()
@@ -58,7 +81,7 @@ namespace InterruptingCards.Managers
 
             // TODO: Workaround for "network prefabs list not empty" warning. Remove after upgrading to Netcode 1.4.1
             NetworkManager.NetworkConfig.Prefabs.NetworkPrefabsLists.Clear();
-            
+
             _cardConfig.Load(_cardPack);
             SetCardsHidden(true);
         }
@@ -66,17 +89,53 @@ namespace InterruptingCards.Managers
         public void Update()
         {
             // TODO: This is temporary
-
-            if (_playerManager.ActivePlayer == null || _tempInfoText == null)
+// UNT0008
+#pragma warning disable RCS1146 // Use conditional access.
+            if (_debugStateText != null)
+#pragma warning restore RCS1146 // Use conditional access.
             {
-                return;
+                _debugStateText.SetText(
+                    $"{_stateMachineManager.CurrentStateName}\n{_theStackStateMachineManager.CurrentStateName}"
+                );
             }
 
-            _tempInfoText.SetText(
-                $"{_playerManager.ActivePlayer.Id}\n" +
-                $"{_stateMachineManager.CurrentStateName}\n" +
-                $"{_theStackStateMachineManager.CurrentStateName}"
-            );
+            if (_debugPlayerText != null)
+            {
+                try
+                {
+                    var playerInfo = _playerManager.DebugPlayers.Select(
+                        p =>
+                        {
+                            var activeString = p == _playerManager.ActivePlayer ? " A" : " _";
+                            var priorityString = p == _priorityManager.PriorityPlayer ? " P" : " _";
+                            return $"{p.Name}{activeString}{priorityString}: {p.Money}¢";
+                        }
+                    );
+
+                    _debugPlayerText.SetText(string.Join("\n", playerInfo));
+                }
+                catch (System.InvalidOperationException)
+                {
+                    // Sometimes players has two ID 0 at the beginning of the game
+                    // It resolves itself within about a frame, so it's fine because this is just a test log
+                }
+            }
+
+            if(_debugTheStackText != null)
+            {
+                var topN = TheStackManager.DebugTopN(_debugTheStackTextCount);
+                var elementStrings = new string[_debugTheStackTextCount];
+
+                for (var i = 0; i < topN.Length; i++)
+                {
+                    var e = topN[i];
+                    var s = $"{e.Type} {e.PushedById} {e.Value}";
+                    elementStrings[i] = i == 0 ? "TOP -> " + s : s;
+                }
+
+                var topNString = string.Join("\n", elementStrings);
+                _debugTheStackText.SetText(topN.Length == 0 ? "The Stack is empty" : topNString);
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -84,10 +143,15 @@ namespace InterruptingCards.Managers
             base.OnNetworkSpawn();
             Log.Info("Network spawned");
 
-            for (var i = 0; i < _hands.Length; i++)
+            // TODO: Need to do this for all activated ability cards
+            foreach (var card in _characters)
             {
-                var j = i;
-                _hands[i].OnCardClicked += (int cardId) => TryPlayLoot(cardId);
+                card.OnClicked += () => _activateAbility.TryExecute(card.CardId);
+            }
+
+            foreach (var hand in _hands)
+            {
+                hand.OnCardClicked += _playLoot.TryExecute;
             }
         }
 
@@ -95,10 +159,15 @@ namespace InterruptingCards.Managers
         {
             Log.Info("Network despawned");
 
-            //foreach (var handManager in _handManagers)
-            //{
-            //    handManager.OnCardClicked = null;
-            //}
+            foreach (var card in _characters)
+            {
+                card.OnClicked = null;
+            }
+
+            foreach (var hand in _hands)
+            {
+                hand.OnCardClicked = null;
+            }
 
             if (_stateMachineManager.CurrentState != StateMachine.WaitingForClients)
             {
@@ -111,6 +180,7 @@ namespace InterruptingCards.Managers
         public override void OnDestroy()
         {
             Singleton = null;
+            _theStackManager.OnEnd -= TriggerPriorityPassComplete;
             base.OnDestroy();
         }
 
@@ -119,42 +189,52 @@ namespace InterruptingCards.Managers
         public void Initialize()
         {
             Log.Info("Initializing Game");
-            _playerManager.Initialize();
-
-            _playerManager.AssignHands(_hands);
 
             if (IsServer)
             {
-                _lootDeck.Initialize();
-                _lootDeck.Shuffle();
-                _lootDeck.IsFaceUp = false;
-                _lootDiscard.Clear();
-                foreach (var hand in _hands)
-                {
-                    hand.Clear();
-                }
-                DealHands();
+                InitializeCharacters();
+                InitializeLoot();
+                _playerManager.Initialize(StartingMoney);
                 _stateMachineManager.SetTrigger(StateMachine.StartGame);
+
+                foreach (var character in _characters)
+                {
+                    character.IsDeactivated = true;
+                }
             }
 
+            _playerManager.AssignCharacters(_characters);
+            _playerManager.AssignHands(_hands);
             SetCardsHidden(false);
         }
 
         public void RechargeStep()
         {
-            // TODO: Recharge all active items
             if (IsServer)
             {
+                Log.Info("Recharging activated cards");
+
+                var player = _playerManager.ActivePlayer;
+                player.CharacterCard.IsDeactivated = false;
+
+                //foreach (var card in player.Items)
+                //{
+                //    if (card.ActivatedAbility != CardAbility.Invalid)
+                //    {
+                //        card.IsDeactivated = false;
+                //    }
+                //}
+
                 _stateMachineManager.SetTrigger(StateMachine.RechargeComplete);
             }
         }
 
         public void TriggerStartOfTurnAbilities()
         {
-            // TODO: Look up the abilities from the player
             if (IsServer)
             {
-                _theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
+                // TODO: Look up the abilities from the player and push them to the stack
+                _stateMachineManager.SetTrigger(StateMachine.StartPhaseTriggerAbilitiesComplete);
             }
         }
 
@@ -181,6 +261,23 @@ namespace InterruptingCards.Managers
             }
         }
 
+        public void TryAutoPassPriority()
+        {
+            if (IsServer)
+            {
+                _priorityManager.TryAutoPass();
+            }
+        }
+
+        public void AddLootPlay()
+        {
+            if (IsServer)
+            {
+                _playerManager.ActivePlayer.LootPlays++;
+                _stateMachineManager.SetTrigger(StateMachine.AddLootPlayComplete);
+            }
+        }
+
         public void TryDeclareAttack()
         {
             _declareAttack.TryExecute();
@@ -197,7 +294,7 @@ namespace InterruptingCards.Managers
         public void Attack()
         {
             // TODO: Prompt the active player to select a monster
-            if (_playerManager.SelfId == _playerManager.ActivePlayer.Id)
+            if (NetworkManager.LocalClientId == _playerManager.ActivePlayer.Id)
             {
                 _attack.TryExecute(CardConfig.InvalidId);
             }
@@ -219,35 +316,9 @@ namespace InterruptingCards.Managers
         public void Purchase()
         {
             // TODO: Prompt the active player to select an item
-            if (_playerManager.SelfId == _playerManager.ActivePlayer.Id)
+            if (NetworkManager.LocalClientId == _playerManager.ActivePlayer.Id)
             {
                 _purchase.TryExecute(CardConfig.InvalidId);
-            }
-        }
-
-        public void TryPlayLoot(int cardId)
-        {
-            _playLoot.TryExecute(cardId);
-        }
-
-        public void PlayLoot(int cardId)
-        {
-            _playerManager.ActivePlayer.Hand.Remove(cardId);
-            _theStackManager.PushLoot(_playerManager.ActivePlayer, cardId);
-        }
-
-        public void TryActivateAbility()
-        {
-            // TODO: This should include which ability is trying to be activated
-            _activateAbility.TryExecute(CardConfig.InvalidId);
-        }
-
-        public void ActivateAbility()
-        {
-            // TODO: Get the ability to be activated
-            if (IsServer)
-            {
-                _theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
             }
         }
 
@@ -267,10 +338,10 @@ namespace InterruptingCards.Managers
 
         public void TriggerEndOfTurnAbilities()
         {
-            // TODO: Look up player's abilities
             if (IsServer)
             {
-                _theStackManager.PushAbility(_playerManager.ActivePlayer, CardAbility.Invalid);
+                // TODO: Look up the abilities from the player and push them to the stack
+                _stateMachineManager.SetTrigger(StateMachine.EndPhaseTriggerAbilitiesComplete);
             }
         }
 
@@ -294,9 +365,9 @@ namespace InterruptingCards.Managers
 
         public void EndTurn()
         {
-            // TODO
             if (IsServer)
             {
+                _playerManager.ActivePlayer.LootPlays = 0;
                 _playerManager.ShiftTurn();
                 _stateMachineManager.SetTrigger(StateMachine.EndTurn);
             }
@@ -305,86 +376,9 @@ namespace InterruptingCards.Managers
         public void EndGame()
         {
             Log.Info("Ending game");
-            _tempInfoText.SetText("Start the game");
             _playerManager.Clear();
             SetCardsHidden(true);
         }
-
-        //// ServerRpc Methods & Tries
-
-        //private bool CanDrawCard(ulong id)
-        //{
-        //    if (id != _playerManager.ActivePlayer.Id)
-        //    {
-        //        Log.Info($"Cannot draw a card unless it is their turn");
-        //        return false;
-        //    }
-
-        //    if (_stateMachineManager.CurrentState != StateMachine.Looting)
-        //    {
-        //        Log.Info($"Player {id} cannot draw a card in the wrong state");
-        //        return false;
-        //    }
-
-        //    return true;
-        //}
-
-        //private bool CanPlayCard(ulong id, int handManagerIndex, int cardIndex)
-        //{
-        //    if (id != _playerManager.ActivePlayer.Id)
-        //    {
-        //        Log.Info($"Player {id} cannot play a card unless it is their turn or they are interrupting");
-        //        return false;
-        //    }
-
-        //    var hand = _handManagers[handManagerIndex];
-
-        //    if (hand != _playerManager.ActivePlayer.Hand)
-        //    {
-        //        Log.Info($"Player {id} can only play cards from their own hand");
-        //        return false;
-        //    }
-
-        //    if (cardIndex < 0 || hand.Count <= cardIndex)
-        //    {
-        //        Log.Info($"Player {id} cannot play a card from an invalid index of their hand");
-        //        return false;
-        //    }
-
-        //    if (_stateMachineManager.CurrentState != StateMachine.PlayingLoot)
-        //    {
-        //        Log.Info($"Player {id} cannot play a card in the wrong state");
-        //        return false;
-        //    }
-
-        //    return true;
-        //}
-
-        //private void TryPlayCard(int handManagerIndex, int cardIndex)
-        //{
-        //    var cardId = _handManagers[handManagerIndex][cardIndex];
-        //    Log.Info($"Trying to play card {_cardConfig.GetName(cardId)}");
-
-        //    if (CanPlayCard(_playerManager.SelfId, handManagerIndex, cardIndex))
-        //    {
-        //        PlayCardServerRpc(handManagerIndex, cardIndex);
-        //    }
-        //}
-
-        //[ServerRpc(RequireOwnership = false)]
-        //private void PlayCardServerRpc(int handManagerIndex, int cardIndex, ServerRpcParams serverRpcParams = default)
-        //{
-        //    var senderId = serverRpcParams.Receive.SenderClientId;
-        //    if (!CanPlayCard(senderId, handManagerIndex, cardIndex))
-        //    {
-        //        return;
-        //    }
-
-        //    Log.Info("Playing card");
-        //    var cardId = _handManagers[handManagerIndex].RemoveAt(cardIndex);
-        //    _discardManager.PlaceTop(cardId);
-        //    _theStackManager.Begin();
-        //}
 
         // Helper Methods
 
@@ -394,27 +388,97 @@ namespace InterruptingCards.Managers
             _lootDeck.SetHidden(val);
             _lootDiscard.SetHidden(val);
 
+            foreach (var card in _characters)
+            {
+                card.SetHidden(val);
+            }
+
             foreach (var hand in _hands)
             {
                 hand.SetHidden(val);
             }
         }
 
-        private void DealHands()
+        private void InitializeCharacters()
         {
             if (_stateMachineManager.CurrentState != StateMachine.InitializingGame)
             {
-                Log.Warn("Cannot deal hands outside of game initialization state");
+                Log.Warn("Cannot initialize characters outside of game initialization state");
                 return;
             }
 
-            Log.Info("Dealing hands");
-            for (var i = 0; i < StartingHandCardCount; i++)
+            Log.Info("Initializing characters");
+
+            var characterDeck = _cardConfig.GenerateIdDeck(c => c.Suit == CardSuit.Characters);
+            Functions.Shuffle(characterDeck);
+
+            for (var i = 0; i < _characters.Length; i++)
+            {
+                _characters[i].CardId = characterDeck[i];
+            }
+        }
+
+        private void InitializeLoot()
+        {
+            if (_stateMachineManager.CurrentState != StateMachine.InitializingGame)
+            {
+                Log.Warn("Cannot initialize loot outside of game initialization state");
+                return;
+            }
+
+            Log.Info("Initializing loot");
+
+            _lootDeck.Initialize(c => c.Suit == CardSuit.Loot);
+            _lootDeck.Shuffle();
+            _lootDeck.IsFaceUp = false;
+            _lootDiscard.Clear();
+
+            foreach (var hand in _hands)
+            {
+                hand.Clear();
+            }
+
+            for (var i = 0; i < StartingLootCount; i++)
             {
                 foreach (var hand in _hands)
                 {
                     hand.Add(_lootDeck.DrawTop());
                 }
+            }
+        }
+
+        private void TriggerPriorityPassComplete()
+        {
+            var currentState = StateMachineManager.CurrentState;
+            switch (currentState)
+            {
+                case StateMachine.StartPhaseTriggeringAbilities:
+                    StateMachineManager.SetTrigger(StateMachine.StartPhaseTriggerAbilitiesComplete);
+                    return;
+                case StateMachine.GamePriorityPassing:
+                    StateMachineManager.SetTrigger(StateMachine.GamePriorityPassComplete);
+                    return;
+                case StateMachine.PlayingLoot:
+                    StateMachineManager.SetTrigger(StateMachine.PlayLootComplete);
+                    return;
+                case StateMachine.ActivatingAbility:
+                    StateMachineManager.SetTrigger(StateMachine.ActivateAbilityComplete);
+                    return;
+                case StateMachine.DeclaringAttack:
+                    StateMachineManager.SetTrigger(StateMachine.DeclareAttackComplete);
+                    return;
+                case StateMachine.DeclaringPurchase:
+                    StateMachineManager.SetTrigger(StateMachine.DeclarePurchaseComplete);
+                    return;
+                case StateMachine.DeclaringEndTurn:
+                    StateMachineManager.SetTrigger(StateMachine.DeclareEndTurnComplete);
+                    return;
+                case StateMachine.EndPhaseTriggeringAbilities:
+                    StateMachineManager.SetTrigger(StateMachine.EndPhaseTriggerAbilitiesComplete);
+                    return;
+                default:
+                    Log.Warn($"Priority pass completed, but state machine is in {currentState}");
+                    break;
             }
         }
     }

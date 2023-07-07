@@ -1,20 +1,26 @@
 using Unity.Netcode;
-using UnityEngine;
 
+using InterruptingCards.Config;
 using InterruptingCards.Managers;
+using InterruptingCards.Managers.TheStack;
 
 namespace InterruptingCards.Actions
 {
     public abstract class AbstractCardAction : NetworkBehaviour
     {
-        [SerializeField] protected PlayerManager _playerManager;
-        [SerializeField] protected StateMachineManager _gameStateMachineManager;
+        protected CardConfig _cardConfig = CardConfig.Singleton;
 
+        protected GameManager Game => GameManager.Singleton;
         protected LogManager Log => LogManager.Singleton;
+        protected PlayerManager PlayerManager => Game.PlayerManager;
+        protected PriorityManager PriorityManager => Game.PriorityManager;
+        protected StateMachineManager GameStateMachineManager => Game.StateMachineManager;
+        protected StateMachineManager TheStackStateMachineManager => Game.TheStackStateMachineManager;
+        protected TheStackManager TheStackManager => Game.TheStackManager;
 
         public void TryExecute(int cardId)
         {
-            if (CanExecute(_playerManager.SelfId, cardId))
+            if (CanExecute(NetworkManager.LocalClientId, cardId))
             {
                 ExecuteServerRpc(cardId);
             }

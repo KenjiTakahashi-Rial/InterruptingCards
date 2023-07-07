@@ -1,5 +1,3 @@
-using UnityEngine;
-
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
 
@@ -7,21 +5,21 @@ namespace InterruptingCards.Actions
 {
     public class PassPriorityAction : AbstractAction
     {
-        [SerializeField] private PriorityManager _priorityManager;
-        [SerializeField] private StateMachineManager _theStackStateMachineManager;
+        private PriorityManager PriorityManager => Game.PriorityManager;
+        private StateMachineManager TheStackStateMachineManager => Game.TheStackStateMachineManager;
 
         protected override bool CanExecute(ulong playerId)
         {
-            if (playerId != _priorityManager.PriorityPlayer.Id)
+            if (playerId != PriorityManager.PriorityPlayer.Id)
             {
                 Log.Warn(
-                    $"Cannot pass priority if not priority player (priority player: " +
-                    $"{_priorityManager.PriorityPlayer.Name})"
+                    "Cannot pass priority if not priority player (priority player: " +
+                    $"{PriorityManager.PriorityPlayer.Name})"
                 );
                 return false;
             }
 
-            var theStackState = _theStackStateMachineManager.CurrentState;
+            var theStackState = TheStackStateMachineManager.CurrentState;
             if (theStackState != StateMachine.TheStackPriorityPassing)
             {
                 Log.Warn($"Cannot pass priority from {theStackState}");
@@ -33,7 +31,7 @@ namespace InterruptingCards.Actions
 
         protected override void Execute()
         {
-            _priorityManager.PassPriority();
+            PriorityManager.PassPriority();
         }
     }
 }

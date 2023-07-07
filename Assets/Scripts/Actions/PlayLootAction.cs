@@ -1,31 +1,36 @@
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
+using InterruptingCards.Managers.TheStack;
 
 namespace InterruptingCards.Actions
 {
     public class PlayLootAction : AbstractCardAction
     {
-        private readonly CardConfig _cardConfig = CardConfig.Singleton;
-
         protected override bool CanExecute(ulong playerId, int cardId)
         {
-            // TODO: Integrate The Stack and priority loot plays (outside of active player's loot plays)
-            // TODO: Check the number of loot plays the player has
-
-            if (playerId != _playerManager.ActivePlayer.Id)
+            var priorityPlayer = PriorityManager.PriorityPlayer;
+            if (playerId != priorityPlayer.Id)
             {
-                Log.Warn($"Cannot play loot if not active player (active player: {_playerManager.ActivePlayer.Name})");
+                Log.Warn($"Cannot play loot without priority (priority player: {priorityPlayer.Name})");
                 return false;
             }
 
-            var gameState = _gameStateMachineManager.CurrentState;
-            if (gameState != StateMachine.ActionPhaseIdling)
+            var lootPlays = priorityPlayer.LootPlays;
+            if (lootPlays < 1)
             {
-                Log.Warn($"Cannot play loot from {gameState}");
+                Log.Warn($"Cannot play loot with {lootPlays} loot plays");
                 return false;
             }
 
-            var hand = _playerManager.ActivePlayer.Hand;
+            var gameState = GameStateMachineManager.CurrentState;
+            var theStackState = TheStackStateMachineManager.CurrentState;
+            if (gameState != StateMachine.ActionPhaseIdling && theStackState != StateMachine.TheStackPriorityPassing)
+            {
+                Log.Warn($"Cannot play loot from {gameState} or {theStackState}");
+                return false;
+            }
+
+            var hand = priorityPlayer.Hand;
             if (!hand.Contains(cardId))
             {
                 Log.Warn($"Cannot play loot {_cardConfig.GetName(cardId)} if hand does not contain it");
@@ -36,8 +41,17 @@ namespace InterruptingCards.Actions
         }
         protected override void Execute(int cardId)
         {
-            _gameStateMachineManager.SetTrigger(StateMachine.PlayLoot);
-            GameManager.Singleton.PlayLoot(cardId);
+            var player = PriorityManager.PriorityPlayer;
+            player.LootPlays--;
+            player.Hand.Remove(cardId);
+            TheStackManager.PushLoot(player, cardId);
+
+            var isActive = player == PlayerManager.ActivePlayer;
+            var isActionPhaseIdling = GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling;
+            if (isActive && isActionPhaseIdling)
+            {
+                GameStateMachineManager.SetTrigger(StateMachine.PlayLoot);
+            }
         }
     }
 }

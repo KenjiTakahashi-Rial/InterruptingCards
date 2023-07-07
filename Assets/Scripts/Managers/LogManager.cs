@@ -10,8 +10,9 @@ namespace InterruptingCards.Managers
     {
         private readonly NetworkVariable<LogLevel> _toServerLevel = new();
 
-        [SerializeField] private LogLevel _localLogLevel;
+#pragma warning disable RCS1169 // Make field read-only.
         [SerializeField] private LogLevel _logToServerLevel;
+#pragma warning restore RCS1169 // Make field read-only.
 
         private enum LogLevel
         {

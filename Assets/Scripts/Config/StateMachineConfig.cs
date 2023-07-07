@@ -27,6 +27,7 @@ namespace InterruptingCards.Config
         GamePriorityPassing,
 
         // Action Phase
+        AddingLootPlay,
         ActionPhaseIdling,
         DeclaringAttack,
         Attacking,
@@ -45,25 +46,33 @@ namespace InterruptingCards.Config
         // Game Triggers
         ActionPhaseComplete,
         ActivateAbility,
+        ActivateAbilityComplete,
+        AddLootPlayComplete,
         AllReady,
         AttackComplete,
         DeclareAttack,
+        DeclareAttackComplete,
         DeclareEndTurn,
+        DeclareEndTurnComplete,
         DeclarePurchase,
+        DeclarePurchaseComplete,
         DiscardComplete,
         EndGame,
         EndTurn,
         EndPhaseComplete,
+        EndPhaseTriggerAbilitiesComplete,
         ForceEndGame,
         ForceEndTurn,
         GamePriorityPassComplete,
         LootComplete,
         PlayLoot,
+        PlayLootComplete,
         PurchaseComplete,
         RechargeComplete,
         ShiftRoomComplete,
         StartGame,
         StartPhaseComplete,
+        StartPhaseTriggerAbilitiesComplete,
         WaitForReady,
 
         // The Stack States
@@ -73,14 +82,14 @@ namespace InterruptingCards.Config
         TheStackEnding,
 
         // The Stack Triggers
+        TheStackEnd,
         TheStackEnded,
-        TheStackIsEmpty,
+        TheStackPop,
         TheStackPopped,
         TheStackBegin,
-        TheStackPriorityPassComplete,
     }
 
-    public class StateMachineConfig
+    public sealed class StateMachineConfig
     {
         private static readonly Dictionary<StateMachine, string> Strings = new()
         {
@@ -100,6 +109,7 @@ namespace InterruptingCards.Config
             { StateMachine.GamePriorityPassing, "Base.InGame.PlayerTurns.StartPhase.PriorityPassing"},
 
             // Action Phase
+            { StateMachine.AddingLootPlay, "Base.InGame.PlayerTurns.ActionPhase.AddingLootPlay"},
             { StateMachine.ActionPhaseIdling, "Base.InGame.PlayerTurns.ActionPhase.Idling"},
             { StateMachine.DeclaringAttack, "Base.InGame.PlayerTurns.ActionPhase.DeclaringAttack"},
             { StateMachine.Attacking, "Base.InGame.PlayerTurns.ActionPhase.Attacking"},
@@ -118,25 +128,33 @@ namespace InterruptingCards.Config
             // Game Triggers
             { StateMachine.ActionPhaseComplete, "actionPhaseComplete"},
             { StateMachine.ActivateAbility, "activateAbility"},
+            { StateMachine.ActivateAbilityComplete, "activateAbilityComplete"},
+            { StateMachine.AddLootPlayComplete, "addLootPlayComplete"},
             { StateMachine.AllReady, "allReady"},
             { StateMachine.AttackComplete, "attackComplete"},
             { StateMachine.DeclareAttack, "declareAttack"},
+            { StateMachine.DeclareAttackComplete, "declareAttackComplete"},
             { StateMachine.DeclareEndTurn, "declareEndTurn"},
+            { StateMachine.DeclareEndTurnComplete, "declareEndTurnComplete"},
             { StateMachine.DeclarePurchase, "declarePurchase"},
+            { StateMachine.DeclarePurchaseComplete, "declarePurchaseComplete"},
             { StateMachine.DiscardComplete, "discardComplete"},
             { StateMachine.EndGame, "endGame"},
             { StateMachine.EndTurn, "endTurn"},
             { StateMachine.EndPhaseComplete, "endPhaseComplete"},
+            { StateMachine.EndPhaseTriggerAbilitiesComplete, "endPhaseTriggerAbilitiesComplete"},
             { StateMachine.ForceEndGame, "forceEndGame"},
             { StateMachine.ForceEndTurn, "forceEndTurn"},
             { StateMachine.GamePriorityPassComplete, "gamePriorityPassComplete"},
             { StateMachine.LootComplete, "lootComplete"},
             { StateMachine.PlayLoot, "playLoot"},
+            { StateMachine.PlayLootComplete, "playLootComplete"},
             { StateMachine.PurchaseComplete, "purchaseComplete"},
             { StateMachine.RechargeComplete, "rechargeComplete"},
             { StateMachine.ShiftRoomComplete, "shiftRoomComplete"},
             { StateMachine.StartGame, "startGame"},
             { StateMachine.StartPhaseComplete, "startPhaseComplete"},
+            { StateMachine.StartPhaseTriggerAbilitiesComplete, "startPhaseTriggerAbilitiesComplete"},
             { StateMachine.WaitForReady, "waitForReady" },
 
             // The Stack States
@@ -147,13 +165,13 @@ namespace InterruptingCards.Config
 
             // The Stack Triggers
             { StateMachine.TheStackBegin, "begin" },
+            { StateMachine.TheStackEnd, "end" },
             { StateMachine.TheStackEnded, "ended" },
-            { StateMachine.TheStackIsEmpty, "isEmpty" },
+            { StateMachine.TheStackPop, "pop" },
             { StateMachine.TheStackPopped, "popped" },
-            { StateMachine.TheStackPriorityPassComplete, "theStackPriorityPassComplete" },
         };
 
-        private static readonly ImmutableDictionary<StateMachine, int> Ids = 
+        private static readonly ImmutableDictionary<StateMachine, int> Ids =
             new(Strings.ToDictionary(pair => pair.Key, pair => Animator.StringToHash(pair.Value)));
 
         private static readonly ImmutableDictionary<int, StateMachine> ReverseLookup =

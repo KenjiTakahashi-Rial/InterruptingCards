@@ -1,5 +1,8 @@
+using System.Linq;
+
 using InterruptingCards.Config;
 using InterruptingCards.Managers;
+using InterruptingCards.Managers.TheStack;
 
 namespace InterruptingCards.Actions
 {
@@ -7,20 +10,32 @@ namespace InterruptingCards.Actions
     {
         protected override bool CanExecute(ulong playerId, int cardId)
         {
-            // TODO: Integrate stack and priority ability activation
-
-            if (playerId != _playerManager.ActivePlayer.Id)
+            var priorityPlayer = PriorityManager.PriorityPlayer;
+            if (playerId != priorityPlayer.Id)
             {
-                Log.Warn(
-                    $"Cannot activate ability if not active player (active player: {_playerManager.ActivePlayer.Name})"
-                );
+                Log.Warn($"Cannot activate ability without priority (priority player: {priorityPlayer.Name})");
                 return false;
             }
 
-            var gameState = _gameStateMachineManager.CurrentState;
-            if (gameState != StateMachine.ActionPhaseIdling)
+            var gameState = GameStateMachineManager.CurrentState;
+            var theStackState = TheStackStateMachineManager.CurrentState;
+            if (gameState != StateMachine.ActionPhaseIdling && theStackState != StateMachine.TheStackPriorityPassing)
             {
-                Log.Warn($"Cannot activate ability from {gameState}");
+                Log.Warn($"Cannot activate ability from {gameState} or {theStackState}");
+                return false;
+            }
+
+            var activatedCards = priorityPlayer.ActivatedCards;
+            if (!activatedCards.Any(c => c.CardId == cardId))
+            {
+                Log.Warn("Cannot activate ability that the player does not have");
+                return false;
+            }
+
+            var card = activatedCards.Single(c => c.CardId == cardId);
+            if (card.IsDeactivated)
+            {
+                Log.Warn("Cannot activate ability that is deactivated");
                 return false;
             }
 
@@ -29,9 +44,18 @@ namespace InterruptingCards.Actions
 
         protected override void Execute(int cardId)
         {
-            // TODO
-            _gameStateMachineManager.SetTrigger(StateMachine.ActivateAbility);
-            GameManager.Singleton.ActivateAbility();
+            var player = PriorityManager.PriorityPlayer;
+            var cardBehaviour = player.ActivatedCards.Single(c => c.CardId == cardId);
+            cardBehaviour.IsDeactivated = true;
+            var card = _cardConfig[cardBehaviour.CardId];
+            TheStackManager.PushAbility(player, card.ActivatedAbility);
+
+            var isActive = player == PlayerManager.ActivePlayer;
+            var isActionPhaseIdling = GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling;
+            if (isActive && isActionPhaseIdling)
+            {
+                GameStateMachineManager.SetTrigger(StateMachine.ActivateAbility);
+            }
         }
     }
 }

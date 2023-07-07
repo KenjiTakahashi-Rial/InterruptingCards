@@ -2,14 +2,15 @@ namespace InterruptingCards.Models
 {
     public class Card
     {
-        public Card(int id, ParserCard metadataCard)
+        public Card(int id, MetadataCard metadataCard)
         {
             Id = id;
             Suit = metadataCard.Suit;
             Rank = metadataCard.Rank;
             Name = metadataCard.Name;
-            Count = metadataCard.Count;
-            ActiveEffect = metadataCard.ActiveEffect;
+            Value = metadataCard.Value;
+            LootAbility = metadataCard.LootAbility;
+            ActivatedAbility = metadataCard.ActivatedAbility;
         }
 
         // All attributes must be readonly
@@ -23,9 +24,11 @@ namespace InterruptingCards.Models
 
         public string Name { get; }
 
-        public int Count { get; }
+        public int Value { get; }
 
-        public CardActiveEffect ActiveEffect { get; }
+        public CardAbility LootAbility { get; }
+
+        public CardAbility ActivatedAbility { get; }
 
         public override string ToString()
         {

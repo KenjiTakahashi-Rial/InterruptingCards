@@ -1,67 +1,93 @@
-using Unity.Netcode;
-using UnityEngine;
+using System.Linq;
 
+using Unity.Netcode;
+
+using InterruptingCards.Behaviours;
 using InterruptingCards.Config;
-using InterruptingCards.Models;
+using InterruptingCards.Managers.TheStack;
 
 namespace InterruptingCards.Managers
 {
     public class PriorityManager : NetworkBehaviour
     {
+        // TODO: Allow each player to set this individually
+        private const bool AutoPass = true;
+
         private readonly NetworkVariable<ulong> _priorityPlayerId = new();
 
-        [SerializeField] private PlayerManager _playerManager;
-        [SerializeField] private StateMachineManager _gameStateMachineManager;
-        [SerializeField] private StateMachineManager _theStackStateMachineManager;
-        [SerializeField] private TheStackManager _theStackManager;
+        public PlayerBehaviour PriorityPlayer => PlayerManager[_priorityPlayerId.Value];
 
-        public Player PriorityPlayer => _playerManager[_priorityPlayerId.Value];
-
+        private GameManager Game => GameManager.Singleton;
+        private PlayerManager PlayerManager => Game.PlayerManager;
+        private StateMachineManager TheStackStateMachineManager => Game.TheStackStateMachineManager;
+        private TheStackManager TheStackManager => Game.TheStackManager;
         private LogManager Log => LogManager.Singleton;
 
-        public void Awake()
+        public override void OnNetworkSpawn()
         {
-            _playerManager.OnActivePlayerChanged += SetPlayerPriority;
-            _theStackManager.OnResolve += SetPlayerPriority;
+            base.OnNetworkSpawn();
+            if (IsServer)
+            {
+                PlayerManager.OnActivePlayerChanged += SetPlayerPriority;
+                TheStackManager.OnResolve += SetPlayerPriority;
+            }
         }
 
-        public override void OnDestroy()
+        public override void OnNetworkDespawn()
         {
-            _playerManager.OnActivePlayerChanged -= SetPlayerPriority;
-            _theStackManager.OnResolve -= SetPlayerPriority;
-            base.OnDestroy();
+            if (IsServer)
+            {
+                PlayerManager.OnActivePlayerChanged -= SetPlayerPriority;
+                TheStackManager.OnResolve -= SetPlayerPriority;
+            }
+            base.OnNetworkDespawn();
         }
 
         public void PassPriority()
         {
             if (!IsServer)
             {
-                Log.Warn($"Cannot pass priority if not host");
+                Log.Warn("Cannot pass priority if not host");
                 return;
             }
 
-            var prevPriorityPlayer = PriorityPlayer;
-            _priorityPlayerId.Value = _playerManager.GetNextId(_priorityPlayerId.Value);
-            var nextPriorityPlayer = PriorityPlayer;
-            Log.Info($"Passing priority from {prevPriorityPlayer.Name} to {nextPriorityPlayer.Name}");
-
-            var lastPushBy = _theStackManager.LastPushBy;
-            if (PriorityPlayer == lastPushBy || lastPushBy == null && PriorityPlayer == _playerManager.ActivePlayer)
+            var theStackState = TheStackStateMachineManager.CurrentState;
+            if (theStackState != StateMachine.TheStackPriorityPassing)
             {
-                var theStackState = _theStackStateMachineManager.CurrentState;
+                Log.Warn($"Cannot pass priority from {theStackState}");
+            }
 
-                if (theStackState == StateMachine.TheStackPriorityPassing)
-                {
-                    _theStackStateMachineManager.SetTrigger(StateMachine.TheStackPriorityPassComplete);
-                }
-                else
-                {
-                    Log.Warn($"Cannot pass priority from {theStackState}");
-                }
+            var prevPriorityPlayer = PriorityPlayer;
+            PriorityPlayer.LootPlays = PriorityPlayer == PlayerManager.ActivePlayer ? PriorityPlayer.LootPlays : 0;
+            _priorityPlayerId.Value = PlayerManager.GetNextId(_priorityPlayerId.Value);
+            Log.Info($"Passed priority from {prevPriorityPlayer.Name} to {PriorityPlayer.Name}");
+
+            var lastPushBy = TheStackManager.LastPushBy;
+            if (PriorityPlayer == lastPushBy || (lastPushBy == null && PriorityPlayer == PlayerManager.ActivePlayer))
+            {
+                TheStackStateMachineManager.SetTrigger(
+                    TheStackManager.IsEmpty ? StateMachine.TheStackEnd : StateMachine.TheStackPop
+                );
+                return;
+            }
+
+            TryAutoPass();
+        }
+
+        public void TryAutoPass()
+        {
+            var hasLootPlay = PriorityPlayer.LootPlays > 0;
+            var hasActivatedCard = PriorityPlayer.ActivatedCards.Any(c => !c.IsDeactivated);
+            var canPurchase = false; // TODO: Allow purchasing during The Stack
+
+            if (AutoPass && !hasLootPlay && !hasActivatedCard && !canPurchase)
+            {
+                Log.Info($"Automatically passing priority from {PriorityPlayer.Name}");
+                PassPriority();
             }
         }
 
-        private void SetPlayerPriority(Player player)
+        private void SetPlayerPriority(PlayerBehaviour player)
         {
             _priorityPlayerId.Value = player.Id;
         }
