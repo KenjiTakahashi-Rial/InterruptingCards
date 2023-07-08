@@ -44,7 +44,7 @@ namespace InterruptingCards.Behaviours
 
         public void SetHidden(bool val)
         {
-            _topCard.SetHidden(val);
+            _topCard.IsHidden = val;
         }
 
         public void Shuffle()

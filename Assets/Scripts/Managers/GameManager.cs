@@ -30,6 +30,7 @@ namespace InterruptingCards.Managers
         [SerializeField] private StateMachineManager _stateMachineManager;
         [SerializeField] private StateMachineManager _theStackStateMachineManager;
         [SerializeField] private TheStackManager _theStackManager;
+        [SerializeField] private UiManager _uiManager;
 
         [Header("Behaviours")]
         [SerializeField] private CardBehaviour[] _characters;
@@ -84,6 +85,7 @@ namespace InterruptingCards.Managers
 
             _cardConfig.Load(_cardPack);
             SetCardsHidden(true);
+            _uiManager.SetGameplayButtonsHidden(true);
         }
 
         public void Update()
@@ -153,6 +155,8 @@ namespace InterruptingCards.Managers
             {
                 hand.OnCardClicked += _playLoot.TryExecute;
             }
+
+            _uiManager.SetNetworkButtonsHidden(true);
         }
 
         public override void OnNetworkDespawn()
@@ -174,6 +178,7 @@ namespace InterruptingCards.Managers
                 _stateMachineManager.SetTrigger(StateMachine.ForceEndGame);
             }
 
+            _uiManager.SetNetworkButtonsHidden(false);
             base.OnNetworkDespawn();
         }
 
@@ -206,6 +211,7 @@ namespace InterruptingCards.Managers
             _playerManager.AssignCharacters(_characters);
             _playerManager.AssignHands(_hands);
             SetCardsHidden(false);
+            _uiManager.SetGameplayButtonsHidden(false);
         }
 
         public void RechargeStep()
@@ -378,6 +384,7 @@ namespace InterruptingCards.Managers
             Log.Info("Ending game");
             _playerManager.Clear();
             SetCardsHidden(true);
+            _uiManager.SetGameplayButtonsHidden(true);
         }
 
         // Helper Methods
@@ -390,7 +397,7 @@ namespace InterruptingCards.Managers
 
             foreach (var card in _characters)
             {
-                card.SetHidden(val);
+                card.IsHidden = val;
             }
 
             foreach (var hand in _hands)

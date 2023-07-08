@@ -24,8 +24,8 @@ namespace InterruptingCards.Behaviours
         private readonly NetworkVariable<bool> _isDeactivated = new(DefaultIsDeactivated);
 
 #pragma warning disable RCS1169 // Make field read-only.
-        [SerializeField] private TextMeshPro _cardText;
-        [SerializeField] private SpriteRenderer _cardSprite;
+        [SerializeField] private GameObject _parent;
+        [SerializeField] private TextMeshProUGUI _cardText;
 #pragma warning restore RCS1169 // Make field read-only.
 
         private Vector3 _originalScale;
@@ -55,6 +55,16 @@ namespace InterruptingCards.Behaviours
             set => _isDeactivated.Value = value;
         }
 
+        public bool IsHidden
+        {
+            get => _isHidden;
+            set
+            {
+                _isHidden = value;
+                _parent.SetActive(!value && CardId != CardConfig.InvalidId);
+            }
+        }
+
         private LogManager Log => LogManager.Singleton;
 
         public void Awake()
@@ -64,9 +74,6 @@ namespace InterruptingCards.Behaviours
             var angles = _originalRotation.eulerAngles;
             _activatedRotation = Quaternion.Euler(angles.x, angles.y, angles.z + ActivatedAngle);
             transform.rotation = _originalRotation;
-
-            _cardSprite.enabled = false;
-            _cardText.enabled = false;
         }
 
         public override void OnNetworkSpawn()
@@ -85,8 +92,14 @@ namespace InterruptingCards.Behaviours
             }
         }
 
+        // Requires collider component
         public void OnMouseDown()
         {
+            if (!_parent.activeSelf)
+            {
+                return;
+            }
+
             if (OnClicked == null)
             {
                 Log.Info("OnClicked has no subscribers");
@@ -106,31 +119,13 @@ namespace InterruptingCards.Behaviours
             _isDeactivated.OnValueChanged -= HandleActivatedChanged;
         }
 
-        public void SetHidden(bool val)
-        {
-            _isHidden = val;
-            SetCardTextEnabled();
-            SetCardSpriteEnabled();
-        }
-
-        private void SetCardTextEnabled()
-        {
-            _cardText.enabled = !_isHidden && CardId != CardConfig.InvalidId && IsFaceUp;
-        }
-
-        private void SetCardSpriteEnabled()
-        {
-            _cardSprite.enabled = !_isHidden && CardId != CardConfig.InvalidId;
-        }
-
         private void HandleCardIdChanged(int oldValue, int newValue)
         {
             var oldCard = _cardConfig.GetName(oldValue);
             var newCard = _cardConfig.GetName(newValue);
             Log.Info($"Card changed ({oldCard} -> {newCard})");
 
-            SetCardTextEnabled();
-            SetCardSpriteEnabled();
+            _parent.SetActive(!IsHidden && newValue != CardConfig.InvalidId);
             _cardText.SetText(_cardConfig.GetName(newValue)); // TODO: Change
         }
 
@@ -140,7 +135,7 @@ namespace InterruptingCards.Behaviours
             var after = newValue ? "face-up" : "face-down";
             Log.Info($"Card changed ({before} -> {after})");
 
-            SetCardTextEnabled();
+            _cardText.enabled = newValue;
         }
 
         private void HandleActivatedChanged(bool oldValue, bool newValue)
