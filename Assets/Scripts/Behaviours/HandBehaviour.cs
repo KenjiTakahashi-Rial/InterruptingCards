@@ -18,10 +18,15 @@ namespace InterruptingCards.Behaviours
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
 #pragma warning disable RCS1169 // Make field read-only.
+        [Header("Config")]
+        [SerializeField] private RectTransform _handRectTransform;
         [SerializeField] private CardBehaviour[] _cardSlots;
         [SerializeField] private RectTransform[] _cardRectTransforms;
         [SerializeField] private Vector2 _spacing;
         [SerializeField] private int _maxColumns;
+
+        [Header("Editor")]
+        [SerializeField] private int _previewCount;
 #pragma warning restore RCS1169 // Make field read-only.
 
         public int Count => _cardSlots.Count(c => c.CardId != CardConfig.InvalidId);
@@ -138,27 +143,44 @@ namespace InterruptingCards.Behaviours
 
         private bool ShouldIncludeInLayout(CardBehaviour card)
         {
+            return
 #if UNITY_EDITOR
-            return EditorApplication.isPlaying
-                ? !card.IsHidden && card.CardId != CardConfig.InvalidId
-                : card.gameObject.activeSelf;
-#else
-            return !card.IsHidden && card.CardId != CardConfig.InvalidId;
+                !EditorApplication.isPlaying ||
 #endif
+                !card.IsHidden && card.CardId != CardConfig.InvalidId;
         }
 
         private void UpdateLayout()
         {
             var cardSize = _cardRectTransforms[0].sizeDelta;
-            var activeCount = _cardSlots.Count(ShouldIncludeInLayout);
+            var activeCount =
+#if UNITY_EDITOR
+                Math.Min(
+                    EditorApplication.isPlaying ? int.MaxValue : _previewCount,
+#endif
+                    _cardSlots.Count(ShouldIncludeInLayout)
+#if UNITY_EDITOR
+                );
+#endif
 
             var rows = Mathf.CeilToInt((float)activeCount / _maxColumns);
             var columns = Math.Min(_maxColumns, activeCount);
 
             var totalWidth = (columns * cardSize.x) + ((columns - 1) * _spacing.x);
             var totalHeight = (rows * cardSize.y) + ((rows - 1) * _spacing.y);
+            _handRectTransform.sizeDelta = new Vector2(totalWidth, totalHeight);
 
             var startPosition = new Vector2((-totalWidth / 2) + (cardSize.x / 2), (totalHeight / 2) - (cardSize.y / 2));
+
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlaying)
+            {
+                for (var i = 0; i < _cardSlots.Length; i++)
+                {
+                    _cardSlots[i].gameObject.SetActive(i < activeCount);
+                }
+            }
+#endif
 
             var cardIndex = 0;
             for (var row = 0; row < rows; row++)
