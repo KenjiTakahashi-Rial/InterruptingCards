@@ -17,6 +17,7 @@ namespace InterruptingCards.Behaviours
         private readonly NetworkVariable<FixedString32Bytes> _name = new();
         private readonly NetworkVariable<uint> _money = new();
         private readonly NetworkVariable<uint> _lootPlays = new();
+        private readonly NetworkVariable<uint> _purchases = new();
 
         public ulong Id { get => _id.Value; set => _id.Value = value; }
 
@@ -49,6 +50,10 @@ namespace InterruptingCards.Behaviours
         public uint Money { get => _money.Value; set => _money.Value = value; }
 
         public uint LootPlays { get => _lootPlays.Value; set => _lootPlays.Value = value; }
+
+        public uint Purchases { get => _purchases.Value; set => _purchases.Value = value; }
+
+        public uint PurchaseCost => 10; // TODO
 
         public IReadOnlyList<CardBehaviour> ActivatedCards
         {

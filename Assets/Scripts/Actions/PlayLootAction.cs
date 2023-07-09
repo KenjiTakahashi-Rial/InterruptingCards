@@ -42,12 +42,13 @@ namespace InterruptingCards.Actions
         protected override void Execute(int cardId)
         {
             var player = PriorityManager.PriorityPlayer;
+            var isActive = player == PlayerManager.ActivePlayer;
+            var isActionPhaseIdling = GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling;
+            
             player.LootPlays--;
             player.Hand.Remove(cardId);
             TheStackManager.PushLoot(player, cardId);
 
-            var isActive = player == PlayerManager.ActivePlayer;
-            var isActionPhaseIdling = GameStateMachineManager.CurrentState == StateMachine.ActionPhaseIdling;
             if (isActive && isActionPhaseIdling)
             {
                 GameStateMachineManager.SetTrigger(StateMachine.PlayLoot);

@@ -27,6 +27,7 @@ namespace InterruptingCards.Behaviours
 #pragma warning disable RCS1169 // Make field read-only.
         [SerializeField] private GameObject _parent;
         [SerializeField] private TextMeshProUGUI _cardText;
+        [SerializeField] private BoxCollider2D _collider;
 #pragma warning restore RCS1169 // Make field read-only.
 
         private Vector3 _originalScale;
@@ -62,13 +63,13 @@ namespace InterruptingCards.Behaviours
             set
             {
                 _isHidden = value;
-                _parent.SetActive(
-                    !value &&
+                SetHidden(
+                    value ||
 #if UNITY_EDITOR
                     (
-                        !EditorApplication.isPlaying ||
+                        EditorApplication.isPlaying &&
 #endif
-                        CardId != CardConfig.InvalidId
+                        CardId == CardConfig.InvalidId
 #if UNITY_EDITOR
                     )
 #endif
@@ -106,11 +107,6 @@ namespace InterruptingCards.Behaviours
         // Requires collider component
         public void OnMouseDown()
         {
-            if (!_parent.activeSelf)
-            {
-                return;
-            }
-
             if (OnClicked == null)
             {
                 Log.Info("OnClicked has no subscribers");
@@ -130,13 +126,19 @@ namespace InterruptingCards.Behaviours
             _isDeactivated.OnValueChanged -= HandleActivatedChanged;
         }
 
+        private void SetHidden(bool val)
+        {
+            _parent.SetActive(!val);
+            _collider.enabled = !val;
+        }
+
         private void HandleCardIdChanged(int oldValue, int newValue)
         {
             var oldCard = _cardConfig.GetName(oldValue);
             var newCard = _cardConfig.GetName(newValue);
             Log.Info($"Card changed ({oldCard} -> {newCard})");
 
-            _parent.SetActive(!IsHidden && newValue != CardConfig.InvalidId);
+            SetHidden(IsHidden || newValue == CardConfig.InvalidId);
             _cardText.SetText(_cardConfig.GetName(newValue)); // TODO: Change
         }
 

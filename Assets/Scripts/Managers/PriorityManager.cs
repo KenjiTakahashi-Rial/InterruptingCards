@@ -78,9 +78,8 @@ namespace InterruptingCards.Managers
         {
             var hasLootPlay = PriorityPlayer.LootPlays > 0;
             var hasActivatedCard = PriorityPlayer.ActivatedCards.Any(c => !c.IsDeactivated);
-            var canPurchase = false; // TODO: Allow purchasing during The Stack
 
-            if (AutoPass && !hasLootPlay && !hasActivatedCard && !canPurchase)
+            if (AutoPass && !hasLootPlay && !hasActivatedCard)
             {
                 Log.Info($"Automatically passing priority from {PriorityPlayer.Name}");
                 PassPriority();

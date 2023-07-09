@@ -4,11 +4,12 @@ using InterruptingCards.Managers;
 
 namespace InterruptingCards.Behaviours
 {
-    public class AddingLootPlayStateBehaviour : StateMachineBehaviour
+    public class AddingLootPlayAndPurchaseStateBehaviour
+        : StateMachineBehaviour
     {
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            GameManager.Singleton.AddLootPlay();
+            GameManager.Singleton.AddLootPlayAndPurchase();
         }
     }
 }

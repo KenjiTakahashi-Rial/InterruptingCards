@@ -265,6 +265,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _parent: {fileID: 6233844383687706158}
   _cardText: {fileID: 5516527355733682660}
+  _collider: {fileID: 2001726023385809532}
 --- !u!61 &2001726023385809532
 BoxCollider2D:
   m_ObjectHideFlags: 0

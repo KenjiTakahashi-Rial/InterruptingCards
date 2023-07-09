@@ -110,6 +110,14 @@ namespace InterruptingCards.Managers
             }
         }
 
+        public void ForEachPlayer(Action<PlayerBehaviour> func)
+        {
+            foreach (var player in _players)
+            {
+                func(player);
+            }
+        }
+
         public ulong GetNextId(ulong id)
         {
             var i = _players.FindIndex(p => p.Id == id);

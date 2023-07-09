@@ -27,7 +27,7 @@ namespace InterruptingCards.Config
         GamePriorityPassing,
 
         // Action Phase
-        AddingLootPlay,
+        AddingLootPlayAndPurchase,
         ActionPhaseIdling,
         DeclaringAttack,
         Attacking,
@@ -47,7 +47,7 @@ namespace InterruptingCards.Config
         ActionPhaseComplete,
         ActivateAbility,
         ActivateAbilityComplete,
-        AddLootPlayComplete,
+        AddLootPlayAndPurchaseComplete,
         AllReady,
         AttackComplete,
         DeclareAttack,
@@ -109,7 +109,7 @@ namespace InterruptingCards.Config
             { StateMachine.GamePriorityPassing, "Base.InGame.PlayerTurns.StartPhase.PriorityPassing"},
 
             // Action Phase
-            { StateMachine.AddingLootPlay, "Base.InGame.PlayerTurns.ActionPhase.AddingLootPlay"},
+            { StateMachine.AddingLootPlayAndPurchase, "Base.InGame.PlayerTurns.ActionPhase.AddingLootPlayAndPurchase"},
             { StateMachine.ActionPhaseIdling, "Base.InGame.PlayerTurns.ActionPhase.Idling"},
             { StateMachine.DeclaringAttack, "Base.InGame.PlayerTurns.ActionPhase.DeclaringAttack"},
             { StateMachine.Attacking, "Base.InGame.PlayerTurns.ActionPhase.Attacking"},
@@ -129,7 +129,7 @@ namespace InterruptingCards.Config
             { StateMachine.ActionPhaseComplete, "actionPhaseComplete"},
             { StateMachine.ActivateAbility, "activateAbility"},
             { StateMachine.ActivateAbilityComplete, "activateAbilityComplete"},
-            { StateMachine.AddLootPlayComplete, "addLootPlayComplete"},
+            { StateMachine.AddLootPlayAndPurchaseComplete, "addLootPlayAndPurchaseComplete"},
             { StateMachine.AllReady, "allReady"},
             { StateMachine.AttackComplete, "attackComplete"},
             { StateMachine.DeclareAttack, "declareAttack"},

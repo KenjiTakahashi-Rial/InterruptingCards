@@ -17,6 +17,7 @@ namespace InterruptingCards.Managers
     {
         private const uint StartingLootCount = 3;
         private const uint StartingMoney = 3;
+        private const uint StartingShopSlots = 2;
 
         private readonly CardConfig _cardConfig = CardConfig.Singleton;
 
@@ -36,7 +37,10 @@ namespace InterruptingCards.Managers
         [SerializeField] private CardBehaviour[] _characters;
         [SerializeField] private DeckBehaviour _lootDeck;
         [SerializeField] private DeckBehaviour _lootDiscard;
+        [SerializeField] private DeckBehaviour _treasureDeck;
+        [SerializeField] private DeckBehaviour _treasureDiscard;
         [SerializeField] private HandBehaviour[] _hands;
+        [SerializeField] private HandBehaviour _shop;
 
         [Header("Actions")]
         [SerializeField] private DeclareAttackAction _declareAttack;
@@ -65,6 +69,9 @@ namespace InterruptingCards.Managers
 
         public DeckBehaviour LootDeck => _lootDeck;
         public DeckBehaviour LootDiscard => _lootDiscard;
+        public DeckBehaviour TreasureDeck => _treasureDeck;
+        public DeckBehaviour TreasureDiscard => _treasureDiscard;
+        public HandBehaviour Shop => _shop;
 
         private LogManager Log => LogManager.Singleton;
 
@@ -142,6 +149,7 @@ namespace InterruptingCards.Managers
 
         public override void OnNetworkSpawn()
         {
+            // TODO: Move on-click actions to initialization
             base.OnNetworkSpawn();
             Log.Info("Network spawned");
 
@@ -155,6 +163,9 @@ namespace InterruptingCards.Managers
             {
                 hand.OnCardClicked += _playLoot.TryExecute;
             }
+
+            _shop.OnCardClicked += _purchase.TryExecute;
+            _treasureDeck.OnClicked += () => _purchase.TryExecute(_treasureDeck.TopCardId);
 
             _uiManager.SetNetworkButtonsHidden(true);
         }
@@ -173,12 +184,16 @@ namespace InterruptingCards.Managers
                 hand.OnCardClicked = null;
             }
 
+            _shop.OnCardClicked = null;
+            _treasureDeck.OnClicked = null;
+
+            _uiManager.SetNetworkButtonsHidden(false);
+
             if (_stateMachineManager.CurrentState != StateMachine.WaitingForClients)
             {
                 _stateMachineManager.SetTrigger(StateMachine.ForceEndGame);
             }
 
-            _uiManager.SetNetworkButtonsHidden(false);
             base.OnNetworkDespawn();
         }
 
@@ -199,6 +214,7 @@ namespace InterruptingCards.Managers
             {
                 InitializeCharacters();
                 InitializeLoot();
+                InitializeTreasure();
                 _playerManager.Initialize(StartingMoney);
                 _stateMachineManager.SetTrigger(StateMachine.StartGame);
 
@@ -275,12 +291,13 @@ namespace InterruptingCards.Managers
             }
         }
 
-        public void AddLootPlay()
+        public void AddLootPlayAndPurchase()
         {
             if (IsServer)
             {
                 _playerManager.ActivePlayer.LootPlays++;
-                _stateMachineManager.SetTrigger(StateMachine.AddLootPlayComplete);
+                _playerManager.ActivePlayer.Purchases++;
+                _stateMachineManager.SetTrigger(StateMachine.AddLootPlayAndPurchaseComplete);
             }
         }
 
@@ -316,15 +333,6 @@ namespace InterruptingCards.Managers
             if (IsServer)
             {
                 _theStackManager.Begin();
-            }
-        }
-
-        public void Purchase()
-        {
-            // TODO: Prompt the active player to select an item
-            if (NetworkManager.LocalClientId == _playerManager.ActivePlayer.Id)
-            {
-                _purchase.TryExecute(CardConfig.InvalidId);
             }
         }
 
@@ -373,7 +381,13 @@ namespace InterruptingCards.Managers
         {
             if (IsServer)
             {
-                _playerManager.ActivePlayer.LootPlays = 0;
+                _playerManager.ForEachPlayer(
+                    p =>
+                    {
+                        p.LootPlays = 0;
+                        p.Purchases = 0;
+                    }
+                );
                 _playerManager.ShiftTurn();
                 _stateMachineManager.SetTrigger(StateMachine.EndTurn);
             }
@@ -394,6 +408,9 @@ namespace InterruptingCards.Managers
             Log.Info($"Setting cards hidden: {val}");
             _lootDeck.SetHidden(val);
             _lootDiscard.SetHidden(val);
+            _treasureDeck.SetHidden(val);
+            _treasureDiscard.SetHidden(val);
+            _shop.SetHidden(val);
 
             foreach (var card in _characters)
             {
@@ -408,9 +425,10 @@ namespace InterruptingCards.Managers
 
         private void InitializeCharacters()
         {
-            if (_stateMachineManager.CurrentState != StateMachine.InitializingGame)
+            var state = _stateMachineManager.CurrentState;
+            if (state != StateMachine.InitializingGame)
             {
-                Log.Warn("Cannot initialize characters outside of game initialization state");
+                Log.Warn($"Cannot initialize characters from {state}");
                 return;
             }
 
@@ -427,9 +445,10 @@ namespace InterruptingCards.Managers
 
         private void InitializeLoot()
         {
-            if (_stateMachineManager.CurrentState != StateMachine.InitializingGame)
+            var state = _stateMachineManager.CurrentState;
+            if (state != StateMachine.InitializingGame)
             {
-                Log.Warn("Cannot initialize loot outside of game initialization state");
+                Log.Warn($"Cannot initialize loot from {state}");
                 return;
             }
 
@@ -451,6 +470,29 @@ namespace InterruptingCards.Managers
                 {
                     hand.Add(_lootDeck.DrawTop());
                 }
+            }
+        }
+
+        private void InitializeTreasure()
+        {
+            var state = _stateMachineManager.CurrentState;
+            if (state != StateMachine.InitializingGame)
+            {
+                Log.Warn($"Cannot initialize treasure from {state}");
+                return;
+            }
+
+            Log.Info("Initializing treasure");
+
+            _treasureDeck.Initialize(c => c.Suit == CardSuit.Treasure);
+            _treasureDeck.Shuffle();
+            _treasureDeck.IsFaceUp = false;
+            _treasureDiscard.Clear();
+
+            _shop.Clear();
+            for (var i = 0; i < StartingShopSlots; i++)
+            {
+                _shop.Add(_treasureDeck.DrawTop());
             }
         }
 

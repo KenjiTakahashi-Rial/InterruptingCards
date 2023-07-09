@@ -19,7 +19,9 @@ namespace InterruptingCards.Behaviours
         [SerializeField] private CardBehaviour _topCard;
 #pragma warning restore RCS1169 // Make field read-only.
 
-        public event Action OnClicked;
+        public int TopCardId => _topCard.CardId;
+
+        public Action OnClicked { get; set; }
 
         public bool IsFaceUp
         {

@@ -89,33 +89,50 @@ namespace InterruptingCards.Behaviours
 
         public void Add(int cardId)
         {
-            Log.Info($"Adding card to hand ({_cardConfig.GetName(cardId)})");
+            if (Count == _cardSlots.Length)
+            {
+                throw new TooManyCardsException("Cannot add more cards than card slots");
+            }
+
+            Log.Info($"Adding {_cardConfig.GetName(cardId)} to hand");
+            _cardSlots[Count].CardId = cardId;
+        }
+
+        public void Insert(int index, int cardId)
+        {
+            if (index < 0 || index > Count)
+            {
+                throw new CardIndexOutOfRangeException($"Cannot insert into index {index} for count {Count}");
+            }
 
             if (Count == _cardSlots.Length)
             {
                 throw new TooManyCardsException("Cannot add more cards than card slots");
             }
 
-            _cardSlots[Count].CardId = cardId;
+            Log.Info($"Inserting {_cardConfig.GetName(cardId)} to hand in position {index}");
+            for (int i = Count; i > index; i--)
+            {
+                _cardSlots[i].CardId = _cardSlots[i - 1].CardId;
+            }
+            _cardSlots[index].CardId = cardId;
         }
 
         public int Remove(int cardId)
         {
             Log.Info($"Removing {_cardConfig.GetName(cardId)} from hand");
-
             var index = Array.FindIndex(_cardSlots, s => s.CardId == cardId);
-            for (int i = index; i < _cardSlots.Length; i++)
+            for (int i = index; i < Count; i++)
             {
-                var nextId = i == _cardSlots.Length - 1 ? CardConfig.InvalidId : _cardSlots[i + 1].CardId;
-                _cardSlots[i].CardId = nextId;
-
-                if (nextId == CardConfig.InvalidId)
-                {
-                    break;
-                }
+                _cardSlots[i].CardId = i == _cardSlots.Length - 1 ? CardConfig.InvalidId : _cardSlots[i + 1].CardId;
             }
 
             return cardId;
+        }
+
+        public int IndexOf(int cardId)
+        {
+            return Array.FindIndex(_cardSlots, s => s.CardId == cardId);
         }
 
         public void Clear()

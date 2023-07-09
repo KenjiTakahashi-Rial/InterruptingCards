@@ -62,4 +62,16 @@ namespace InterruptingCards
 
         protected TooManyPlayersException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
+
+    [Serializable]
+    public class CardIndexOutOfRangeException : Exception
+    {
+        public CardIndexOutOfRangeException() { }
+
+        public CardIndexOutOfRangeException(string message) : base(message) { }
+
+        public CardIndexOutOfRangeException(string message, Exception inner) : base(message, inner) { }
+
+        protected CardIndexOutOfRangeException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
 }
