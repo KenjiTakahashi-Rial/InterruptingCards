@@ -160,8 +160,9 @@ namespace InterruptingCards.Behaviours
 #endif
                     _cardSlots.Count(ShouldIncludeInLayout)
 #if UNITY_EDITOR
-                );
+                )
 #endif
+            ;
 
             var rows = Mathf.CeilToInt((float)activeCount / _maxColumns);
             var columns = Math.Min(_maxColumns, activeCount);
@@ -177,7 +178,7 @@ namespace InterruptingCards.Behaviours
             {
                 for (var i = 0; i < _cardSlots.Length; i++)
                 {
-                    _cardSlots[i].gameObject.SetActive(i < activeCount);
+                    _cardSlots[i].IsHidden = i >= activeCount;
                 }
             }
 #endif

@@ -2,6 +2,7 @@ using System;
 
 using TMPro;
 using Unity.Netcode;
+using UnityEditor;
 using UnityEngine;
 
 using InterruptingCards.Config;
@@ -61,7 +62,17 @@ namespace InterruptingCards.Behaviours
             set
             {
                 _isHidden = value;
-                _parent.SetActive(!value && CardId != CardConfig.InvalidId);
+                _parent.SetActive(
+                    !value &&
+#if UNITY_EDITOR
+                    (
+                        !EditorApplication.isPlaying ||
+#endif
+                        CardId != CardConfig.InvalidId
+#if UNITY_EDITOR
+                    )
+#endif
+                );
             }
         }
 
