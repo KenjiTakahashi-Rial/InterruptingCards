@@ -64,7 +64,17 @@ namespace InterruptingCards.Models
         TheLost,
         TheKeeper,
         Apollyon,
-        BumBo,
+        BumBoCharacter,
+
+        // Four Souls Treasure
+        BellyButton,
+        BobsBrain,
+        Breakfast,
+        Brimstone,
+        BumBoTreasure,
+        CambionConception,
+        ChampionBelt,
+        ChargedBaby,
 
         // Four Souls Loot
         APenny,
